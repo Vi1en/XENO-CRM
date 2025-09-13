@@ -54,8 +54,8 @@ A comprehensive, full-stack CRM application built with Next.js, Express.js, Mong
 
 1. **Clone the repository**
 ```bash
-git clone <your-repo-url>
-cd CRM_XENO
+git clone https://github.com/Vi1en/XENO-CRM.git
+cd XENO-CRM
 ```
 
 2. **Install dependencies**
