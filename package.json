@@ -1,0 +1,30 @@
+{
+  "name": "xeno-mini-crm",
+  "version": "1.0.0",
+  "description": "Mini CRM system with AI-powered segmentation and campaign management",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "worker",
+    "vendor-simulator"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:worker\" \"npm run dev:vendor\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:worker": "cd worker && npm run dev",
+    "dev:vendor": "cd vendor-simulator && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend && npm run build:worker && npm run build:vendor",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build:worker": "cd worker && npm run build",
+    "build:vendor": "cd vendor-simulator && npm run build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,501 @@
+import { Router } from 'express';
+import { z } from 'zod';
+import { Order } from '../models/order';
+import { Customer } from '../models/customer';
+
+const router = Router();
+
+// Helper function to parse date from various formats
+function parseDate(dateString: string): Date {
+  if (!dateString) return new Date();
+  
+  // Try DD/MM/YYYY format first
+  if (dateString.includes('/')) {
+    const [day, month, year] = dateString.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
+  // Try YYYY-MM-DD format
+  if (dateString.includes('-')) {
+    return new Date(dateString);
+  }
+  
+  // Try ISO string
+  return new Date(dateString);
+}
+
+// Validation schemas
+const orderCreateSchema = z.object({
+  customerName: z.string().min(1, 'Customer name is required'),
+  totalSpent: z.number().min(0, 'Total spent must be positive'),
+  date: z.string().optional(),
+});
+
+const orderUpdateSchema = z.object({
+  customerName: z.string().min(1, 'Customer name is required').optional(),
+  totalSpent: z.number().min(0, 'Total spent must be positive').optional(),
+  date: z.string().optional(),
+});
+
+/**
+ * @swagger
+ * /api/v1/orders:
+ *   get:
+ *     summary: Get all orders
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of orders per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by customer name
+ *     responses:
+ *       200:
+ *         description: List of orders
+ */
+router.get('/', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    if (search) {
+      query = { customerName: { $regex: search, $options: 'i' } };
+    }
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Order.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/orders/test:
+ *   get:
+ *     summary: Test orders endpoint
+ *     tags: [Orders]
+ *     responses:
+ *       200:
+ *         description: Test successful
+ */
+router.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Orders route is working' });
+});
+
+// Debug endpoint
+router.get('/debug', async (req, res) => {
+  try {
+    // Test Order model
+    const testOrder = new Order({
+      customerName: 'test customer',
+      totalSpent: 100,
+      date: new Date()
+    });
+    
+    res.json({ 
+      success: true, 
+      message: 'Order model test successful',
+      orderId: testOrder.orderId 
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Order model test failed',
+      error: error.message
+    });
+  }
+});
+
+// Simple test endpoint
+router.post('/test-create', async (req, res) => {
+  try {
+    console.log('Test create request:', req.body);
+    
+    // Test customer lookup
+    const customer = await Customer.findOne({
+      $expr: {
+        $eq: [
+          { $concat: ['$firstName', ' ', '$lastName'] },
+          'jonan puro'
+        ]
+      }
+    });
+    
+    console.log('Customer found:', customer ? 'Yes' : 'No');
+    
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+    
+    // Test order creation
+    const order = new Order({
+      customerName: 'jonan puro',
+      totalSpent: 1000,
+      date: new Date()
+    });
+    
+    await order.save();
+    
+    res.json({
+      success: true,
+      message: 'Test order created successfully',
+      data: order
+    });
+  } catch (error) {
+    console.error('Test create error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test create failed',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/orders/{id}:
+ *   get:
+ *     summary: Get order by ID
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order details
+ *       404:
+ *         description: Order not found
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    console.error('Get order error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/orders:
+ *   post:
+ *     summary: Create new order
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerName
+ *               - totalSpent
+ *             properties:
+ *               customerName:
+ *                 type: string
+ *                 description: Customer name
+ *               totalSpent:
+ *                 type: number
+ *                 description: Total amount spent
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Order date
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *       400:
+ *         description: Invalid input data
+ */
+router.post('/', async (req, res) => {
+  try {
+    console.log('Order creation request:', req.body);
+    const { customerName, totalSpent, date } = orderCreateSchema.parse(req.body);
+    console.log('Parsed data:', { customerName, totalSpent, date });
+    
+    // Find customer by name
+    console.log('Looking for customer:', customerName);
+    const customer = await Customer.findOne({
+      $expr: {
+        $eq: [
+          { $concat: ['$firstName', ' ', '$lastName'] },
+          customerName
+        ]
+      }
+    });
+    console.log('Found customer:', customer ? 'Yes' : 'No');
+    console.log('Customer details:', customer ? { firstName: customer.firstName, lastName: customer.lastName, totalSpend: customer.totalSpend } : 'Not found');
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found. Please create the customer first.',
+      });
+    }
+
+    // Create order
+    const order = new Order({
+      customerName,
+      totalSpent,
+      date: parseDate(date || ''),
+    });
+
+    await order.save();
+
+    // Update customer's totalSpend
+    customer.totalSpend += totalSpent;
+    await customer.save();
+
+    return res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      data: order,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: error.errors,
+      });
+    }
+
+    console.error('Create order error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/orders/{id}:
+ *   put:
+ *     summary: Update order
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               customerName:
+ *                 type: string
+ *                 description: Customer name
+ *               totalSpent:
+ *                 type: number
+ *                 description: Total amount spent
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Order date
+ *     responses:
+ *       200:
+ *         description: Order updated successfully
+ *       404:
+ *         description: Order not found
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { customerName, totalSpent, date } = orderUpdateSchema.parse(req.body);
+    
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Store old values for customer update
+    const oldTotalSpent = order.totalSpent;
+    const oldCustomerName = order.customerName;
+
+    // Update order
+    if (customerName) order.customerName = customerName;
+    if (totalSpent !== undefined) order.totalSpent = totalSpent;
+    if (date) order.date = parseDate(date);
+
+    await order.save();
+
+    // Update customer's totalSpend
+    if (oldCustomerName !== customerName || oldTotalSpent !== totalSpent) {
+      // Find old customer and subtract old amount
+      const oldCustomer = await Customer.findOne({
+        $expr: {
+          $eq: [
+            { $concat: ['$firstName', ' ', '$lastName'] },
+            oldCustomerName
+          ]
+        }
+      });
+
+      if (oldCustomer) {
+        oldCustomer.totalSpend -= oldTotalSpent;
+        await oldCustomer.save();
+      }
+
+      // Find new customer and add new amount
+      const newCustomer = await Customer.findOne({
+        $expr: {
+          $eq: [
+            { $concat: ['$firstName', ' ', '$lastName'] },
+            order.customerName
+          ]
+        }
+      });
+
+      if (newCustomer) {
+        newCustomer.totalSpend += order.totalSpent;
+        await newCustomer.save();
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: 'Order updated successfully',
+      data: order,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: error.errors,
+      });
+    }
+
+    console.error('Update order error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/orders/{id}:
+ *   delete:
+ *     summary: Delete order
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Order deleted successfully
+ *       404:
+ *         description: Order not found
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+    }
+
+    // Find customer and subtract the order amount
+    const customer = await Customer.findOne({
+      $expr: {
+        $eq: [
+          { $concat: ['$firstName', ' ', '$lastName'] },
+          order.customerName
+        ]
+      }
+    });
+
+    if (customer) {
+      customer.totalSpend -= order.totalSpent;
+      await customer.save();
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    return res.json({
+      success: true,
+      message: 'Order deleted successfully',
+    });
+  } catch (error) {
+    console.error('Delete order error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+export { router as orderRoutes };
