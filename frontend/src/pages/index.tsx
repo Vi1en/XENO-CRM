@@ -94,6 +94,46 @@ export default function Home() {
       setSegments(mockSegments)
       setOrders(mockOrders)
       
+      // Generate analytics data based on mock data
+      const mockAnalytics = {
+        customerSegments: {
+          vip: Math.round(mockCustomers.length * 0.75),
+          premium: Math.round(mockCustomers.length * 0.17),
+          regular: Math.round(mockCustomers.length * 0.08)
+        },
+        campaignPerformance: {
+          running: mockCampaigns.length,
+          completed: Math.round(mockCampaigns.length * 0.8),
+          scheduled: Math.round(mockCampaigns.length * 0.3)
+        }
+      }
+      
+      const mockTrends = {
+        customerGrowth: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
+          month,
+          value: index < 4 ? 0 : Math.round(mockCustomers.length * (index - 3) * 0.3)
+        })),
+        revenueTrend: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
+          month,
+          value: Math.round(mockOrders.length * (index + 1) * 0.2)
+        }))
+      }
+      
+      const mockDelivery = {
+        deliveryRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
+          day,
+          rate: Math.round(85 + Math.random() * 15 + mockCampaigns.length * 0.5)
+        })),
+        successRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
+          day,
+          rate: Math.round(90 + Math.random() * 10 + mockCampaigns.length * 0.3)
+        }))
+      }
+      
+      setAnalyticsData(mockAnalytics)
+      setTrendsData(mockTrends)
+      setDeliveryData(mockDelivery)
+      
       console.log('✅ Mock data loaded:', {
         customers: mockCustomers.length,
         campaigns: mockCampaigns.length,
@@ -135,7 +175,7 @@ export default function Home() {
   }
 
   const generateMockAnalytics = () => {
-    const totalCustomers = customers.length
+    const totalCustomers = customers.length || 5 // Fallback to 5 if no customers
     return {
       customerSegments: {
         vip: Math.round(totalCustomers * 0.75),
@@ -143,37 +183,40 @@ export default function Home() {
         regular: Math.round(totalCustomers * 0.08)
       },
       campaignPerformance: {
-        running: campaigns.length,
-        completed: Math.round(campaigns.length * 0.8),
-        scheduled: Math.round(campaigns.length * 0.3)
+        running: campaigns.length || 3, // Fallback to 3 if no campaigns
+        completed: Math.round((campaigns.length || 3) * 0.8),
+        scheduled: Math.round((campaigns.length || 3) * 0.3)
       }
     }
   }
 
   const generateMockTrends = () => {
     const months = ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25']
+    const customerCount = customers.length || 5
+    const orderCount = orders.length || 5
     return {
       customerGrowth: months.map((month, index) => ({
         month,
-        value: index < 4 ? 0 : Math.round(customers.length * (index - 3) * 0.3)
+        value: index < 4 ? 0 : Math.round(customerCount * (index - 3) * 0.3)
       })),
       revenueTrend: months.map((month, index) => ({
         month,
-        value: Math.round(orders.length * (index + 1) * 0.2)
+        value: Math.round(orderCount * (index + 1) * 0.2)
       }))
     }
   }
 
   const generateMockDelivery = () => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const campaignCount = campaigns.length || 3
     return {
       deliveryRates: days.map((day, index) => ({
         day,
-        rate: Math.round(85 + Math.random() * 15 + campaigns.length * 0.5)
+        rate: Math.round(85 + Math.random() * 15 + campaignCount * 0.5)
       })),
       successRates: days.map((day, index) => ({
         day,
-        rate: Math.round(90 + Math.random() * 10 + campaigns.length * 0.3)
+        rate: Math.round(90 + Math.random() * 10 + campaignCount * 0.3)
       }))
     }
   }
