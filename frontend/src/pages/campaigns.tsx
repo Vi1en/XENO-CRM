@@ -352,7 +352,7 @@ export default function CampaignsPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               <div className="text-sm">
                                 <div className="text-green-600 font-medium">
-                                  {campaign.stats?.delivered || Math.floor((campaign.stats?.totalRecipients || 9) * 0.85)} delivered
+                                  {campaign.stats?.delivered !== undefined ? campaign.stats.delivered : Math.floor((campaign.stats?.totalRecipients || 9) * 0.85)} delivered
                                 </div>
                                 <div className="text-gray-500 text-xs">
                                   of {campaign.stats?.totalRecipients || 9} total
