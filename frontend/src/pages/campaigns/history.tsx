@@ -46,7 +46,7 @@ export default function CampaignHistory() {
     try {
       setLoading(true)
       const response = await campaignApi.getAll()
-      let filteredCampaigns = response.data.data
+      let filteredCampaigns = response.data
 
       // Apply search filter
       if (searchTerm) {
