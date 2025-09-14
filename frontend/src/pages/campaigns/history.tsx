@@ -46,7 +46,13 @@ export default function CampaignHistory() {
     try {
       setLoading(true)
       const response = await campaignApi.getAll()
-      let filteredCampaigns = response.data
+      let filteredCampaigns = response.data.data || []
+
+      // Ensure filteredCampaigns is an array
+      if (!Array.isArray(filteredCampaigns)) {
+        console.error('Expected array but got:', typeof filteredCampaigns, filteredCampaigns)
+        filteredCampaigns = []
+      }
 
       // Apply search filter
       if (searchTerm) {
