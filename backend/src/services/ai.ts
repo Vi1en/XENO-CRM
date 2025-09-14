@@ -195,13 +195,12 @@ function generateSmartMockCampaign(objective: string, tone: string, offer?: stri
 }
 
 export async function generateSegmentRules(prompt: string): Promise<{ rules: any[], name: string, description: string }> {
-  if (!process.env.OPENAI_API_KEY) {
-    console.log('🤖 Using smart mock AI response for segment rules');
-    console.log('🤖 Input prompt:', prompt);
-    const result = generateSmartMockRules(prompt);
-    console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
-    return result;
-  }
+  // Always use smart mock for now to ensure it works
+  console.log('🤖 FORCED to use smart mock AI response for segment rules');
+  console.log('🤖 Input prompt:', prompt);
+  const result = generateSmartMockRules(prompt);
+  console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
+  return result;
 
   try {
     const completion = await openai.chat.completions.create({
