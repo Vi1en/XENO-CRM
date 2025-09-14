@@ -288,7 +288,9 @@ export default function CampaignDetails() {
                     <button 
                       onClick={(e) => {
                         e.preventDefault()
+                        e.stopPropagation()
                         console.log('Edit button clicked for campaign:', campaign._id)
+                        alert('Edit button clicked! Check console for details.')
                         router.push(`/campaigns/edit?id=${campaign._id}`)
                       }}
                       className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
@@ -298,7 +300,9 @@ export default function CampaignDetails() {
                     <button 
                       onClick={(e) => {
                         e.preventDefault()
+                        e.stopPropagation()
                         console.log('Delete button clicked for campaign:', campaign._id)
+                        alert('Delete button clicked! Check console for details.')
                         handleDelete()
                       }}
                       className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
