@@ -5,16 +5,11 @@ const nextConfig = {
     unoptimized: true
   },
   // Ensure proper routing for Render
-  async headers() {
+  async rewrites() {
     return [
       {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-        ],
+        source: '/',
+        destination: '/',
       },
     ]
   },

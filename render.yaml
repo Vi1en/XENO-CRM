@@ -6,7 +6,7 @@ services:
     rootDir: frontend
     buildCommand: npm ci && npm run build
     startCommand: npm start
-    healthCheckPath: /test
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,5 +16,3 @@ services:
         value: your-secret-key-here
       - key: NEXT_PUBLIC_API_URL
         value: https://backend-production-05a7e.up.railway.app/api/v1
-      - key: PORT
-        value: 10000
