@@ -4,7 +4,11 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  // Ensure proper routing for Render
+  // Railway optimizations
+  experimental: {
+    outputFileTracingRoot: undefined,
+  },
+  // Ensure proper routing
   async rewrites() {
     return [
       {
@@ -12,11 +16,6 @@ const nextConfig = {
         destination: '/',
       },
     ]
-  },
-  // Add debugging
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
   },
 }
 
