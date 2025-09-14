@@ -329,10 +329,12 @@ export async function generateMessageVariants(
   tone: string,
   offer?: string
 ): Promise<{ name: string, description: string, message: string, variants: string[] }> {
-  if (!process.env.OPENAI_API_KEY) {
-    console.log('🤖 Using smart mock AI response for campaign generation');
-    return generateSmartMockCampaign(objective, tone, offer);
-  }
+  // Always use smart mock for now to ensure it works
+  console.log('🤖 FORCED to use smart mock AI response for campaign generation');
+  console.log('🤖 Input - Objective:', objective, 'Tone:', tone, 'Offer:', offer);
+  const result = generateSmartMockCampaign(objective, tone, offer);
+  console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
+  return result;
 
   try {
     const completion = await openai.chat.completions.create({
