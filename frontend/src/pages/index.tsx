@@ -269,51 +269,51 @@ export default function Home() {
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         </Head>
         
-        {/* Mobile Header - Simplified for iPhone */}
-        <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">X</span>
+        {/* Mobile Interface - Always Show on Small Screens */}
+        <div className="block lg:hidden">
+          {/* Mobile Header */}
+          <div className="bg-white shadow-sm border-b px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">X</span>
+                </div>
+                <span className="ml-2 text-xl font-semibold text-gray-900">Xeno CRM</span>
               </div>
-              <span className="ml-2 text-xl font-semibold text-gray-900">Xeno CRM</span>
+              <button
+                onClick={() => signOut()}
+                className="p-2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="p-2 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
           </div>
-        </div>
 
-        {/* Mobile Content - Ultra Simple for iPhone */}
-        <div className="lg:hidden p-4 space-y-4">
-          {/* Debug Info */}
-          <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3">
-            <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Info</h3>
-            <div className="text-xs text-yellow-700 space-y-1">
-              <div>Screen: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}</div>
-              <div>Data: {customers.length} customers, {campaigns.length} campaigns</div>
-              <div>Status: {loading ? 'Loading...' : error || 'Ready'}</div>
+          {/* Mobile Content */}
+          <div className="p-4 space-y-4">
+            {/* Test Message - Should Always Show */}
+            <div className="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
+              <h2 className="text-lg font-bold text-green-800 mb-2">✅ MOBILE INTERFACE WORKING!</h2>
+              <p className="text-sm text-green-700">This is the new mobile interface for iPhone</p>
             </div>
-            <button
-              onClick={loadData}
-              className="mt-2 px-2 py-1 bg-yellow-600 text-white text-xs rounded"
-            >
-              Refresh
-            </button>
-          </div>
+
+            {/* Debug Info */}
+            <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Info</h3>
+              <div className="text-xs text-yellow-700 space-y-1">
+                <div>Screen: {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}</div>
+                <div>Data: {customers.length} customers, {campaigns.length} campaigns</div>
+                <div>Status: {loading ? 'Loading...' : error || 'Ready'}</div>
+              </div>
+              <button
+                onClick={loadData}
+                className="mt-2 px-2 py-1 bg-yellow-600 text-white text-xs rounded"
+              >
+                Refresh
+              </button>
+            </div>
 
           {/* Simple Stats */}
           <div className="grid grid-cols-2 gap-3">
@@ -461,6 +461,12 @@ export default function Home() {
               </div>
             </div>
           )}
+          </div>
+        </div>
+
+        {/* Desktop Content - Hidden on Mobile */}
+        <div className="hidden lg:block">
+          {/* Desktop content goes here - this is the complex layout for desktop */}
         </div>
       </div>
     )
