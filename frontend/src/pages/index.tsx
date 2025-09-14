@@ -70,7 +70,7 @@ export default function Home() {
   useEffect(() => {
     if (isMobile && session) {
       console.log('📱 Redirecting to mobile dashboard...')
-      router.push('/mobile-dashboard')
+      router.push('/mobile')
     }
   }, [isMobile, session, router])
 
@@ -297,7 +297,7 @@ export default function Home() {
           </div>
           <p className="text-gray-600 mb-4">Redirecting to mobile dashboard...</p>
           <button
-            onClick={() => router.push('/mobile-dashboard')}
+            onClick={() => router.push('/mobile')}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Go to Mobile Dashboard
@@ -464,7 +464,7 @@ export default function Home() {
                 <div className="text-sm text-blue-100">Last updated</div>
                 <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
                 <button
-                  onClick={() => router.push('/mobile-dashboard')}
+                  onClick={() => router.push('/mobile')}
                   className="mt-2 px-3 py-1 bg-white bg-opacity-20 text-white text-xs rounded hover:bg-opacity-30"
                 >
                   Mobile View
