@@ -35,7 +35,10 @@ export default function CampaignsPage() {
       setLoading(true)
       setError(null)
       const response = await campaignApi.getAll()
-      setCampaigns(response.data || [])
+      console.log('Campaigns API response:', response)
+      console.log('Campaigns data:', response.data)
+      console.log('Campaigns array:', response.data.data)
+      setCampaigns(response.data.data || [])
     } catch (error) {
       console.error('Error loading campaigns:', error)
       setError('Failed to load campaigns')
