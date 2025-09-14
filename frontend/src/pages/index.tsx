@@ -256,39 +256,66 @@ export default function Home() {
   // Show responsive interface for all devices
   if (session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gray-50">
         <Head>
           <title>Xeno CRM Dashboard</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         </Head>
         
-        {/* Header */}
-        <div className="bg-white shadow-lg border-b border-gray-200">
-          <div className="px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900">Xeno CRM</h1>
-                  <p className="text-xs text-gray-500">Welcome back, {(session as any)?.user?.name?.split(' ')[0] || 'User'}</p>
-                </div>
+        {/* Mobile Header - Simplified for iPhone */}
+        <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">X</span>
               </div>
-              <button
-                onClick={() => signOut()}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              <span className="ml-2 text-xl font-semibold text-gray-900">Xeno CRM</span>
             </div>
+            <button
+              onClick={() => signOut()}
+              className="p-2 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="p-4 lg:p-8 space-y-6">
+          {/* iPhone Debug Info */}
+          <div className="lg:hidden bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-4">
+            <h3 className="text-lg font-semibold text-yellow-800 mb-2">iPhone Debug Info</h3>
+            <div className="text-sm text-yellow-700 space-y-1">
+              <div>Screen Width: {typeof window !== 'undefined' ? window.innerWidth : 'N/A'}</div>
+              <div>Screen Height: {typeof window !== 'undefined' ? window.innerHeight : 'N/A'}</div>
+              <div>User Agent: {typeof window !== 'undefined' ? navigator.userAgent.substring(0, 50) + '...' : 'N/A'}</div>
+              <div>Customers: {customers.length}</div>
+              <div>Campaigns: {campaigns.length}</div>
+              <div>Loading: {loading ? 'Yes' : 'No'}</div>
+              <div>Error: {error || 'None'}</div>
+            </div>
+            <div className="mt-3 space-x-2">
+              <button
+                onClick={loadData}
+                className="px-3 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+              >
+                Refresh Data
+              </button>
+            </div>
+          </div>
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
