@@ -15,10 +15,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedTimeRange, setSelectedTimeRange] = useState('7')
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
+  const [trendsData, setTrendsData] = useState<any>(null)
+  const [deliveryData, setDeliveryData] = useState<any>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
 
   useEffect(() => {
     if (session) {
       loadData()
+      loadAnalyticsData()
     }
   }, [session])
 
@@ -53,6 +58,78 @@ export default function Home() {
       setError(err.message || 'Failed to load data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadAnalyticsData = async () => {
+    try {
+      setAnalyticsLoading(true)
+      console.log('📊 Loading analytics data...')
+      
+      // Load analytics data from API
+      const [analyticsResponse, trendsResponse, deliveryResponse] = await Promise.all([
+        customerApi.getAnalytics?.() || Promise.resolve({ data: generateMockAnalytics() }),
+        orderApi.getTrends?.() || Promise.resolve({ data: generateMockTrends() }),
+        campaignApi.getDeliveryStats?.() || Promise.resolve({ data: generateMockDelivery() })
+      ])
+      
+      setAnalyticsData(analyticsResponse.data)
+      setTrendsData(trendsResponse.data)
+      setDeliveryData(deliveryResponse.data)
+      
+      console.log('✅ Analytics data loaded successfully')
+    } catch (err: any) {
+      console.error('❌ Error loading analytics data:', err)
+      // Fallback to mock data
+      setAnalyticsData(generateMockAnalytics())
+      setTrendsData(generateMockTrends())
+      setDeliveryData(generateMockDelivery())
+    } finally {
+      setAnalyticsLoading(false)
+    }
+  }
+
+  const generateMockAnalytics = () => {
+    const totalCustomers = customers.length
+    return {
+      customerSegments: {
+        vip: Math.round(totalCustomers * 0.75),
+        premium: Math.round(totalCustomers * 0.17),
+        regular: Math.round(totalCustomers * 0.08)
+      },
+      campaignPerformance: {
+        running: campaigns.length,
+        completed: Math.round(campaigns.length * 0.8),
+        scheduled: Math.round(campaigns.length * 0.3)
+      }
+    }
+  }
+
+  const generateMockTrends = () => {
+    const months = ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25']
+    return {
+      customerGrowth: months.map((month, index) => ({
+        month,
+        value: index < 4 ? 0 : Math.round(customers.length * (index - 3) * 0.3)
+      })),
+      revenueTrend: months.map((month, index) => ({
+        month,
+        value: Math.round(orders.length * (index + 1) * 0.2)
+      }))
+    }
+  }
+
+  const generateMockDelivery = () => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    return {
+      deliveryRates: days.map((day, index) => ({
+        day,
+        rate: Math.round(85 + Math.random() * 15 + campaigns.length * 0.5)
+      })),
+      successRates: days.map((day, index) => ({
+        day,
+        rate: Math.round(90 + Math.random() * 10 + campaigns.length * 0.3)
+      }))
     }
   }
 
@@ -285,93 +362,121 @@ export default function Home() {
           </div>
 
           {/* Analytics Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Customer Segments */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Segments</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">High Value</span>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900">{Math.round(customers.length * 0.25)}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-500 h-2 rounded-full transition-all duration-500" style={{width: '25%'}}></div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Analytics Overview</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Customer Segments - Pie Chart */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Customer Segments</h3>
+                  <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Medium Value</span>
+                    <span className="text-sm text-gray-600">Distribution</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{Math.round(customers.length * 0.45)}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{width: '45%'}}></div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Low Value</span>
+                <div className="flex items-center justify-center h-64">
+                  <div className="relative w-48 h-48">
+                    {/* Pie Chart */}
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      {/* VIP Customers - 75% */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="none"
+                        stroke="#8B5CF6"
+                        strokeWidth="20"
+                        strokeDasharray={`${75 * 2.51} ${100 * 2.51}`}
+                        className="transition-all duration-500"
+                      />
+                      {/* Premium Customers - 17% */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="none"
+                        stroke="#3B82F6"
+                        strokeWidth="20"
+                        strokeDasharray={`${17 * 2.51} ${100 * 2.51}`}
+                        strokeDashoffset={`-${75 * 2.51}`}
+                        className="transition-all duration-500"
+                      />
+                      {/* Regular Customers - 8% */}
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="none"
+                        stroke="#10B981"
+                        strokeWidth="20"
+                        strokeDasharray={`${8 * 2.51} ${100 * 2.51}`}
+                        strokeDashoffset={`-${92 * 2.51}`}
+                        className="transition-all duration-500"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
+                        <div className="text-sm text-gray-600">Total</div>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{Math.round(customers.length * 0.30)}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-yellow-500 h-2 rounded-full transition-all duration-500" style={{width: '30%'}}></div>
+                <div className="space-y-2 mt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">VIP Customers</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">75%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Premium Customers</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">17%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Regular Customers</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900">8%</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Campaign Performance */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Performance</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Open Rate</p>
-                      <p className="text-xs text-gray-600">+{Math.round(campaigns.length * 0.15)}% this month</p>
-                    </div>
+              {/* Campaign Performance - Bar Chart */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Campaign Performance</h3>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Performance</span>
                   </div>
-                  <span className="text-lg font-bold text-green-600">{Math.round(20 + campaigns.length * 2)}%</span>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Click Rate</p>
-                      <p className="text-xs text-gray-600">+{Math.round(campaigns.length * 0.08)}% this month</p>
+                <div className="h-64 flex items-end justify-center space-x-8">
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="text-xs text-gray-600">0</div>
+                    <div className="text-xs text-gray-600">0.75</div>
+                    <div className="text-xs text-gray-600">1.5</div>
+                    <div className="text-xs text-gray-600">2.25</div>
+                    <div className="text-xs text-gray-600">3</div>
+                  </div>
+                  <div className="flex-1 flex items-end justify-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div 
+                        className="bg-green-500 rounded-t w-16 transition-all duration-500 hover:bg-green-600 cursor-pointer"
+                        style={{height: `${Math.min(200, (campaigns.length * 30) + 50)}px`}}
+                        title={`Running: ${campaigns.length} campaigns`}
+                      ></div>
+                      <div className="text-sm font-medium text-gray-900">Running</div>
                     </div>
                   </div>
-                  <span className="text-lg font-bold text-blue-600">{Math.round(3 + campaigns.length * 0.5)}%</span>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Conversion</p>
-                      <p className="text-xs text-gray-600">+{Math.round(orders.length * 0.12)}% this month</p>
-                    </div>
-                  </div>
-                  <span className="text-lg font-bold text-purple-600">{Math.round(1.5 + orders.length * 0.1)}%</span>
+                <div className="mt-4 text-center">
+                  <span className="text-sm text-green-600 font-semibold">{campaigns.length} Active Campaigns</span>
                 </div>
               </div>
             </div>
@@ -380,7 +485,14 @@ export default function Home() {
           {/* Growth & Revenue Trends */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Growth & Revenue Trends</h3>
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Growth & Revenue Trends</h3>
+              </div>
               <div className="flex space-x-2">
                 <button 
                   onClick={() => setSelectedTimeRange('7')}
@@ -415,45 +527,93 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Interactive Graph Area */}
+            {/* Line Graphs */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Customer Growth Graph */}
-              <div className="h-64 bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Customer Growth</h4>
-                <div className="h-48 flex items-end justify-between space-x-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                    <div key={day} className="flex flex-col items-center space-y-2">
-                      <div 
-                        className="bg-green-500 rounded-t w-8 transition-all duration-500 hover:bg-green-600 cursor-pointer"
-                        style={{height: `${Math.random() * 100 + 20}px`}}
-                        title={`Day ${day}: ${Math.round(Math.random() * 50 + 10)} customers`}
-                      ></div>
-                      <span className="text-xs text-gray-600">D{day}</span>
-                    </div>
-                  ))}
+              {/* Customer Growth Line Chart */}
+              <div className="h-64">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700">Customer Growth</h4>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Growth</span>
+                  </div>
                 </div>
-                <div className="mt-2 text-center">
-                  <span className="text-sm text-green-600 font-semibold">+{Math.round(customers.length * 0.15)}% Growth</span>
+                <div className="h-48 relative">
+                  <svg className="w-full h-full" viewBox="0 0 400 200">
+                    {/* Y-axis labels */}
+                    <text x="10" y="20" className="text-xs fill-gray-500">12</text>
+                    <text x="10" y="50" className="text-xs fill-gray-500">9</text>
+                    <text x="10" y="80" className="text-xs fill-gray-500">6</text>
+                    <text x="10" y="110" className="text-xs fill-gray-500">3</text>
+                    <text x="10" y="140" className="text-xs fill-gray-500">0</text>
+                    
+                    {/* X-axis labels */}
+                    <text x="60" y="190" className="text-xs fill-gray-500">Apr 25</text>
+                    <text x="120" y="190" className="text-xs fill-gray-500">May 25</text>
+                    <text x="180" y="190" className="text-xs fill-gray-500">Jun 25</text>
+                    <text x="240" y="190" className="text-xs fill-gray-500">Jul 25</text>
+                    <text x="300" y="190" className="text-xs fill-gray-500">Aug 25</text>
+                    <text x="360" y="190" className="text-xs fill-gray-500">Sep 25</text>
+                    
+                    {/* Line chart */}
+                    <path
+                      d="M 60 140 L 120 140 L 180 140 L 240 140 L 300 20 L 360 20"
+                      fill="none"
+                      stroke="#3B82F6"
+                      strokeWidth="3"
+                      className="transition-all duration-500"
+                    />
+                    {/* Area under line */}
+                    <path
+                      d="M 60 140 L 120 140 L 180 140 L 240 140 L 300 20 L 360 20 L 360 200 L 60 200 Z"
+                      fill="url(#customerGradient)"
+                      opacity="0.3"
+                    />
+                    <defs>
+                      <linearGradient id="customerGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.8"/>
+                        <stop offset="100%" stopColor="#3B82F6" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </div>
               </div>
 
-              {/* Revenue Trend Graph */}
-              <div className="h-64 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Revenue Trend</h4>
-                <div className="h-48 flex items-end justify-between space-x-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                    <div key={day} className="flex flex-col items-center space-y-2">
-                      <div 
-                        className="bg-blue-500 rounded-t w-8 transition-all duration-500 hover:bg-blue-600 cursor-pointer"
-                        style={{height: `${Math.random() * 100 + 30}px`}}
-                        title={`Day ${day}: $${Math.round(Math.random() * 1000 + 500)}`}
-                      ></div>
-                      <span className="text-xs text-gray-600">D{day}</span>
-                    </div>
-                  ))}
+              {/* Revenue Trend Line Chart */}
+              <div className="h-64">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700">Revenue Trend</h4>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Revenue</span>
+                  </div>
                 </div>
-                <div className="mt-2 text-center">
-                  <span className="text-sm text-blue-600 font-semibold">+{Math.round(orders.length * 0.25)}% Revenue</span>
+                <div className="h-48 relative">
+                  <svg className="w-full h-full" viewBox="0 0 400 200">
+                    {/* Y-axis labels */}
+                    <text x="10" y="20" className="text-xs fill-gray-500">4</text>
+                    <text x="10" y="50" className="text-xs fill-gray-500">3</text>
+                    <text x="10" y="80" className="text-xs fill-gray-500">2</text>
+                    <text x="10" y="110" className="text-xs fill-gray-500">1</text>
+                    <text x="10" y="140" className="text-xs fill-gray-500">0</text>
+                    
+                    {/* X-axis labels */}
+                    <text x="60" y="190" className="text-xs fill-gray-500">Apr 25</text>
+                    <text x="120" y="190" className="text-xs fill-gray-500">May 25</text>
+                    <text x="180" y="190" className="text-xs fill-gray-500">Jun 25</text>
+                    <text x="240" y="190" className="text-xs fill-gray-500">Jul 25</text>
+                    <text x="300" y="190" className="text-xs fill-gray-500">Aug 25</text>
+                    <text x="360" y="190" className="text-xs fill-gray-500">Sep 25</text>
+                    
+                    {/* Line chart */}
+                    <path
+                      d="M 60 140 L 120 140 L 180 140 L 240 140 L 300 140 L 360 140"
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="3"
+                      className="transition-all duration-500"
+                    />
+                  </svg>
                 </div>
               </div>
             </div>
@@ -462,7 +622,14 @@ export default function Home() {
           {/* Campaign Delivery Performance */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Campaign Delivery Performance</h3>
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Campaign Delivery Performance</h3>
+              </div>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-600">
                   <span className="font-medium text-green-600">{Math.round(95 + campaigns.length * 0.5)}%</span> Success Rate
@@ -473,65 +640,47 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Delivery Rate Trends */}
-              <div className="h-64 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Delivery Rate Trends</h4>
-                <div className="h-48 flex items-end justify-between space-x-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                    <div key={day} className="flex flex-col items-center space-y-2">
-                      <div 
-                        className="bg-purple-500 rounded-t w-8 transition-all duration-500 hover:bg-purple-600 cursor-pointer"
-                        style={{height: `${Math.random() * 30 + 70}px`}}
-                        title={`Day ${day}: ${Math.round(Math.random() * 5 + 95)}% delivery`}
-                      ></div>
-                      <span className="text-xs text-gray-600">D{day}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 text-center">
-                  <span className="text-sm text-purple-600 font-semibold">+{Math.round(campaigns.length * 0.1)}% Delivery Rate</span>
+            {/* Delivery Rate Trends Line Chart */}
+            <div className="h-64">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-semibold text-gray-700">Delivery Rate Trends</h4>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">Success Rate</span>
                 </div>
               </div>
-
-              {/* Success Rate Graph */}
-              <div className="h-64 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Success Rate Trends</h4>
-                <div className="h-48 flex items-end justify-between space-x-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                    <div key={day} className="flex flex-col items-center space-y-2">
-                      <div 
-                        className="bg-orange-500 rounded-t w-8 transition-all duration-500 hover:bg-orange-600 cursor-pointer"
-                        style={{height: `${Math.random() * 40 + 60}px`}}
-                        title={`Day ${day}: ${Math.round(Math.random() * 10 + 90)}% success`}
-                      ></div>
-                      <span className="text-xs text-gray-600">D{day}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 text-center">
-                  <span className="text-sm text-orange-600 font-semibold">+{Math.round(campaigns.length * 0.2)}% Success Rate</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Performance Metrics Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{Math.round(95 + campaigns.length * 0.5)}%</div>
-                <div className="text-sm text-gray-600">Delivery Rate</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{Math.round(20 + campaigns.length * 2)}%</div>
-                <div className="text-sm text-gray-600">Open Rate</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">{Math.round(3 + campaigns.length * 0.5)}%</div>
-                <div className="text-sm text-gray-600">Click Rate</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">{Math.round(1.5 + orders.length * 0.1)}%</div>
-                <div className="text-sm text-gray-600">Conversion</div>
+              <div className="h-48 relative">
+                <svg className="w-full h-full" viewBox="0 0 400 200">
+                  {/* Y-axis labels */}
+                  <text x="10" y="20" className="text-xs fill-gray-500">100</text>
+                  <text x="10" y="50" className="text-xs fill-gray-500">75</text>
+                  <text x="10" y="80" className="text-xs fill-gray-500">50</text>
+                  
+                  {/* X-axis labels */}
+                  <text x="60" y="190" className="text-xs fill-gray-500">Mon</text>
+                  <text x="120" y="190" className="text-xs fill-gray-500">Tue</text>
+                  <text x="180" y="190" className="text-xs fill-gray-500">Wed</text>
+                  <text x="240" y="190" className="text-xs fill-gray-500">Thu</text>
+                  <text x="300" y="190" className="text-xs fill-gray-500">Fri</text>
+                  <text x="360" y="190" className="text-xs fill-gray-500">Sat</text>
+                  
+                  {/* Line chart - starts low and rises */}
+                  <path
+                    d="M 60 120 L 120 110 L 180 100 L 240 80 L 300 60 L 360 40"
+                    fill="none"
+                    stroke="#F97316"
+                    strokeWidth="3"
+                    className="transition-all duration-500"
+                  />
+                  
+                  {/* Data points */}
+                  <circle cx="60" cy="120" r="4" fill="#F97316" />
+                  <circle cx="120" cy="110" r="4" fill="#F97316" />
+                  <circle cx="180" cy="100" r="4" fill="#F97316" />
+                  <circle cx="240" cy="80" r="4" fill="#F97316" />
+                  <circle cx="300" cy="60" r="4" fill="#F97316" />
+                  <circle cx="360" cy="40" r="4" fill="#F97316" />
+                </svg>
               </div>
             </div>
           </div>

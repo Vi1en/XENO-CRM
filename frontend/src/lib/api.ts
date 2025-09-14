@@ -119,6 +119,9 @@ export const customerApi = {
   
   // Delete customer
   delete: (id: string) => retryRequest(() => api.delete(`/customers/${id}`)),
+  
+  // Get customer analytics
+  getAnalytics: () => retryRequest(() => api.get('/customers/analytics')),
 };
 
 // Segment API functions
@@ -164,6 +167,9 @@ export const campaignApi = {
   
   // Get campaign summary
   getSummary: (id: string) => retryRequest(() => api.get(`/campaigns/${id}/summary`)),
+  
+  // Get delivery statistics
+  getDeliveryStats: () => retryRequest(() => api.get('/campaigns/delivery-stats')),
 };
 
 // Order API functions
@@ -183,6 +189,9 @@ export const orderApi = {
   
   // Delete order
   delete: (id: string) => retryRequest(() => api.delete(`/orders/${id}`)),
+  
+  // Get revenue trends
+  getTrends: () => retryRequest(() => api.get('/orders/trends')),
 };
 
 // AI API functions
