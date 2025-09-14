@@ -40,15 +40,25 @@ export default function Home() {
     try {
       setLoading(true)
       console.log('📱 Loading data for mobile device...')
+      console.log('🔗 API Base URL:', process.env.NEXT_PUBLIC_API_URL)
+      console.log('🌍 Current hostname:', window.location.hostname)
       
       // Try to load data with individual error handling
       const loadCustomersData = async () => {
         try {
+          console.log('🔄 Loading customers...')
           const response = await customerApi.getAll()
           console.log('✅ Customers loaded:', response.data.data?.length || 0)
+          console.log('📊 Customers response:', response.data)
           return response.data.data || []
         } catch (error: any) {
           console.error('❌ Customers error:', error)
+          console.error('❌ Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+            config: error.config
+          })
           return []
         }
       }
@@ -396,10 +406,37 @@ export default function Home() {
           {/* Mobile Debug Info */}
           {typeof window !== 'undefined' && window.innerWidth < 768 && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="text-xs text-blue-800">
+              <div className="text-xs text-blue-800 mb-2">
                 <strong>📱 Mobile Debug:</strong> Screen: {window.innerWidth}x{window.innerHeight} | 
                 API: {process.env.NEXT_PUBLIC_API_URL || 'Default'} | 
                 Data: {customers.length} customers, {campaigns.length} campaigns
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={loadData}
+                  disabled={loading}
+                  className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? 'Loading...' : 'Refresh'}
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('🧪 Testing API connection...')
+                    fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+                      .then(res => res.json())
+                      .then(data => {
+                        console.log('🧪 API Test Result:', data)
+                        alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}`)
+                      })
+                      .catch(err => {
+                        console.error('🧪 API Test Error:', err)
+                        alert(`API Test: FAILED\nError: ${err.message}`)
+                      })
+                  }}
+                  className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                >
+                  Test API
+                </button>
               </div>
             </div>
           )}

@@ -28,7 +28,7 @@ const getApiBaseUrl = () => {
   }
   
   // In server-side rendering, use environment variable or fallback
-  const ssrUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  const ssrUrl = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1';
   console.log('🖥️ Using SSR URL:', ssrUrl);
   return ssrUrl;
 }
