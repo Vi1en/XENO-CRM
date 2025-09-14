@@ -28,7 +28,7 @@ export default function DebugPage() {
           count: customersRes.data.data?.length || 0,
           data: customersRes.data.data?.slice(0, 2) || []
         }
-      } catch (error) {
+      } catch (error: any) {
         info.tests.customers = {
           status: 'error',
           error: error.message,
@@ -44,7 +44,7 @@ export default function DebugPage() {
           count: campaignsRes.data.data?.length || 0,
           data: campaignsRes.data.data?.slice(0, 2) || []
         }
-      } catch (error) {
+      } catch (error: any) {
         info.tests.campaigns = {
           status: 'error',
           error: error.message,
@@ -60,7 +60,7 @@ export default function DebugPage() {
           count: segmentsRes.data.data?.length || 0,
           data: segmentsRes.data.data?.slice(0, 2) || []
         }
-      } catch (error) {
+      } catch (error: any) {
         info.tests.segments = {
           status: 'error',
           error: error.message,
@@ -76,7 +76,7 @@ export default function DebugPage() {
           count: ordersRes.data.data?.length || 0,
           data: ordersRes.data.data?.slice(0, 2) || []
         }
-      } catch (error) {
+      } catch (error: any) {
         info.tests.orders = {
           status: 'error',
           error: error.message,
@@ -84,7 +84,7 @@ export default function DebugPage() {
         }
       }
 
-    } catch (error) {
+    } catch (error: any) {
       info.generalError = error.message
     }
 
