@@ -98,5 +98,5 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Vendor Simulator running on port ${PORT}`);
   console.log(`📡 Backend URL: ${BACKEND_URL}`);
-  console.log(`📧 Send endpoint: http://localhost:${PORT}/vendor/send`);
+  console.log(`📧 Send endpoint: http://vendor-simulator.railway.internal:${PORT}/vendor/send`);
 });
