@@ -38,32 +38,58 @@ app.post('/vendor/send', async (req, res) => {
     // 90% success rate, 10% failure rate
     const isSuccess = Math.random() < 0.9;
     
-    const result = {
+    // First, send SENT status
+    const sentResult = {
       communicationLogId,
       status: isSuccess ? 'SENT' : 'FAILED',
       vendorId: `vendor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       reason: isSuccess ? undefined : 'Simulated delivery failure',
     };
     
-    console.log(`📤 Vendor result: ${result.status} for ${communicationLogId}`);
+    console.log(`📤 Vendor result: ${sentResult.status} for ${communicationLogId}`);
     
-    // Send receipt back to backend
+    // Send SENT receipt back to backend
     try {
-      await axios.post(`${BACKEND_URL}/api/v1/delivery/receipt`, result, {
+      await axios.post(`${BACKEND_URL}/api/v1/delivery/receipt`, sentResult, {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      console.log(`✅ Receipt sent to backend for ${communicationLogId}`);
+      console.log(`✅ SENT receipt sent to backend for ${communicationLogId}`);
     } catch (receiptError) {
-      console.error(`❌ Failed to send receipt to backend for ${communicationLogId}:`, receiptError);
+      console.error(`❌ Failed to send SENT receipt to backend for ${communicationLogId}:`, receiptError);
+    }
+    
+    // If successful, simulate delivery after a delay
+    if (isSuccess) {
+      setTimeout(async () => {
+        const deliveredResult = {
+          communicationLogId,
+          status: 'DELIVERED',
+          vendorId: sentResult.vendorId,
+        };
+        
+        console.log(`📤 Vendor delivery result: DELIVERED for ${communicationLogId}`);
+        
+        try {
+          await axios.post(`${BACKEND_URL}/api/v1/delivery/receipt`, deliveredResult, {
+            timeout: 10000,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          console.log(`✅ DELIVERED receipt sent to backend for ${communicationLogId}`);
+        } catch (receiptError) {
+          console.error(`❌ Failed to send DELIVERED receipt to backend for ${communicationLogId}:`, receiptError);
+        }
+      }, Math.random() * 5000 + 2000); // 2-7 seconds delay
     }
     
     res.json({
       success: true,
       message: 'Message processed',
-      data: result,
+      data: sentResult,
     });
   } catch (error) {
     console.error('❌ Vendor send error:', error);
