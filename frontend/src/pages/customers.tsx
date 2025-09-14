@@ -186,7 +186,7 @@ export default function Customers() {
                   External
                 </div>
                 <a
-                  href="http://localhost:3001/api/docs/"
+                  href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/docs/`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
@@ -334,7 +334,7 @@ export default function Customers() {
                       Get started by adding your first customer through the API.
                     </p>
                     <a
-                      href="http://localhost:3001/api/docs/"
+                      href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/docs/`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"

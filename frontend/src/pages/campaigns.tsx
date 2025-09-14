@@ -172,7 +172,7 @@ export default function CampaignsPage() {
                   External
                 </div>
                 <a
-                  href="http://localhost:3001/api/docs/"
+                  href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/docs/`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
