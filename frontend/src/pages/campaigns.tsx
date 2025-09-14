@@ -14,6 +14,12 @@ interface Campaign {
   status: string
   createdAt: string
   updatedAt: string
+  stats?: {
+    totalRecipients?: number
+    sent?: number
+    delivered?: number
+    failed?: number
+  }
 }
 
 export default function CampaignsPage() {
