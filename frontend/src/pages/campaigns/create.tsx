@@ -65,11 +65,11 @@ export default function CreateCampaign() {
     setError(null)
 
     try {
-      const response = await aiApi.messageVariants({
-        objective: aiObjective,
-        tone: aiTone,
-        offer: aiOffer || undefined
-      })
+      const response = await aiApi.generateMessageVariants(
+        aiObjective,
+        aiTone,
+        aiOffer || undefined
+      )
       
       const { name, description, message, variants } = response.data.data
       

@@ -66,7 +66,7 @@ export default function CampaignDetails() {
     setError(null)
 
     try {
-      const response = await aiApi.getSummary(campaign._id)
+      const response = await campaignApi.getSummary(campaign._id)
       setAiSummary(response.data.summary)
       setShowAiSummary(true)
     } catch (err) {

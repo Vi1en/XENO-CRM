@@ -26,7 +26,7 @@ export default function Home() {
   const [campaigns, setCampaigns] = useState([])
   const [segments, setSegments] = useState([])
   const [orders, setOrders] = useState([])
-  const [analytics, setAnalytics] = useState(null)
+  const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -303,7 +303,7 @@ export default function Home() {
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">🤖 AI Insights</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {analytics.insights.map((insight, index) => (
+                {analytics.insights.map((insight: any, index: number) => (
                   <div key={index} className={`p-4 rounded-lg border-l-4 ${
                     insight.type === 'positive' ? 'border-green-400 bg-green-50' :
                     insight.type === 'warning' ? 'border-yellow-400 bg-yellow-50' :
@@ -360,12 +360,12 @@ export default function Home() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {(analytics.customerAnalytics?.topCustomerSegments || []).map((entry, index) => (
+                      {(analytics.customerAnalytics?.topCustomerSegments || []).map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
                       ))}
                     </Pie>
@@ -415,7 +415,7 @@ export default function Home() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+                    <Tooltip formatter={(value: any) => [`$${value}`, 'Revenue']} />
                     <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -432,7 +432,7 @@ export default function Home() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value) => [`${value}%`, 'Delivery Rate']} />
+                  <Tooltip formatter={(value: any) => [`${value}%`, 'Delivery Rate']} />
                   <Line type="monotone" dataKey="value" stroke="#10B981" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>

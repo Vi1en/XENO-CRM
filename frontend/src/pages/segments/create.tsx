@@ -70,7 +70,7 @@ export default function CreateSegment() {
     setError(null)
 
     try {
-      const response = await aiApi.nlToSegment({ prompt: aiPrompt })
+      const response = await aiApi.generateSegmentRules(aiPrompt)
       const { rules, name, description } = response.data.data
       
       // Convert AI rules to conditions format
@@ -122,7 +122,7 @@ export default function CreateSegment() {
 
   const updateCondition = (index: number, field: keyof Condition, value: string | number) => {
     const newConditions = [...conditions]
-    newConditions[index][field] = value
+    newConditions[index][field] = value as any
     setConditions(newConditions)
   }
 
@@ -452,15 +452,15 @@ export default function CreateSegment() {
             <div className="text-sm text-blue-700 space-y-2">
               <div>
                 <strong>High Value Customers:</strong>
-                <p className="mt-1">Total Spend > $1000</p>
+                <p className="mt-1">Total Spend &gt; $1000</p>
               </div>
               <div>
                 <strong>Frequent Visitors:</strong>
-                <p className="mt-1">Number of Visits > 10</p>
+                <p className="mt-1">Number of Visits &gt; 10</p>
               </div>
               <div>
                 <strong>VIP Customers:</strong>
-                <p className="mt-1">Tags contains "vip" AND Total Spend > $2000</p>
+                <p className="mt-1">Tags contains "vip" AND Total Spend &gt; $2000</p>
               </div>
             </div>
           </div>
