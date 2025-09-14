@@ -61,29 +61,28 @@ app.post('/vendor/send', async (req, res) => {
       console.error(`❌ Failed to send SENT receipt to backend for ${communicationLogId}:`, receiptError);
     }
     
-    // If successful, simulate delivery after a delay
+    // If successful, simulate delivery immediately (for testing)
     if (isSuccess) {
-      setTimeout(async () => {
-        const deliveredResult = {
-          communicationLogId,
-          status: 'DELIVERED',
-          vendorId: sentResult.vendorId,
-        };
-        
-        console.log(`📤 Vendor delivery result: DELIVERED for ${communicationLogId}`);
-        
-        try {
-          await axios.post(`${BACKEND_URL}/api/v1/delivery/receipt`, deliveredResult, {
-            timeout: 10000,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          console.log(`✅ DELIVERED receipt sent to backend for ${communicationLogId}`);
-        } catch (receiptError) {
-          console.error(`❌ Failed to send DELIVERED receipt to backend for ${communicationLogId}:`, receiptError);
-        }
-      }, Math.random() * 5000 + 2000); // 2-7 seconds delay
+      // Send DELIVERED status immediately
+      const deliveredResult = {
+        communicationLogId,
+        status: 'DELIVERED',
+        vendorId: sentResult.vendorId,
+      };
+      
+      console.log(`📤 Vendor delivery result: DELIVERED for ${communicationLogId}`);
+      
+      try {
+        await axios.post(`${BACKEND_URL}/api/v1/delivery/receipt`, deliveredResult, {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log(`✅ DELIVERED receipt sent to backend for ${communicationLogId}`);
+      } catch (receiptError) {
+        console.error(`❌ Failed to send DELIVERED receipt to backend for ${communicationLogId}:`, receiptError);
+      }
     }
     
     res.json({
