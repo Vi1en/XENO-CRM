@@ -76,7 +76,7 @@ export default function MobileDashboard() {
         segments: segmentsRes.data?.length || 0,
         orders: ordersRes.data?.length || 0
       })
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error loading data:', err)
       setError('Cannot connect to server: ' + err.message)
     }
@@ -91,7 +91,7 @@ export default function MobileDashboard() {
       const data = await response.json()
       console.log('🧪 API Test Result:', data)
       alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}\nStatus: ${response.status}`)
-    } catch (err) {
+    } catch (err: any) {
       console.error('🧪 API Test Error:', err)
       alert(`API Test: FAILED\nError: ${err.message}`)
     }
