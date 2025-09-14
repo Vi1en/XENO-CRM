@@ -54,15 +54,22 @@ export default function Orders() {
   const loadOrders = async () => {
     try {
       setLoading(true)
+      console.log('📱 Loading orders for mobile device...')
       const response = await orderApi.getAll({
         page: currentPage,
         limit: 10,
         search: searchTerm || undefined
       })
-      setOrders(response.data.data)
-      setTotalPages(response.data.pagination.pages)
+      console.log('📊 Orders API response:', response.data)
+      setOrders(response.data.data || [])
+      setTotalPages(response.data.pagination?.pages || 1)
     } catch (err) {
-      console.error('Error loading orders:', err)
+      console.error('❌ Error loading orders:', err)
+      console.error('❌ Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
       setError('Failed to load orders')
     } finally {
       setLoading(false)
@@ -71,10 +78,17 @@ export default function Orders() {
 
   const loadCustomers = async () => {
     try {
+      console.log('📱 Loading customers for mobile device...')
       const response = await customerApi.getAll()
-      setCustomers(response.data.data)
+      console.log('📊 Customers API response:', response.data)
+      setCustomers(response.data.data || [])
     } catch (err) {
-      console.error('Error loading customers:', err)
+      console.error('❌ Error loading customers:', err)
+      console.error('❌ Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
     }
   }
 
@@ -318,6 +332,17 @@ export default function Orders() {
             >
               ×
             </button>
+          </div>
+        )}
+
+        {/* Mobile Debug Info */}
+        {typeof window !== 'undefined' && window.innerWidth < 768 && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="text-xs text-blue-800">
+              <strong>📱 Mobile Debug:</strong> Screen: {window.innerWidth}x{window.innerHeight} | 
+              API: {process.env.NEXT_PUBLIC_API_URL || 'Default'} | 
+              Orders: {orders.length} | Customers: {customers.length}
+            </div>
           </div>
         )}
 
