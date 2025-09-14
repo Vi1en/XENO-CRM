@@ -200,98 +200,142 @@ export default function Home() {
       {/* Main Content */}
       <div className="pl-64">
         {/* Top Bar */}
-        <div className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+          <div className="px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                <p className="text-blue-100 mt-1">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="text-right text-white">
+                  <div className="text-sm text-blue-100">Last updated</div>
+                  <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
+                </div>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="p-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-4">
+            {/* Customers Card */}
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
                     </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {loading ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          customers.length
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Customers</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {loading ? '...' : customers.length}
-                      </dd>
-                    </dl>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">Active</div>
+                    <div className="text-xs font-semibold text-green-600">+12%</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Segments Card */}
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Segments</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {loading ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          segments.length
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Segments</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {loading ? '...' : segments.length}
-                      </dd>
-                    </dl>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">Targeted</div>
+                    <div className="text-xs font-semibold text-blue-600">+8%</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Campaigns Card */}
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Campaigns</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {loading ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          campaigns.length
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Campaigns</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {loading ? '...' : campaigns.length}
-                      </dd>
-                    </dl>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">Running</div>
+                    <div className="text-xs font-semibold text-purple-600">+5%</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Orders Card */}
+            <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-600">Orders</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {loading ? (
+                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                        ) : (
+                          orders.length
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Orders</dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {loading ? '...' : orders.length}
-                      </dd>
-                    </dl>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">This Month</div>
+                    <div className="text-xs font-semibold text-orange-600">+15%</div>
                   </div>
                 </div>
               </div>
@@ -301,44 +345,75 @@ export default function Home() {
           {/* AI Insights */}
           {analytics && analytics.insights && analytics.insights.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">🤖 AI Insights</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex items-center mb-6">
+                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg mr-3">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">AI Insights</h3>
+                <div className="ml-auto">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Powered by AI
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {analytics.insights.map((insight: any, index: number) => (
-                  <div key={index} className={`p-4 rounded-lg border-l-4 ${
-                    insight.type === 'positive' ? 'border-green-400 bg-green-50' :
-                    insight.type === 'warning' ? 'border-yellow-400 bg-yellow-50' :
-                    insight.type === 'negative' ? 'border-red-400 bg-red-50' :
-                    'border-blue-400 bg-blue-50'
+                  <div key={index} className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+                    insight.type === 'positive' ? 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200' :
+                    insight.type === 'warning' ? 'bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200' :
+                    insight.type === 'negative' ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200' :
+                    'bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200'
                   }`}>
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        {insight.type === 'positive' && (
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                        {insight.type === 'warning' && (
-                          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                        )}
-                        {insight.type === 'negative' && (
-                          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                        {insight.type === 'neutral' && (
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="text-sm font-medium text-gray-900">{insight.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
-                        {insight.value && (
-                          <p className="text-lg font-semibold text-gray-900 mt-2">{insight.value}</p>
-                        )}
+                    <div className="p-6">
+                      <div className="flex items-start">
+                        <div className={`flex-shrink-0 p-3 rounded-xl shadow-lg ${
+                          insight.type === 'positive' ? 'bg-green-500' :
+                          insight.type === 'warning' ? 'bg-yellow-500' :
+                          insight.type === 'negative' ? 'bg-red-500' :
+                          'bg-blue-500'
+                        }`}>
+                          {insight.type === 'positive' && (
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {insight.type === 'warning' && (
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          )}
+                          {insight.type === 'negative' && (
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {insight.type === 'neutral' && (
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">{insight.title}</h4>
+                          <p className="text-sm text-gray-600 mb-3 leading-relaxed">{insight.description}</p>
+                          {insight.value && (
+                            <div className="flex items-center justify-between">
+                              <p className="text-2xl font-bold text-gray-900">{insight.value}</p>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                insight.type === 'positive' ? 'bg-green-200 text-green-800' :
+                                insight.type === 'warning' ? 'bg-yellow-200 text-yellow-800' :
+                                insight.type === 'negative' ? 'bg-red-200 text-red-800' :
+                                'bg-blue-200 text-blue-800'
+                              }`}>
+                                {insight.type === 'positive' ? 'Good' :
+                                 insight.type === 'warning' ? 'Warning' :
+                                 insight.type === 'negative' ? 'Attention' : 'Info'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -349,93 +424,203 @@ export default function Home() {
 
           {/* Analytics Charts */}
           {analytics && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Customer Segments Chart */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Segments</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={analytics.customerAnalytics?.topCustomerSegments || []}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {(analytics.customerAnalytics?.topCustomerSegments || []).map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
+            <div className="mb-8">
+              <div className="flex items-center mb-6">
+                <div className="p-2 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg mr-3">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Analytics Overview</h3>
               </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Customer Segments Chart */}
+                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-gray-900">Customer Segments</h4>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Distribution</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={analytics.customerAnalytics?.topCustomerSegments || []}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {(analytics.customerAnalytics?.topCustomerSegments || []).map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
 
-              {/* Campaign Performance Chart */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Performance</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={analytics.campaignAnalytics?.campaignPerformance || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
+                {/* Campaign Performance Chart */}
+                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-gray-900">Campaign Performance</h4>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Performance</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={analytics.campaignAnalytics?.campaignPerformance || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb', 
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }} 
+                        />
+                        <Bar dataKey="value" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* Revenue and Growth Trends */}
           {analytics && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Customer Growth Trend */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Growth Trend</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={analytics.customerAnalytics?.customerGrowthTrend || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-                  </AreaChart>
-                </ResponsiveContainer>
+            <div className="mb-8">
+              <div className="flex items-center mb-6">
+                <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg mr-3">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Growth & Revenue Trends</h3>
               </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Customer Growth Trend */}
+                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-gray-900">Customer Growth</h4>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Growth</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={analytics.customerAnalytics?.customerGrowthTrend || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb', 
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }} 
+                        />
+                        <Area type="monotone" dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.2} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
 
-              {/* Revenue Trend */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={analytics.orderAnalytics?.revenueTrend || []}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip formatter={(value: any) => [`$${value}`, 'Revenue']} />
-                    <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+                {/* Revenue Trend */}
+                <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-gray-900">Revenue Trend</h4>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-600">Revenue</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={analytics.orderAnalytics?.revenueTrend || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip 
+                          formatter={(value: any) => [`$${value}`, 'Revenue']}
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb', 
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }} 
+                        />
+                        <Line type="monotone" dataKey="value" stroke="#10B981" strokeWidth={3} dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* Delivery Rate Trends */}
           {analytics && analytics.campaignAnalytics?.deliveryTrends && (
-            <div className="bg-white shadow rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Delivery Rate Trends</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={analytics.campaignAnalytics.deliveryTrends}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value: any) => [`${value}%`, 'Delivery Rate']} />
-                  <Line type="monotone" dataKey="value" stroke="#10B981" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="mb-8">
+              <div className="flex items-center mb-6">
+                <div className="p-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg mr-3">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Campaign Delivery Performance</h3>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div className="p-6 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-gray-900">Delivery Rate Trends</h4>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Success Rate</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={analytics.campaignAnalytics.deliveryTrends}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                      <Tooltip 
+                        formatter={(value: any) => [`${value}%`, 'Delivery Rate']}
+                        contentStyle={{ 
+                          backgroundColor: 'white', 
+                          border: '1px solid #e5e7eb', 
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }} 
+                      />
+                      <Line type="monotone" dataKey="value" stroke="#F59E0B" strokeWidth={3} dot={{ fill: '#F59E0B', strokeWidth: 2, r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           )}
         </div>
