@@ -56,6 +56,8 @@ export default function CampaignsPage() {
   }
 
   const handleEdit = (campaign: Campaign) => {
+    console.log('handleEdit called with campaign:', campaign._id, campaign.name)
+    console.log('Navigating to edit page...')
     router.push({
       pathname: '/campaigns/edit',
       query: { id: campaign._id }
@@ -361,13 +363,21 @@ export default function CampaignsPage() {
                                 View Details
                               </Link>
                               <button
-                                onClick={() => handleEdit(campaign)}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  console.log('Edit button clicked for campaign:', campaign._id)
+                                  handleEdit(campaign)
+                                }}
                                 className="text-blue-600 hover:text-blue-900 mr-4 transition-colors"
                               >
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleDelete(campaign)}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  console.log('Delete button clicked for campaign:', campaign._id)
+                                  handleDelete(campaign)
+                                }}
                                 disabled={deleteLoading === campaign._id}
                                 className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
