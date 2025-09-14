@@ -287,21 +287,88 @@ export default function Home() {
     )
   }
 
-  // Show loading while redirecting on mobile
+  // Show mobile interface directly
   if (isMobile && session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-white font-bold text-2xl">X</span>
-          </div>
-          <p className="text-gray-600 mb-4">Redirecting to mobile dashboard...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Head>
+          <title>Mobile Dashboard - Xeno CRM</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </Head>
+        
+        {/* Mobile Header */}
+        <div className="bg-gray-900 text-white p-4 text-center">
+          <h1 className="text-xl font-bold">Xeno CRM</h1>
+          <p className="text-sm text-gray-300">Welcome, {session.user?.name?.split(' ')[0] || 'User'}</p>
           <button
-            onClick={() => router.push('/mobile')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => signOut()}
+            className="mt-2 px-3 py-1 bg-transparent border border-white text-white text-xs rounded"
           >
-            Go to Mobile Dashboard
+            Sign Out
           </button>
+        </div>
+
+        {/* Mobile Content */}
+        <div className="p-4">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow text-center">
+              <div className="text-2xl font-bold text-blue-600">{data.customers}</div>
+              <div className="text-sm text-gray-600">Customers</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow text-center">
+              <div className="text-2xl font-bold text-green-600">{data.campaigns}</div>
+              <div className="text-sm text-gray-600">Campaigns</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow text-center">
+              <div className="text-2xl font-bold text-yellow-600">{data.segments}</div>
+              <div className="text-sm text-gray-600">Segments</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow text-center">
+              <div className="text-2xl font-bold text-red-600">{data.orders}</div>
+              <div className="text-sm text-gray-600">Orders</div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:bg-gray-400"
+            >
+              {loading ? 'Loading...' : 'Refresh Data'}
+            </button>
+            
+            <button
+              onClick={async () => {
+                try {
+                  const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+                  const data = await response.json()
+                  alert(`API Test: ${response.ok ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}`)
+                } catch (err: any) {
+                  alert(`API Test: FAILED\nError: ${err.message}`)
+                }
+              }}
+              className="w-full py-3 bg-green-600 text-white rounded-lg font-medium"
+            >
+              Test API Connection
+            </button>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {/* Debug Info */}
+          <div className="mt-6 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
+            <div><strong>URL:</strong> {typeof window !== 'undefined' ? window.location.href : 'N/A'}</div>
+            <div><strong>Screen:</strong> {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}</div>
+            <div><strong>Mobile:</strong> {isMobile ? 'Yes' : 'No'}</div>
+          </div>
         </div>
       </div>
     )
