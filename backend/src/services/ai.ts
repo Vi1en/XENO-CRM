@@ -29,6 +29,7 @@ const MOCK_RESPONSES = {
 };
 
 // Smart mock function that processes the user's description
+// Updated to fix AI segment generation issue
 function generateSmartMockRules(prompt: string): { rules: any[], name: string, description: string } {
   const lowerPrompt = prompt.toLowerCase();
   const rules: any[] = [];
