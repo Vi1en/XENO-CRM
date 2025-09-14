@@ -42,7 +42,7 @@ export default function EditCampaign() {
   const loadSegments = async () => {
     try {
       const response = await segmentApi.getAll()
-      setSegments(response.data.data || [])
+      setSegments(response.data || [])
     } catch (err) {
       console.error('Error loading segments:', err)
     }
@@ -53,7 +53,7 @@ export default function EditCampaign() {
       setLoading(true)
       setError(null)
       const response = await campaignApi.getById(campaignId)
-      const campaign = response.data.data
+      const campaign = response.data.data.campaign
 
       setFormData({
         name: campaign.name,
