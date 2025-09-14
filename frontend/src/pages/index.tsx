@@ -272,7 +272,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold text-gray-900">Xeno CRM</h1>
-                  <p className="text-xs text-gray-500">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
+                  <p className="text-xs text-gray-500">Welcome back, {(session as any)?.user?.name?.split(' ')[0] || 'User'}</p>
                 </div>
               </div>
               <button
@@ -550,12 +550,12 @@ export default function Home() {
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-700">
-                  {session.user?.name?.charAt(0) || 'U'}
+                  {(session as any)?.user?.name?.charAt(0) || 'U'}
                 </span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">{session.user?.name}</p>
-                <p className="text-xs text-gray-500">{session.user?.email}</p>
+                <p className="text-sm font-medium text-gray-900">{(session as any)?.user?.name}</p>
+                <p className="text-xs text-gray-500">{(session as any)?.user?.email}</p>
               </div>
               <button
                 onClick={() => signOut()}
@@ -599,7 +599,7 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
-                <p className="text-blue-100 mt-1 text-sm lg:text-base">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
+                <p className="text-blue-100 mt-1 text-sm lg:text-base">Welcome back, {(session as any)?.user?.name?.split(' ')[0] || 'User'}</p>
               </div>
               <div className="hidden lg:flex items-center space-x-4">
               <div className="text-right text-white">
