@@ -58,8 +58,8 @@ export default function Simple() {
               fontWeight: 'bold',
               transition: 'transform 0.2s'
             }}
-            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+            onMouseOver={(e) => (e.target as HTMLAnchorElement).style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => (e.target as HTMLAnchorElement).style.transform = 'scale(1)'}
           >
             Go to Main App
           </a>
