@@ -1,7 +1,32 @@
 import axios from 'axios';
 
 // API base configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+const getApiBaseUrl = () => {
+  // Check if we're in browser environment
+  if (typeof window !== 'undefined') {
+    // In browser, use the environment variable or fallback
+    const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (envUrl) {
+      return envUrl;
+    }
+    // Fallback for production if env var is not set
+    if (window.location.hostname !== 'localhost') {
+      return 'https://backend-production-05a7e.up.railway.app/api/v1';
+    }
+    return 'http://localhost:3001/api/v1';
+  }
+  // In server-side rendering, use environment variable or fallback
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug logging (remove in production)
+if (typeof window !== 'undefined') {
+  console.log('API Base URL:', API_BASE_URL);
+  console.log('Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('Current hostname:', window.location.hostname);
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

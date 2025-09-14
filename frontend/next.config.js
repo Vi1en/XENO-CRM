@@ -16,6 +16,10 @@ const nextConfig = {
   },
   // Ensure proper build output
   output: 'standalone',
+  // Ensure environment variables are available at build time
+  publicRuntimeConfig: {
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1',
+  },
 }
 
 module.exports = nextConfig
