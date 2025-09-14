@@ -875,7 +875,7 @@ router.post('/:id/send', async (req, res) => {
     }
 
     // Build customer query from segment rules
-    const customerQuery = buildCustomerQuery(segment.rules);
+    const customerQuery = buildCustomerQueryFromSegment(segment.rules);
     const customers = await Customer.find(customerQuery);
 
     if (customers.length === 0) {
