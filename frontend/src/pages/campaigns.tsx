@@ -25,10 +25,18 @@ export default function CampaignsPage() {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log('Session status:', status)
+    console.log('Session data:', session)
     if (session) {
+      console.log('Session exists, loading campaigns...')
       loadCampaigns()
+    } else if (status === 'unauthenticated') {
+      console.log('No session, but trying to load campaigns anyway for testing...')
+      loadCampaigns()
+    } else {
+      console.log('Session loading or unknown status, not loading campaigns')
     }
-  }, [session])
+  }, [session, status])
 
   const loadCampaigns = async () => {
     try {
