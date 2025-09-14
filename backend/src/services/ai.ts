@@ -196,7 +196,10 @@ function generateSmartMockCampaign(objective: string, tone: string, offer?: stri
 export async function generateSegmentRules(prompt: string): Promise<{ rules: any[], name: string, description: string }> {
   if (!process.env.OPENAI_API_KEY) {
     console.log('🤖 Using smart mock AI response for segment rules');
-    return generateSmartMockRules(prompt);
+    console.log('🤖 Input prompt:', prompt);
+    const result = generateSmartMockRules(prompt);
+    console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
+    return result;
   }
 
   try {
