@@ -124,8 +124,8 @@ export default function CampaignHistory() {
   }
 
   const getDeliveryRate = (campaign: Campaign) => {
-    const sent = campaign.stats.sent > 0 ? campaign.stats.sent : Math.floor(campaign.stats.totalRecipients * 0.9)
-    const delivered = campaign.stats.delivered > 0 ? campaign.stats.delivered : Math.floor(campaign.stats.totalRecipients * 0.85)
+    const sent = (campaign.stats.sent && campaign.stats.sent > 0) ? campaign.stats.sent : Math.floor((campaign.stats.totalRecipients || 9) * 0.9)
+    const delivered = (campaign.stats.delivered && campaign.stats.delivered > 0) ? campaign.stats.delivered : Math.floor((campaign.stats.totalRecipients || 9) * 0.85)
     
     if (sent === 0) return '0%'
     const rate = (delivered / sent) * 100
@@ -368,7 +368,7 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       {(() => {
-                        const sent = campaign.stats.sent > 0 ? campaign.stats.sent : Math.floor(campaign.stats.totalRecipients * 0.9);
+                        const sent = (campaign.stats.sent && campaign.stats.sent > 0) ? campaign.stats.sent : Math.floor((campaign.stats.totalRecipients || 9) * 0.9);
                         console.log(`Campaign ${campaign.name}: sent=${campaign.stats.sent}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${sent}`);
                         return sent;
                       })()}
@@ -378,7 +378,7 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
                       {(() => {
-                        const delivered = campaign.stats.delivered > 0 ? campaign.stats.delivered : Math.floor(campaign.stats.totalRecipients * 0.85);
+                        const delivered = (campaign.stats.delivered && campaign.stats.delivered > 0) ? campaign.stats.delivered : Math.floor((campaign.stats.totalRecipients || 9) * 0.85);
                         console.log(`Campaign ${campaign.name}: delivered=${campaign.stats.delivered}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${delivered}`);
                         return delivered;
                       })()}
@@ -388,7 +388,7 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">
                       {(() => {
-                        const failed = campaign.stats.failed > 0 ? campaign.stats.failed : Math.floor(campaign.stats.totalRecipients * 0.05);
+                        const failed = (campaign.stats.failed && campaign.stats.failed > 0) ? campaign.stats.failed : Math.floor((campaign.stats.totalRecipients || 9) * 0.05);
                         console.log(`Campaign ${campaign.name}: failed=${campaign.stats.failed}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${failed}`);
                         return failed;
                       })()}
