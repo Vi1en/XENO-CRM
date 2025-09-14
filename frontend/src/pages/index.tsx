@@ -605,15 +605,6 @@ export default function Home() {
               <div className="text-right text-white">
                 <div className="text-sm text-blue-100">Last updated</div>
                 <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
-                <button
-                  onClick={() => {
-                    console.log('📱 Manual mobile mode triggered from desktop')
-                    setIsMobile(true)
-                  }}
-                  className="mt-2 px-3 py-1 bg-white bg-opacity-20 text-white text-xs rounded hover:bg-opacity-30"
-                >
-                  📱 Mobile View
-                </button>
               </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
