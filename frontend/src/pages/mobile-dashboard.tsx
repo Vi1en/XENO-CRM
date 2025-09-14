@@ -1,6 +1,5 @@
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { customerApi, campaignApi, segmentApi, orderApi } from '@/lib/api'
 import Head from 'next/head'
 
 export default function MobileDashboard() {
@@ -12,6 +11,8 @@ export default function MobileDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const API_BASE_URL = 'https://backend-production-05a7e.up.railway.app/api/v1'
+
   useEffect(() => {
     if (session) {
       loadData()
@@ -22,40 +23,52 @@ export default function MobileDashboard() {
     try {
       setLoading(true)
       setError('')
-      console.log('📱 Loading data...')
+      console.log('📱 Loading data from:', API_BASE_URL)
       
-      // Test API first
-      const testResponse = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
-      console.log('🧪 API Test:', testResponse.status)
-      
-      if (!testResponse.ok) {
-        throw new Error(`API returned ${testResponse.status}`)
-      }
-      
-      // Load all data
+      // Load all data using direct fetch calls
       const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
-        customerApi.getAll(),
-        campaignApi.getAll(),
-        segmentApi.getAll(),
-        orderApi.getAll()
+        fetch(`${API_BASE_URL}/customers`).then(res => res.json()),
+        fetch(`${API_BASE_URL}/campaigns`).then(res => res.json()),
+        fetch(`${API_BASE_URL}/segments`).then(res => res.json()),
+        fetch(`${API_BASE_URL}/orders`).then(res => res.json())
       ])
 
-      setCustomers(customersRes.data.data || [])
-      setCampaigns(campaignsRes.data.data || [])
-      setSegments(segmentsRes.data.data || [])
-      setOrders(ordersRes.data.data || [])
+      console.log('📊 API Responses:', {
+        customers: customersRes,
+        campaigns: campaignsRes,
+        segments: segmentsRes,
+        orders: ordersRes
+      })
+
+      setCustomers(customersRes.data || [])
+      setCampaigns(campaignsRes.data || [])
+      setSegments(segmentsRes.data || [])
+      setOrders(ordersRes.data || [])
       
-      console.log('✅ Data loaded:', {
-        customers: customersRes.data.data?.length || 0,
-        campaigns: campaignsRes.data.data?.length || 0,
-        segments: segmentsRes.data.data?.length || 0,
-        orders: ordersRes.data.data?.length || 0
+      console.log('✅ Data loaded successfully:', {
+        customers: customersRes.data?.length || 0,
+        campaigns: campaignsRes.data?.length || 0,
+        segments: segmentsRes.data?.length || 0,
+        orders: ordersRes.data?.length || 0
       })
     } catch (error: any) {
       console.error('❌ Error loading data:', error)
       setError(`Failed to load data: ${error.message}`)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const testAPI = async () => {
+    try {
+      console.log('🧪 Testing API connection...')
+      const response = await fetch(`${API_BASE_URL}/orders`)
+      const data = await response.json()
+      console.log('🧪 API Test Result:', data)
+      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}`)
+    } catch (err: any) {
+      console.error('🧪 API Test Error:', err)
+      alert(`API Test: FAILED\nError: ${err.message}`)
     }
   }
 
@@ -131,12 +144,20 @@ export default function MobileDashboard() {
       {error && (
         <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
           <p className="text-sm text-red-700">{error}</p>
-          <button
-            onClick={loadData}
-            className="mt-2 text-sm text-red-600 underline"
-          >
-            Try again
-          </button>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={loadData}
+              className="text-sm text-red-600 underline"
+            >
+              Try again
+            </button>
+            <button
+              onClick={testAPI}
+              className="text-sm text-blue-600 underline"
+            >
+              Test API
+            </button>
+          </div>
         </div>
       )}
 
@@ -219,6 +240,13 @@ export default function MobileDashboard() {
           </button>
           
           <button
+            onClick={testAPI}
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium"
+          >
+            Test API Connection
+          </button>
+          
+          <button
             onClick={() => window.location.href = '/mobile-orders'}
             className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium"
           >
@@ -236,9 +264,10 @@ export default function MobileDashboard() {
         {/* Debug Info */}
         <div className="mt-6 bg-gray-50 rounded-lg p-3">
           <p className="text-xs text-gray-600 mb-2">Debug Info:</p>
-          <p className="text-xs text-gray-500">API: {process.env.NEXT_PUBLIC_API_URL || 'Default'}</p>
+          <p className="text-xs text-gray-500">API: {API_BASE_URL}</p>
           <p className="text-xs text-gray-500">Data: {customers.length} customers, {orders.length} orders</p>
           <p className="text-xs text-gray-500">Status: {loading ? 'Loading...' : 'Ready'}</p>
+          <p className="text-xs text-gray-500">Error: {error || 'None'}</p>
         </div>
       </div>
     </div>

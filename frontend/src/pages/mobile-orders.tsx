@@ -1,6 +1,5 @@
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { orderApi } from '@/lib/api'
 import Head from 'next/head'
 
 export default function MobileOrders() {
@@ -8,6 +7,8 @@ export default function MobileOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const API_BASE_URL = 'https://backend-production-05a7e.up.railway.app/api/v1'
 
   useEffect(() => {
     if (session) {
@@ -19,16 +20,36 @@ export default function MobileOrders() {
     try {
       setLoading(true)
       setError('')
-      console.log('📱 Loading orders...')
+      console.log('📱 Loading orders from:', API_BASE_URL)
       
-      const response = await orderApi.getAll()
-      console.log('✅ Orders loaded:', response.data.data?.length || 0)
-      setOrders(response.data.data || [])
+      const response = await fetch(`${API_BASE_URL}/orders`)
+      const data = await response.json()
+      
+      console.log('✅ Orders loaded:', data)
+      
+      if (data.success) {
+        setOrders(data.data || [])
+      } else {
+        throw new Error(data.message || 'Failed to load orders')
+      }
     } catch (err: any) {
       console.error('❌ Error loading orders:', err)
       setError(`Failed to load orders: ${err.message}`)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const testAPI = async () => {
+    try {
+      console.log('🧪 Testing API connection...')
+      const response = await fetch(`${API_BASE_URL}/orders`)
+      const data = await response.json()
+      console.log('🧪 API Test Result:', data)
+      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}`)
+    } catch (err: any) {
+      console.error('🧪 API Test Error:', err)
+      alert(`API Test: FAILED\nError: ${err.message}`)
     }
   }
 
@@ -114,12 +135,20 @@ export default function MobileOrders() {
       {error && (
         <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
           <p className="text-sm text-red-700">{error}</p>
-          <button
-            onClick={loadOrders}
-            className="mt-2 text-sm text-red-600 underline"
-          >
-            Try again
-          </button>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={loadOrders}
+              className="text-sm text-red-600 underline"
+            >
+              Try again
+            </button>
+            <button
+              onClick={testAPI}
+              className="text-sm text-blue-600 underline"
+            >
+              Test API
+            </button>
+          </div>
         </div>
       )}
 
@@ -162,8 +191,8 @@ export default function MobileOrders() {
           </div>
         )}
 
-        {/* Refresh Button */}
-        <div className="mt-6">
+        {/* Actions */}
+        <div className="mt-6 space-y-3">
           <button
             onClick={loadOrders}
             disabled={loading}
@@ -171,6 +200,22 @@ export default function MobileOrders() {
           >
             {loading ? 'Loading...' : 'Refresh Orders'}
           </button>
+          
+          <button
+            onClick={testAPI}
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium"
+          >
+            Test API Connection
+          </button>
+        </div>
+
+        {/* Debug Info */}
+        <div className="mt-6 bg-gray-50 rounded-lg p-3">
+          <p className="text-xs text-gray-600 mb-2">Debug Info:</p>
+          <p className="text-xs text-gray-500">API: {API_BASE_URL}</p>
+          <p className="text-xs text-gray-500">Orders: {orders.length}</p>
+          <p className="text-xs text-gray-500">Status: {loading ? 'Loading...' : 'Ready'}</p>
+          <p className="text-xs text-gray-500">Error: {error || 'None'}</p>
         </div>
       </div>
     </div>
