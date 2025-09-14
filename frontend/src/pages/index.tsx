@@ -105,6 +105,9 @@ export default function Home() {
         <title>Xeno CRM Dashboard</title>
         <meta name="description" content="Customer Relationship Management Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </Head>
       
       {/* Sidebar */}
@@ -116,7 +119,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Xeno CRM</h1>
-              <p className="text-sm text-gray-500">Dashboard</p>
+              <p className="text-sm text-gray-500">Dashboard v2.1</p>
             </div>
           </div>
           

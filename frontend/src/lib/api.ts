@@ -199,6 +199,9 @@ export const aiApi = {
   
   // Get analytics insights
   getAnalytics: () => retryRequest(() => api.get('/ai/analytics')),
+  
+  // Get AI insights (for AI dashboard)
+  getInsights: () => retryRequest(() => api.get('/ai/insights')),
 };
 
 export default api;
