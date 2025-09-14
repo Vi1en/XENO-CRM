@@ -34,9 +34,26 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Check if mobile
+    // Better mobile detection
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      const isSmallScreen = width < 768 || height < 600
+      const isMobileUserAgent = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      
+      const isMobileDevice = isSmallScreen || (isTouch && isMobileUserAgent)
+      
+      console.log('📱 Mobile detection:', {
+        width,
+        height,
+        isTouch,
+        isSmallScreen,
+        isMobileUserAgent,
+        isMobileDevice
+      })
+      
+      setIsMobile(isMobileDevice)
     }
     
     checkMobile()
@@ -51,10 +68,11 @@ export default function Home() {
 
   // Redirect to mobile dashboard on mobile devices
   useEffect(() => {
-    if (isMobile) {
+    if (isMobile && session) {
+      console.log('📱 Redirecting to mobile dashboard...')
       router.push('/mobile-dashboard')
     }
-  }, [isMobile, router])
+  }, [isMobile, session, router])
 
   const loadData = async () => {
     try {
@@ -277,7 +295,13 @@ export default function Home() {
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <span className="text-white font-bold text-2xl">X</span>
           </div>
-          <p className="text-gray-600">Redirecting to mobile dashboard...</p>
+          <p className="text-gray-600 mb-4">Redirecting to mobile dashboard...</p>
+          <button
+            onClick={() => router.push('/mobile-dashboard')}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Go to Mobile Dashboard
+          </button>
         </div>
       </div>
     )
@@ -436,10 +460,16 @@ export default function Home() {
                 <p className="text-blue-100 mt-1 text-sm lg:text-base">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
               </div>
               <div className="hidden lg:flex items-center space-x-4">
-                <div className="text-right text-white">
-                  <div className="text-sm text-blue-100">Last updated</div>
-                  <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
-                </div>
+              <div className="text-right text-white">
+                <div className="text-sm text-blue-100">Last updated</div>
+                <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
+                <button
+                  onClick={() => router.push('/mobile-dashboard')}
+                  className="mt-2 px-3 py-1 bg-white bg-opacity-20 text-white text-xs rounded hover:bg-opacity-30"
+                >
+                  Mobile View
+                </button>
+              </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
