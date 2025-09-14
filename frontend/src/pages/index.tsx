@@ -55,7 +55,7 @@ export default function Home() {
       const isMobileUserAgent = isIPhone || isIPad || isIPod || isAndroid || /BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
       
       // iOS specific detection
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
       
       // More lenient mobile detection
       const isMobileDevice = isSmallScreen || isMobileUserAgent || (isTouch && (isIOS || isAndroid))
