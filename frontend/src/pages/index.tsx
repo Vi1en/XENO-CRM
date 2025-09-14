@@ -28,6 +28,7 @@ export default function Home() {
   const [orders, setOrders] = useState([])
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (session) {
@@ -163,8 +164,18 @@ export default function Home() {
         <meta name="description" content="Xeno CRM Dashboard - Customer Relationship Management System" />
       </Head>
 
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Navigation Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center px-6 py-4 border-b border-gray-200">
@@ -268,16 +279,37 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className="pl-64">
+      <div className="lg:pl-64">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">X</span>
+              </div>
+              <span className="ml-2 text-xl font-semibold text-gray-900">Xeno CRM</span>
+            </div>
+            <div className="w-8"></div>
+          </div>
+        </div>
+
         {/* Top Bar */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
-          <div className="px-6 py-6">
+          <div className="px-4 lg:px-6 py-4 lg:py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-                <p className="text-blue-100 mt-1">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
+                <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
+                <p className="text-blue-100 mt-1 text-sm lg:text-base">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="hidden lg:flex items-center space-x-4">
                 <div className="text-right text-white">
                   <div className="text-sm text-blue-100">Last updated</div>
                   <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
@@ -292,31 +324,31 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 lg:p-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8 -mt-2 lg:-mt-4">
             {/* Customers Card */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-              <div className="p-6">
+              <div className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 lg:p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                      <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Total Customers</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
                         {loading ? (
-                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          <div className="animate-pulse bg-gray-200 h-6 lg:h-8 w-12 lg:w-16 rounded"></div>
                         ) : (
                           customers.length
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right hidden sm:block">
                     <div className="text-xs text-gray-500">Active</div>
                     <div className="text-xs font-semibold text-green-600">+12%</div>
                   </div>
@@ -326,26 +358,26 @@ export default function Home() {
 
             {/* Segments Card */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-              <div className="p-6">
+              <div className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 lg:p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                      <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Segments</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Segments</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
                         {loading ? (
-                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          <div className="animate-pulse bg-gray-200 h-6 lg:h-8 w-12 lg:w-16 rounded"></div>
                         ) : (
                           segments.length
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right hidden sm:block">
                     <div className="text-xs text-gray-500">Targeted</div>
                     <div className="text-xs font-semibold text-blue-600">+8%</div>
                   </div>
@@ -355,26 +387,26 @@ export default function Home() {
 
             {/* Campaigns Card */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-              <div className="p-6">
+              <div className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 lg:p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg">
+                      <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Campaigns</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Campaigns</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
                         {loading ? (
-                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          <div className="animate-pulse bg-gray-200 h-6 lg:h-8 w-12 lg:w-16 rounded"></div>
                         ) : (
                           campaigns.length
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right hidden sm:block">
                     <div className="text-xs text-gray-500">Running</div>
                     <div className="text-xs font-semibold text-purple-600">+5%</div>
                   </div>
@@ -384,26 +416,26 @@ export default function Home() {
 
             {/* Orders Card */}
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-              <div className="p-6">
+              <div className="p-4 lg:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 lg:p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                      <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Orders</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-xs lg:text-sm font-medium text-gray-600">Orders</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
                         {loading ? (
-                          <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          <div className="animate-pulse bg-gray-200 h-6 lg:h-8 w-12 lg:w-16 rounded"></div>
                         ) : (
                           orders.length
                         )}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right hidden sm:block">
                     <div className="text-xs text-gray-500">This Month</div>
                     <div className="text-xs font-semibold text-orange-600">+15%</div>
                   </div>
@@ -414,21 +446,21 @@ export default function Home() {
 
           {/* AI Insights */}
           {analytics && analytics.insights && analytics.insights.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center mb-6">
+            <div className="mb-6 lg:mb-8">
+              <div className="flex items-center mb-4 lg:mb-6">
                 <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">AI Insights</h3>
-                <div className="ml-auto">
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900">AI Insights</h3>
+                <div className="ml-auto hidden sm:block">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                     Powered by AI
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                 {analytics.insights.map((insight: any, index: number) => (
                   <div key={index} className={`group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
                     insight.type === 'positive' ? 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200' :
@@ -494,29 +526,29 @@ export default function Home() {
 
           {/* Analytics Charts */}
           {analytics && (
-            <div className="mb-8">
-              <div className="flex items-center mb-6">
+            <div className="mb-6 lg:mb-8">
+              <div className="flex items-center mb-4 lg:mb-6">
                 <div className="p-2 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-lg mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Analytics Overview</h3>
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900">Analytics Overview</h3>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 {/* Customer Segments Chart */}
                 <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-                  <div className="p-6 border-b border-gray-100">
+                  <div className="p-4 lg:p-6 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-semibold text-gray-900">Customer Segments</h4>
+                      <h4 className="text-base lg:text-lg font-semibold text-gray-900">Customer Segments</h4>
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm text-gray-600">Distribution</span>
+                        <span className="text-xs lg:text-sm text-gray-600">Distribution</span>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <ResponsiveContainer width="100%" height={300}>
+                  <div className="p-4 lg:p-6">
+                    <ResponsiveContainer width="100%" height={250}>
                       <PieChart>
                         <Pie
                           data={analytics.customerAnalytics?.topCustomerSegments || []}
