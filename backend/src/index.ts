@@ -26,30 +26,12 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(helmet());
 
-// CORS configuration
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: Function) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'https://xeno-crm-frontend.vercel.app',
-      'https://xeno-crm-frontend-sigma.vercel.app',
-      'https://no-crm-frontend-sigma.vercel.app'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+// CORS configuration - Allow all origins for now
+app.use(cors({
+  origin: true,
   credentials: true,
   optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+}));
 
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));

@@ -25,13 +25,40 @@ export default function MobileDashboard() {
     
     try {
       console.log('📱 Loading data from API...')
+      console.log('📱 Current URL:', window.location.href)
+      console.log('📱 User Agent:', navigator.userAgent)
+      
+      // Test with a simple fetch first
+      console.log('🧪 Testing simple fetch...')
+      const testResponse = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+      console.log('🧪 Test response status:', testResponse.status)
+      console.log('🧪 Test response headers:', Object.fromEntries(testResponse.headers.entries()))
+      
+      if (!testResponse.ok) {
+        throw new Error(`HTTP ${testResponse.status}: ${testResponse.statusText}`)
+      }
+      
+      const testData = await testResponse.json()
+      console.log('🧪 Test data:', testData)
       
       // Load all data in parallel
       const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
-        fetch('https://backend-production-05a7e.up.railway.app/api/v1/customers').then(res => res.json()),
-        fetch('https://backend-production-05a7e.up.railway.app/api/v1/campaigns').then(res => res.json()),
-        fetch('https://backend-production-05a7e.up.railway.app/api/v1/segments').then(res => res.json()),
-        fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders').then(res => res.json())
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/customers').then(res => {
+          console.log('📊 Customers response status:', res.status)
+          return res.json()
+        }),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/campaigns').then(res => {
+          console.log('📊 Campaigns response status:', res.status)
+          return res.json()
+        }),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/segments').then(res => {
+          console.log('📊 Segments response status:', res.status)
+          return res.json()
+        }),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders').then(res => {
+          console.log('📊 Orders response status:', res.status)
+          return res.json()
+        })
       ])
       
       console.log('📊 API Responses:', { customersRes, campaignsRes, segmentsRes, ordersRes })
