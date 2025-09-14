@@ -62,102 +62,116 @@ api.interceptors.response.use(
   }
 );
 
+// Retry function for failed requests
+const retryRequest = async (fn: () => Promise<any>, retries = 3): Promise<any> => {
+  try {
+    return await fn()
+  } catch (error) {
+    if (retries > 0) {
+      console.log(`🔄 Retrying request, ${retries} attempts left...`)
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+      return retryRequest(fn, retries - 1)
+    }
+    throw error
+  }
+}
+
 // Customer API functions
 export const customerApi = {
   // Get all customers
-  getAll: () => api.get('/customers'),
+  getAll: () => retryRequest(() => api.get('/customers')),
   
   // Get customer by ID
-  getById: (id: string) => api.get(`/customers/${id}`),
+  getById: (id: string) => retryRequest(() => api.get(`/customers/${id}`)),
   
   // Create customer
-  create: (data: any) => api.post('/ingest/customers', data),
+  create: (data: any) => retryRequest(() => api.post('/ingest/customers', data)),
   
   // Update customer
-  update: (id: string, data: any) => api.put(`/customers/${id}`, data),
+  update: (id: string, data: any) => retryRequest(() => api.put(`/customers/${id}`, data)),
   
   // Delete customer
-  delete: (id: string) => api.delete(`/customers/${id}`),
+  delete: (id: string) => retryRequest(() => api.delete(`/customers/${id}`)),
 };
 
 // Segment API functions
 export const segmentApi = {
   // Get all segments
-  getAll: () => api.get('/segments'),
+  getAll: () => retryRequest(() => api.get('/segments')),
   
   // Get segment by ID
-  getById: (id: string) => api.get(`/segments/${id}`),
+  getById: (id: string) => retryRequest(() => api.get(`/segments/${id}`)),
   
   // Create segment
-  create: (data: any) => api.post('/segments', data),
+  create: (data: any) => retryRequest(() => api.post('/segments', data)),
   
   // Preview segment
-  preview: (data: any) => api.post('/segments/preview', data),
+  preview: (data: any) => retryRequest(() => api.post('/segments/preview', data)),
   
   // Update segment
-  update: (id: string, data: any) => api.put(`/segments/${id}`, data),
+  update: (id: string, data: any) => retryRequest(() => api.put(`/segments/${id}`, data)),
   
   // Delete segment
-  delete: (id: string) => api.delete(`/segments/${id}`),
+  delete: (id: string) => retryRequest(() => api.delete(`/segments/${id}`)),
 };
 
 // Campaign API functions
 export const campaignApi = {
   // Get all campaigns
-  getAll: () => api.get('/campaigns'),
+  getAll: () => retryRequest(() => api.get('/campaigns')),
   
   // Get campaign by ID
-  getById: (id: string) => api.get(`/campaigns/${id}`),
+  getById: (id: string) => retryRequest(() => api.get(`/campaigns/${id}`)),
   
   // Create campaign
-  create: (data: any) => api.post('/campaigns', data),
+  create: (data: any) => retryRequest(() => api.post('/campaigns', data)),
   
   // Update campaign
-  update: (id: string, data: any) => api.put(`/campaigns/${id}`, data),
+  update: (id: string, data: any) => retryRequest(() => api.put(`/campaigns/${id}`, data)),
   
   // Delete campaign
-  delete: (id: string) => api.delete(`/campaigns/${id}`),
+  delete: (id: string) => retryRequest(() => api.delete(`/campaigns/${id}`)),
   
   // Send campaign
-  send: (id: string) => api.post(`/campaigns/${id}/send`),
+  send: (id: string) => retryRequest(() => api.post(`/campaigns/${id}/send`)),
   
   // Get campaign summary
-  getSummary: (id: string) => api.get(`/campaigns/${id}/summary`),
+  getSummary: (id: string) => retryRequest(() => api.get(`/campaigns/${id}/summary`)),
 };
 
 // Order API functions
 export const orderApi = {
   // Get all orders
   getAll: (params?: { page?: number; limit?: number; search?: string }) => 
-    api.get('/orders', { params }),
+    retryRequest(() => api.get('/orders', { params })),
   
   // Get order by ID
-  getById: (id: string) => api.get(`/orders/${id}`),
+  getById: (id: string) => retryRequest(() => api.get(`/orders/${id}`)),
   
   // Create order
-  create: (data: any) => api.post('/orders', data),
+  create: (data: any) => retryRequest(() => api.post('/orders', data)),
   
   // Update order
-  update: (id: string, data: any) => api.put(`/orders/${id}`, data),
+  update: (id: string, data: any) => retryRequest(() => api.put(`/orders/${id}`, data)),
   
   // Delete order
-  delete: (id: string) => api.delete(`/orders/${id}`),
+  delete: (id: string) => retryRequest(() => api.delete(`/orders/${id}`)),
 };
 
 // AI API functions
 export const aiApi = {
   // Generate segment rules
-  generateSegmentRules: (prompt: string) => api.post('/ai/nl-to-segment', { prompt }),
+  generateSegmentRules: (prompt: string) => retryRequest(() => api.post('/ai/nl-to-segment', { prompt })),
   
   // Generate message variants
   generateMessageVariants: (objective: string, tone: string, offer?: string) => 
-    api.post('/ai/message-variants', { objective, tone, offer }),
+    retryRequest(() => api.post('/ai/message-variants', { objective, tone, offer })),
   
   // Generate campaign summary
-  generateCampaignSummary: (campaignId: string) => api.get(`/ai/campaigns/${campaignId}/summary`),
+  generateCampaignSummary: (campaignId: string) => retryRequest(() => api.get(`/ai/campaigns/${campaignId}/summary`)),
   
   // Get analytics insights
-  getAnalytics: () => api.get('/ai/analytics'),
+  getAnalytics: () => retryRequest(() => api.get('/ai/analytics')),
 };
 
 export default api;
