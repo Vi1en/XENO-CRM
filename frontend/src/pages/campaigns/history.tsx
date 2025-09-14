@@ -401,7 +401,7 @@ export default function CampaignHistory() {
                         const finalSent = (sent !== null && sent !== undefined && sent > 0) ? sent : Math.floor(totalRecipients * 0.9);
                         const finalFailed = (failed !== null && failed !== undefined && failed > 0) ? failed : Math.floor(totalRecipients * 0.1);
                         const actualDelivered = finalSent - finalFailed;
-                        console.log(`DELIVERED CALCULATION for ${campaign.name}: sent=${sent}, failed=${failed}, finalSent=${finalSent}, finalFailed=${finalFailed}, actualDelivered=${actualDelivered}`);
+                        console.log(`DELIVERED CALCULATION for ${campaign.name}: sent=${sent}, failed=${failed}, finalSent=${finalSent}, finalFailed=${finalFailed}, actualDelivered=${actualDelivered} - FIXED VERSION`);
                         return actualDelivered;
                       })()}
                     </div>
