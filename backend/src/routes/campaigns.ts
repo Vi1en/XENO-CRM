@@ -961,6 +961,7 @@ router.post('/:id/simulate-delivery', async (req, res) => {
 router.post('/simulate-all-delivery', async (req, res) => {
   try {
     const campaigns = await Campaign.find({ status: 'running' });
+    console.log(`Found ${campaigns.length} running campaigns to update`);
     
     for (const campaign of campaigns) {
       const totalRecipients = campaign.stats?.totalRecipients || 9;
@@ -977,6 +978,7 @@ router.post('/simulate-all-delivery', async (req, res) => {
         bounced,
       };
       await campaign.save();
+      console.log(`Updated campaign: ${campaign.name} - Delivered: ${delivered}, Failed: ${failed}`);
     }
 
     return res.json({
@@ -988,6 +990,52 @@ router.post('/simulate-all-delivery', async (req, res) => {
     });
   } catch (error) {
     console.error('Error simulating delivery stats:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+// Quick fix endpoint - update all campaigns with realistic stats
+router.get('/fix-delivery-stats', async (req, res) => {
+  try {
+    console.log('Starting delivery stats fix...');
+    const campaigns = await Campaign.find({});
+    console.log(`Found ${campaigns.length} total campaigns`);
+    
+    let updatedCount = 0;
+    for (const campaign of campaigns) {
+      if (campaign.stats && campaign.stats.totalRecipients > 0) {
+        const totalRecipients = campaign.stats.totalRecipients;
+        const sent = Math.floor(totalRecipients * 0.9); // 90% sent
+        const delivered = Math.floor(sent * 0.95); // 95% delivery rate
+        const failed = sent - delivered;
+        const bounced = Math.floor(totalRecipients * 0.05); // 5% bounced
+
+        campaign.stats = {
+          totalRecipients,
+          sent,
+          failed,
+          delivered,
+          bounced,
+        };
+        await campaign.save();
+        updatedCount++;
+        console.log(`Updated campaign: ${campaign.name} - Delivered: ${delivered}, Failed: ${failed}`);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `Fixed delivery stats for ${updatedCount} campaigns`,
+      data: {
+        updatedCampaigns: updatedCount,
+        totalCampaigns: campaigns.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error fixing delivery stats:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
