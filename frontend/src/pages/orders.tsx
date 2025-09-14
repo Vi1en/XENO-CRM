@@ -63,7 +63,7 @@ export default function Orders() {
       console.log('📊 Orders API response:', response.data)
       setOrders(response.data.data || [])
       setTotalPages(response.data.pagination?.pages || 1)
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error loading orders:', err)
       console.error('❌ Error details:', {
         message: err.message,
@@ -82,7 +82,7 @@ export default function Orders() {
       const response = await customerApi.getAll()
       console.log('📊 Customers API response:', response.data)
       setCustomers(response.data.data || [])
-    } catch (err) {
+    } catch (err: any) {
       console.error('❌ Error loading customers:', err)
       console.error('❌ Error details:', {
         message: err.message,

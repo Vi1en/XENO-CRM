@@ -36,7 +36,7 @@ export default function ApiTest() {
           fullResponse: response.data
         }
         console.log(`✅ ${api.name} API success:`, response.data)
-      } catch (error) {
+      } catch (error: any) {
         testResults.tests[api.name] = {
           status: 'error',
           error: error.message,

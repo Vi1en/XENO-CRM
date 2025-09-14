@@ -47,7 +47,7 @@ export default function Home() {
           const response = await customerApi.getAll()
           console.log('✅ Customers loaded:', response.data.data?.length || 0)
           return response.data.data || []
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Customers error:', error)
           return []
         }
@@ -58,7 +58,7 @@ export default function Home() {
           const response = await campaignApi.getAll()
           console.log('✅ Campaigns loaded:', response.data.data?.length || 0)
           return response.data.data || []
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Campaigns error:', error)
           return []
         }
@@ -69,7 +69,7 @@ export default function Home() {
           const response = await segmentApi.getAll()
           console.log('✅ Segments loaded:', response.data.data?.length || 0)
           return response.data.data || []
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Segments error:', error)
           return []
         }
@@ -80,7 +80,7 @@ export default function Home() {
           const response = await orderApi.getAll()
           console.log('✅ Orders loaded:', response.data.data?.length || 0)
           return response.data.data || []
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Orders error:', error)
           return []
         }
@@ -91,7 +91,7 @@ export default function Home() {
           const response = await aiApi.getAnalytics()
           console.log('✅ Analytics loaded:', !!response.data)
           return response.data.data || null
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Analytics error:', error)
           return null
         }
@@ -119,7 +119,7 @@ export default function Home() {
       setSegments(segmentsData)
       setOrders(ordersData)
       setAnalytics(analyticsData)
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Critical error loading data:', error)
     } finally {
       setLoading(false)
