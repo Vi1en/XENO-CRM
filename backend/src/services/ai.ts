@@ -233,7 +233,7 @@ export async function generateSegmentRules(prompt: string): Promise<{ rules: any
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(response);
+    return JSON.parse(response as string);
   } catch (error) {
     console.error('OpenAI API error:', error);
     return {
@@ -283,7 +283,7 @@ export async function generateMessageVariants(
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(response);
+    return JSON.parse(response as string);
   } catch (error) {
     console.error('OpenAI API error:', error);
     return {
