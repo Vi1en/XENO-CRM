@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { campaignApi, segmentApi } from '@/lib/api'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 interface CampaignFormData {
   name: string
@@ -16,7 +17,47 @@ interface Segment {
   name: string
 }
 
-export default function EditCampaign() {
+// Error boundary component
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error('Edit page error:', error)
+      setHasError(true)
+    }
+
+    window.addEventListener('error', handleError)
+    return () => window.removeEventListener('error', handleError)
+  }, [])
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h2>
+          <p className="text-gray-600 mb-4">There was an error loading the edit page.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mr-2"
+          >
+            Reload Page
+          </button>
+          <Link
+            href="/campaigns"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Back to Campaigns
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return <>{children}</>
+}
+
+function EditCampaignContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { id } = router.query
@@ -38,6 +79,11 @@ export default function EditCampaign() {
       loadSegments()
     }
   }, [session, id])
+
+  // Add error boundary for client-side errors
+  if (typeof window !== 'undefined' && error) {
+    console.error('Edit page error:', error)
+  }
 
   const loadSegments = async () => {
     try {
@@ -126,6 +172,29 @@ export default function EditCampaign() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h2>
           <p className="text-gray-600">You need to be signed in to edit campaigns.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Campaign</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mr-2"
+          >
+            Retry
+          </button>
+          <button
+            onClick={() => router.push('/campaigns')}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Back to Campaigns
+          </button>
         </div>
       </div>
     )
@@ -243,6 +312,14 @@ export default function EditCampaign() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function EditCampaign() {
+  return (
+    <ErrorBoundary>
+      <EditCampaignContent />
+    </ErrorBoundary>
   )
 }
 
