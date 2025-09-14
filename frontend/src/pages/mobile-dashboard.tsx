@@ -24,25 +24,50 @@ export default function MobileDashboard() {
     setError('')
     
     try {
-      // Simple direct API call
-      const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
-      const result = await response.json()
+      console.log('📱 Loading data from API...')
       
-      if (result.success) {
-        setData({
-          customers: result.data?.length || 0,
-          campaigns: 0,
-          segments: 0,
-          orders: result.data?.length || 0
-        })
-      } else {
-        setError('API returned error')
-      }
+      // Load all data in parallel
+      const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/customers').then(res => res.json()),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/campaigns').then(res => res.json()),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/segments').then(res => res.json()),
+        fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders').then(res => res.json())
+      ])
+      
+      console.log('📊 API Responses:', { customersRes, campaignsRes, segmentsRes, ordersRes })
+      
+      setData({
+        customers: customersRes.data?.length || 0,
+        campaigns: campaignsRes.data?.length || 0,
+        segments: segmentsRes.data?.length || 0,
+        orders: ordersRes.data?.length || 0
+      })
+      
+      console.log('✅ Data loaded successfully:', {
+        customers: customersRes.data?.length || 0,
+        campaigns: campaignsRes.data?.length || 0,
+        segments: segmentsRes.data?.length || 0,
+        orders: ordersRes.data?.length || 0
+      })
     } catch (err) {
-      setError('Cannot connect to server')
+      console.error('❌ Error loading data:', err)
+      setError('Cannot connect to server: ' + err.message)
     }
     
     setLoading(false)
+  }
+
+  const testAPI = async () => {
+    try {
+      console.log('🧪 Testing API connection...')
+      const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+      const data = await response.json()
+      console.log('🧪 API Test Result:', data)
+      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}\nStatus: ${response.status}`)
+    } catch (err) {
+      console.error('🧪 API Test Error:', err)
+      alert(`API Test: FAILED\nError: ${err.message}`)
+    }
   }
 
   if (status === 'loading') {
@@ -366,6 +391,23 @@ export default function MobileDashboard() {
             }}
           >
             {loading ? 'Loading...' : 'Refresh Data'}
+          </button>
+          
+          <button
+            onClick={testAPI}
+            style={{
+              width: '100%',
+              padding: '15px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            Test API Connection
           </button>
           
           <button
