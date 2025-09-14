@@ -63,13 +63,20 @@ export default function CampaignsPage() {
   }
 
   const handleDelete = async (campaign: Campaign) => {
+    console.log('Delete button clicked for campaign:', campaign.name, campaign._id)
+    
     if (!confirm(`Are you sure you want to delete "${campaign.name}"? This action cannot be undone.`)) {
+      console.log('Delete cancelled by user')
       return
     }
 
     try {
+      console.log('Starting delete process for campaign:', campaign._id)
       setDeleteLoading(campaign._id)
-      await campaignApi.delete(campaign._id)
+      
+      console.log('Calling campaignApi.delete...')
+      const response = await campaignApi.delete(campaign._id)
+      console.log('Delete API response:', response)
       
       // Remove campaign from local state
       setCampaigns(prev => prev.filter(c => c._id !== campaign._id))
