@@ -11,8 +11,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXTAUTH_URL
-        value: https://your-app-name.onrender.com
+        value: https://xeno-crm-frontend.onrender.com
       - key: NEXTAUTH_SECRET
-        value: your-secret-key
+        value: your-secret-key-here
       - key: NEXT_PUBLIC_API_URL
         value: https://backend-production-05a7e.up.railway.app/api/v1
