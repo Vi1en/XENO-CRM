@@ -17,55 +17,15 @@ interface Segment {
   name: string
 }
 
-// Error boundary component
-function ErrorBoundary({ children }: { children: React.ReactNode }) {
-  const [hasError, setHasError] = useState(false)
-
-  useEffect(() => {
-    const handleError = (error: ErrorEvent) => {
-      console.error('Edit page error:', error)
-      setHasError(true)
-    }
-
-    window.addEventListener('error', handleError)
-    return () => window.removeEventListener('error', handleError)
-  }, [])
-
-  if (hasError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h2>
-          <p className="text-gray-600 mb-4">There was an error loading the edit page.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mr-2"
-          >
-            Reload Page
-          </button>
-          <Link
-            href="/campaigns"
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Back to Campaigns
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  return <>{children}</>
-}
-
-function EditCampaignContent() {
+export default function EditCampaign() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { id } = router.query
+  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [segments, setSegments] = useState<Segment[]>([])
-
   const [formData, setFormData] = useState<CampaignFormData>({
     name: '',
     description: '',
@@ -73,58 +33,59 @@ function EditCampaignContent() {
     message: ''
   })
 
+  // Load data when component mounts
   useEffect(() => {
-    if (session && id) {
-      loadCampaignData(id as string)
-      loadSegments()
-    }
-  }, [session, id])
-
-  // Add error boundary for client-side errors
-  if (typeof window !== 'undefined' && error) {
-    console.error('Edit page error:', error)
-  }
-
-  const loadSegments = async () => {
-    try {
-      console.log('Loading segments...')
-      const response = await segmentApi.getAll()
-      console.log('Segments API response:', response)
-      setSegments(response.data || [])
-    } catch (err) {
-      console.error('Error loading segments:', err)
-      setError(`Failed to load segments: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    }
-  }
-
-  const loadCampaignData = async (campaignId: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      console.log('Loading campaign data for ID:', campaignId)
-      const response = await campaignApi.getById(campaignId)
-      console.log('Campaign API response:', response)
-      
-      if (!response.data || !response.data.data || !response.data.data.campaign) {
-        throw new Error('Invalid response structure from API')
+    const loadData = async () => {
+      if (!id || typeof id !== 'string') {
+        setError('Invalid campaign ID')
+        setLoading(false)
+        return
       }
-      
-      const campaign = response.data.data.campaign
-      console.log('Campaign data:', campaign)
 
-      setFormData({
-        name: campaign.name || '',
-        description: campaign.description || '',
-        segmentId: campaign.segmentId || '',
-        message: campaign.message || ''
-      })
-    } catch (err) {
-      console.error('Error loading campaign data:', err)
-      setError(`Failed to load campaign data: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    } finally {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Load campaign data
+        console.log('Loading campaign:', id)
+        const campaignResponse = await campaignApi.getById(id)
+        console.log('Campaign response:', campaignResponse)
+        
+        if (campaignResponse?.data?.data?.campaign) {
+          const campaign = campaignResponse.data.data.campaign
+          setFormData({
+            name: campaign.name || '',
+            description: campaign.description || '',
+            segmentId: campaign.segmentId || '',
+            message: campaign.message || ''
+          })
+        } else {
+          throw new Error('Campaign not found')
+        }
+
+        // Load segments
+        console.log('Loading segments...')
+        const segmentsResponse = await segmentApi.getAll()
+        console.log('Segments response:', segmentsResponse)
+        
+        if (segmentsResponse?.data) {
+          setSegments(Array.isArray(segmentsResponse.data) ? segmentsResponse.data : [])
+        }
+
+      } catch (err) {
+        console.error('Error loading data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (session && id) {
+      loadData()
+    } else if (status === 'unauthenticated') {
       setLoading(false)
     }
-  }
+  }, [session, id, status])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -136,70 +97,101 @@ function EditCampaignContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setSuccess(false)
+    
+    if (!id || typeof id !== 'string') {
+      setError('Invalid campaign ID')
+      return
+    }
 
     try {
-      const campaignData = {
-        name: formData.name,
-        description: formData.description,
-        segmentId: formData.segmentId,
-        message: formData.message
-      }
-
-      await campaignApi.update(id as string, campaignData)
+      setLoading(true)
+      setError(null)
+      
+      console.log('Updating campaign:', id, formData)
+      await campaignApi.update(id, formData)
+      
       setSuccess(true)
-
       setTimeout(() => {
         router.push('/campaigns')
-      }, 2000)
+      }, 1500)
     } catch (err) {
       console.error('Error updating campaign:', err)
-      setError('Failed to update campaign. Please check your input.')
+      setError(err instanceof Error ? err.message : 'Failed to update campaign')
     } finally {
       setLoading(false)
     }
   }
 
+  // Loading state
   if (status === 'loading' || loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </div>
+    )
   }
 
+  // Not authenticated
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h2>
-          <p className="text-gray-600">You need to be signed in to edit campaigns.</p>
+          <p className="text-gray-600 mb-4">You need to be signed in to edit campaigns.</p>
+          <Link
+            href="/api/auth/signin"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+          >
+            Sign In
+          </Link>
         </div>
       </div>
     )
   }
 
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Campaign</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mr-2"
-          >
-            Retry
-          </button>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Back to Campaigns
-          </button>
+          <div className="space-x-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Retry
+            </button>
+            <Link
+              href="/campaigns"
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Back to Campaigns
+            </Link>
+          </div>
         </div>
       </div>
     )
   }
 
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-green-600 text-6xl mb-4">✓</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Campaign Updated!</h2>
+          <p className="text-gray-600">Redirecting to campaigns...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Main form
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
@@ -211,22 +203,10 @@ function EditCampaignContent() {
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl font-bold mb-6">Edit Campaign</h1>
           
-          {success && (
-            <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-              Campaign updated successfully! Redirecting...
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Campaign Name *
+                Campaign Name
               </label>
               <input
                 type="text"
@@ -236,7 +216,7 @@ function EditCampaignContent() {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Summer Sale 2024"
+                placeholder="Enter campaign name..."
               />
             </div>
 
@@ -251,13 +231,13 @@ function EditCampaignContent() {
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Describe this campaign..."
+                placeholder="Enter campaign description..."
               />
             </div>
 
             <div>
               <label htmlFor="segmentId" className="block text-sm font-medium text-gray-700 mb-2">
-                Target Segment *
+                Target Segment
               </label>
               <select
                 id="segmentId"
@@ -267,7 +247,7 @@ function EditCampaignContent() {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Select a segment</option>
+                <option value="">Select a segment...</option>
                 {segments.map((segment) => (
                   <option key={segment._id} value={segment._id}>
                     {segment.name}
@@ -278,15 +258,15 @@ function EditCampaignContent() {
 
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                Campaign Message *
+                Campaign Message
               </label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
+                rows={4}
                 required
-                rows={6}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter your campaign message..."
               />
@@ -314,12 +294,3 @@ function EditCampaignContent() {
     </div>
   )
 }
-
-export default function EditCampaign() {
-  return (
-    <ErrorBoundary>
-      <EditCampaignContent />
-    </ErrorBoundary>
-  )
-}
-
