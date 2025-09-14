@@ -11,6 +11,52 @@ import mongoose from 'mongoose';
 
 const router = Router();
 
+// Helper function to build MongoDB query from rules
+function buildCustomerQuery(rules: any[]): any {
+  const query: any = {};
+  
+  for (const rule of rules) {
+    const { field, operator, value } = rule;
+    
+    switch (operator) {
+      case 'equals':
+        query[field] = value;
+        break;
+      case 'not_equals':
+        query[field] = { $ne: value };
+        break;
+      case 'greater_than':
+        query[field] = { $gt: value };
+        break;
+      case 'less_than':
+        query[field] = { $lt: value };
+        break;
+      case 'contains':
+        query[field] = { $in: [value] };
+        break;
+      case 'not_contains':
+        query[field] = { $nin: [value] };
+        break;
+      case 'greater_than_or_equal':
+        query[field] = { $gte: value };
+        break;
+      case 'less_than_or_equal':
+        query[field] = { $lte: value };
+        break;
+      case 'is_empty':
+        query[field] = { $in: [null, ''] };
+        break;
+      case 'is_not_empty':
+        query[field] = { $nin: [null, ''] };
+        break;
+      default:
+        console.warn(`Unknown operator: ${operator}`);
+    }
+  }
+  
+  return query;
+}
+
 // Validation schemas
 const campaignCreateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
