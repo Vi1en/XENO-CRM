@@ -32,69 +32,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-
   useEffect(() => {
-    // Proper mobile detection for iPhone and Android
-    const checkMobile = () => {
-      const width = window.innerWidth
-      const height = window.innerHeight
-      const userAgent = navigator.userAgent
-      
-      // Touch detection
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-      
-      // Screen size detection - mobile threshold
-      const isSmallScreen = width < 768 || height < 600
-      
-      // User agent detection - mobile devices
-      const isIPhone = /iPhone/i.test(userAgent)
-      const isIPad = /iPad/i.test(userAgent)
-      const isIPod = /iPod/i.test(userAgent)
-      const isAndroid = /Android/i.test(userAgent)
-      const isMobileUserAgent = isIPhone || isIPad || isIPod || isAndroid || /BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent)
-      
-      // iOS specific detection
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
-      
-      // Proper mobile detection - only show mobile for actual mobile devices
-      const isMobileDevice = isSmallScreen || (isMobileUserAgent && isTouch)
-      
-      console.log('📱 Mobile detection:', {
-        width,
-        height,
-        userAgent: userAgent.substring(0, 50) + '...',
-        isTouch,
-        isSmallScreen,
-        isIPhone,
-        isIPad,
-        isIPod,
-        isAndroid,
-        isIOS,
-        isMobileUserAgent,
-        isMobileDevice
-      })
-      
-      setIsMobile(isMobileDevice)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    
     if (session) {
       loadData()
     }
-    
-    return () => window.removeEventListener('resize', checkMobile)
   }, [session])
-
-  // Redirect to mobile dashboard on mobile devices
-  useEffect(() => {
-    if (isMobile && session) {
-      console.log('📱 Redirecting to mobile dashboard...')
-      router.push('/mobile')
-    }
-  }, [isMobile, session, router])
 
   const loadData = async () => {
     try {
@@ -345,10 +287,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile Content */}
-        <div className="p-4 space-y-6">
+        {/* Main Content */}
+        <div className="p-4 lg:p-8 space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -402,84 +344,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Main Navigation */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Navigation</h3>
-            <div className="space-y-2">
-              <Link href="/customers" className="flex items-center justify-between p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Customers</div>
-                    <div className="text-sm text-gray-500">Manage customer data</div>
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link href="/campaigns" className="flex items-center justify-between p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Campaigns</div>
-                    <div className="text-sm text-gray-500">Marketing campaigns</div>
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link href="/orders" className="flex items-center justify-between p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Orders</div>
-                    <div className="text-sm text-gray-500">Customer orders</div>
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              
-              <Link href="/segments" className="flex items-center justify-between p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">Segments</div>
-                    <div className="text-sm text-gray-500">Customer segments</div>
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </div>
 
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link href="/customers/create" className="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
