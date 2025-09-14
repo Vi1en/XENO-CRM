@@ -313,19 +313,19 @@ export default function Home() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-blue-600">{data.customers}</div>
+              <div className="text-2xl font-bold text-blue-600">{customers.length}</div>
               <div className="text-sm text-gray-600">Customers</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-green-600">{data.campaigns}</div>
+              <div className="text-2xl font-bold text-green-600">{campaigns.length}</div>
               <div className="text-sm text-gray-600">Campaigns</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-yellow-600">{data.segments}</div>
+              <div className="text-2xl font-bold text-yellow-600">{segments.length}</div>
               <div className="text-sm text-gray-600">Segments</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-red-600">{data.orders}</div>
+              <div className="text-2xl font-bold text-red-600">{orders.length}</div>
               <div className="text-sm text-gray-600">Orders</div>
             </div>
           </div>
