@@ -792,4 +792,116 @@ router.put('/:id/stats', async (req, res) => {
   }
 });
 
+// Send campaign endpoint
+router.post('/:id/send', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid campaign ID',
+      });
+    }
+
+    const campaign = await Campaign.findById(id);
+    if (!campaign) {
+      return res.status(404).json({
+        success: false,
+        message: 'Campaign not found',
+      });
+    }
+
+    if (campaign.status !== 'draft') {
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign can only be sent if it is in draft status',
+      });
+    }
+
+    // Get segment and customers
+    const segment = await Segment.findById(campaign.segmentId);
+    if (!segment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Segment not found',
+      });
+    }
+
+    // Build customer query from segment rules
+    const customerQuery = buildCustomerQuery(segment.rules);
+    const customers = await Customer.find(customerQuery);
+
+    if (customers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No customers found for this segment',
+      });
+    }
+
+    // Update campaign status
+    campaign.status = 'running';
+    campaign.startedAt = new Date();
+    campaign.stats = {
+      totalRecipients: customers.length,
+      sent: 0,
+      failed: 0,
+      delivered: 0,
+      bounced: 0,
+    };
+    await campaign.save();
+
+    // Create communication logs and queue messages
+    const communicationLogs = [];
+    for (const customer of customers) {
+      const personalizedMessage = generateSmartPersonalizedMessage(
+        campaign.message,
+        customer
+      );
+
+      const communicationLog = new CommunicationLog({
+        campaignId: campaign._id,
+        customerId: customer._id,
+        message: personalizedMessage,
+        status: 'PENDING',
+        customerData: {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          totalSpend: customer.totalSpend,
+          visits: customer.visits,
+          lastOrderAt: customer.lastOrderAt,
+          tags: customer.tags,
+        },
+      });
+      await communicationLog.save();
+      communicationLogs.push(communicationLog);
+
+      // Queue message for delivery
+      await publishToQueue('campaign-delivery', {
+        communicationLogId: communicationLog._id,
+        customerId: customer._id,
+        message: personalizedMessage,
+        campaignId: campaign._id,
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Campaign sent successfully',
+      data: {
+        campaignId: campaign._id,
+        totalRecipients: customers.length,
+        communicationLogs: communicationLogs.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error sending campaign:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as campaignsRoutes };
