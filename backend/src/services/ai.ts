@@ -144,7 +144,7 @@ function generateSmartMockRules(prompt: string): { rules: any[], name: string, d
   return { rules, name, description };
 }
 
-// Smart mock function for campaign generation
+// Smart mock function for campaign generation - VERSION 2.0
 function generateSmartMockCampaign(objective: string, tone: string, offer?: string): { name: string, description: string, message: string, variants: string[] } {
   const lowerObjective = objective.toLowerCase();
   const lowerTone = tone.toLowerCase();
