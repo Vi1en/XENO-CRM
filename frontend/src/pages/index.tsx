@@ -314,65 +314,158 @@ export default function Home() {
   // Show mobile interface directly
   if (isMobile && session) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <Head>
-          <title>Mobile Dashboard - Xeno CRM</title>
+          <title>Xeno CRM - Mobile</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         
         {/* Mobile Header */}
-        <div className="bg-gray-900 text-white p-4 text-center">
-          <h1 className="text-xl font-bold">Xeno CRM</h1>
-          <p className="text-sm text-gray-300">Welcome, {session.user?.name?.split(' ')[0] || 'User'}</p>
-          <div className="mt-2 space-x-2">
-            <button
-              onClick={() => signOut()}
-              className="px-3 py-1 bg-transparent border border-white text-white text-xs rounded"
-            >
-              Sign Out
-            </button>
-            <button
-              onClick={() => {
-                console.log('📱 Manual mobile detection triggered')
-                setIsMobile(true)
-              }}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded"
-            >
-              Mobile Mode
-            </button>
+        <div className="bg-white shadow-lg border-b border-gray-200">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">X</span>
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">Xeno CRM</h1>
+                  <p className="text-xs text-gray-500">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => signOut()}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Mobile Content */}
-        <div className="p-4">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-blue-600">{customers.length}</div>
+        <div className="p-4 space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-500">Total</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
               <div className="text-sm text-gray-600">Customers</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-green-600">{campaigns.length}</div>
+            
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-500">Active</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{campaigns.length}</div>
               <div className="text-sm text-gray-600">Campaigns</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-yellow-600">{segments.length}</div>
+            
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-500">Groups</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{segments.length}</div>
               <div className="text-sm text-gray-600">Segments</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow text-center">
-              <div className="text-2xl font-bold text-red-600">{orders.length}</div>
+            
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <span className="text-xs text-gray-500">Orders</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
               <div className="text-sm text-gray-600">Orders</div>
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Quick Actions */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/customers" className="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-900">Add Customer</span>
+              </Link>
+              
+              <Link href="/campaigns/create" className="flex items-center space-x-3 p-3 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-900">New Campaign</span>
+              </Link>
+              
+              <Link href="/segments/create" className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors">
+                <div className="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-900">Create Segment</span>
+              </Link>
+              
+              <Link href="/orders" className="flex items-center space-x-3 p-3 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
+                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-900">View Orders</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
           <div className="space-y-3">
             <button
               onClick={loadData}
               disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium disabled:bg-gray-400"
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-medium disabled:opacity-50 flex items-center justify-center space-x-2"
             >
-              {loading ? 'Loading...' : 'Refresh Data'}
+              {loading ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Refresh Data</span>
+                </>
+              )}
             </button>
             
             <button
@@ -385,25 +478,29 @@ export default function Home() {
                   alert(`API Test: FAILED\nError: ${err.message}`)
                 }
               }}
-              className="w-full py-3 bg-green-600 text-white rounded-lg font-medium"
+              className="w-full py-4 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-2xl font-medium flex items-center justify-center space-x-2"
             >
-              Test API Connection
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Test API Connection</span>
             </button>
           </div>
 
-          {/* Error */}
+          {/* Error Display */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              <strong>Error:</strong> {error}
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
+              <div className="flex items-start space-x-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 className="text-sm font-medium text-red-800">Error</h4>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                </div>
+              </div>
             </div>
           )}
-
-          {/* Debug Info */}
-          <div className="mt-6 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
-            <div><strong>URL:</strong> {typeof window !== 'undefined' ? window.location.href : 'N/A'}</div>
-            <div><strong>Screen:</strong> {typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'}</div>
-            <div><strong>Mobile:</strong> {isMobile ? 'Yes' : 'No'}</div>
-          </div>
         </div>
       </div>
     )
