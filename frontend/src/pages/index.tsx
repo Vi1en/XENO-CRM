@@ -35,21 +35,42 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Better mobile detection
+    // Enhanced mobile detection for iPhone and Android
     const checkMobile = () => {
       const width = window.innerWidth
       const height = window.innerHeight
+      const userAgent = navigator.userAgent
+      
+      // Touch detection
       const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      
+      // Screen size detection
       const isSmallScreen = width < 768 || height < 600
-      const isMobileUserAgent = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       
-      const isMobileDevice = isSmallScreen || (isTouch && isMobileUserAgent)
+      // User agent detection - more comprehensive
+      const isIPhone = /iPhone/i.test(userAgent)
+      const isIPad = /iPad/i.test(userAgent)
+      const isIPod = /iPod/i.test(userAgent)
+      const isAndroid = /Android/i.test(userAgent)
+      const isMobileUserAgent = isIPhone || isIPad || isIPod || isAndroid || /BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
       
-      console.log('📱 Mobile detection:', {
+      // iOS specific detection
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream
+      
+      // More lenient mobile detection
+      const isMobileDevice = isSmallScreen || isMobileUserAgent || (isTouch && (isIOS || isAndroid))
+      
+      console.log('📱 Enhanced Mobile detection:', {
         width,
         height,
+        userAgent: userAgent.substring(0, 50) + '...',
         isTouch,
         isSmallScreen,
+        isIPhone,
+        isIPad,
+        isIPod,
+        isAndroid,
+        isIOS,
         isMobileUserAgent,
         isMobileDevice
       })
@@ -303,12 +324,23 @@ export default function Home() {
         <div className="bg-gray-900 text-white p-4 text-center">
           <h1 className="text-xl font-bold">Xeno CRM</h1>
           <p className="text-sm text-gray-300">Welcome, {session.user?.name?.split(' ')[0] || 'User'}</p>
-          <button
-            onClick={() => signOut()}
-            className="mt-2 px-3 py-1 bg-transparent border border-white text-white text-xs rounded"
-          >
-            Sign Out
-          </button>
+          <div className="mt-2 space-x-2">
+            <button
+              onClick={() => signOut()}
+              className="px-3 py-1 bg-transparent border border-white text-white text-xs rounded"
+            >
+              Sign Out
+            </button>
+            <button
+              onClick={() => {
+                console.log('📱 Manual mobile detection triggered')
+                setIsMobile(true)
+              }}
+              className="px-3 py-1 bg-blue-600 text-white text-xs rounded"
+            >
+              Mobile Mode
+            </button>
+          </div>
         </div>
 
         {/* Mobile Content */}
@@ -534,7 +566,10 @@ export default function Home() {
                 <div className="text-sm text-blue-100">Last updated</div>
                 <div className="text-sm font-medium">{new Date().toLocaleDateString()}</div>
                 <button
-                  onClick={() => router.push('/mobile')}
+                  onClick={() => {
+                    console.log('📱 Manual mobile mode triggered from desktop')
+                    setIsMobile(true)
+                  }}
                   className="mt-2 px-3 py-1 bg-white bg-opacity-20 text-white text-xs rounded hover:bg-opacity-30"
                 >
                   Mobile View
