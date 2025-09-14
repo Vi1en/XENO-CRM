@@ -366,15 +366,33 @@ export default function CampaignHistory() {
                     <div className="text-sm text-gray-500">Audience Size</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{campaign.stats.sent > 0 ? campaign.stats.sent : Math.floor(campaign.stats.totalRecipients * 0.9)}</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {(() => {
+                        const sent = campaign.stats.sent > 0 ? campaign.stats.sent : Math.floor(campaign.stats.totalRecipients * 0.9);
+                        console.log(`Campaign ${campaign.name}: sent=${campaign.stats.sent}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${sent}`);
+                        return sent;
+                      })()}
+                    </div>
                     <div className="text-sm text-gray-500">Sent</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{campaign.stats.delivered > 0 ? campaign.stats.delivered : Math.floor(campaign.stats.totalRecipients * 0.85)}</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {(() => {
+                        const delivered = campaign.stats.delivered > 0 ? campaign.stats.delivered : Math.floor(campaign.stats.totalRecipients * 0.85);
+                        console.log(`Campaign ${campaign.name}: delivered=${campaign.stats.delivered}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${delivered}`);
+                        return delivered;
+                      })()}
+                    </div>
                     <div className="text-sm text-gray-500">Delivered</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{campaign.stats.failed > 0 ? campaign.stats.failed : Math.floor(campaign.stats.totalRecipients * 0.05)}</div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {(() => {
+                        const failed = campaign.stats.failed > 0 ? campaign.stats.failed : Math.floor(campaign.stats.totalRecipients * 0.05);
+                        console.log(`Campaign ${campaign.name}: failed=${campaign.stats.failed}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${failed}`);
+                        return failed;
+                      })()}
+                    </div>
                     <div className="text-sm text-gray-500">Failed</div>
                   </div>
                   <div className="text-center">
