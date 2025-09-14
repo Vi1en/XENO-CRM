@@ -1,6 +1,7 @@
 import { useSession, signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api'
 import Head from 'next/head'
 import { 
@@ -22,6 +23,7 @@ import {
 
 export default function Home() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [customers, setCustomers] = useState([])
   const [campaigns, setCampaigns] = useState([])
   const [segments, setSegments] = useState([])
@@ -29,12 +31,30 @@ export default function Home() {
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
     if (session) {
       loadData()
     }
+    
+    return () => window.removeEventListener('resize', checkMobile)
   }, [session])
+
+  // Redirect to mobile dashboard on mobile devices
+  useEffect(() => {
+    if (isMobile && session) {
+      router.push('/mobile-dashboard')
+    }
+  }, [isMobile, session, router])
 
   const loadData = async () => {
     try {
@@ -230,6 +250,20 @@ export default function Home() {
               <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">Privacy Policy</a>
             </p>
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading while redirecting on mobile
+  if (isMobile && session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="text-white font-bold text-2xl">X</span>
+          </div>
+          <p className="text-gray-600">Redirecting to mobile dashboard...</p>
         </div>
       </div>
     )
