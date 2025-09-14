@@ -957,4 +957,42 @@ router.post('/:id/simulate-delivery', async (req, res) => {
   }
 });
 
+// Bulk simulate delivery stats for all campaigns
+router.post('/simulate-all-delivery', async (req, res) => {
+  try {
+    const campaigns = await Campaign.find({ status: 'running' });
+    
+    for (const campaign of campaigns) {
+      const totalRecipients = campaign.stats?.totalRecipients || 9;
+      const sent = Math.floor(totalRecipients * 0.9); // 90% sent
+      const delivered = Math.floor(sent * 0.95); // 95% delivery rate
+      const failed = sent - delivered;
+      const bounced = Math.floor(totalRecipients * 0.05); // 5% bounced
+
+      campaign.stats = {
+        totalRecipients,
+        sent,
+        failed,
+        delivered,
+        bounced,
+      };
+      await campaign.save();
+    }
+
+    return res.json({
+      success: true,
+      message: `Delivery stats simulated for ${campaigns.length} campaigns`,
+      data: {
+        updatedCampaigns: campaigns.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error simulating delivery stats:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as campaignsRoutes };
