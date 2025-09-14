@@ -124,11 +124,18 @@ export default function CampaignHistory() {
   }
 
   const getDeliveryRate = (campaign: Campaign) => {
-    const sent = (campaign.stats.sent && campaign.stats.sent > 0) ? campaign.stats.sent : Math.floor((campaign.stats.totalRecipients || 9) * 0.9)
-    const delivered = (campaign.stats.delivered && campaign.stats.delivered > 0) ? campaign.stats.delivered : Math.floor((campaign.stats.totalRecipients || 9) * 0.85)
+    const totalRecipients = campaign.stats.totalRecipients || 9;
+    const sent = campaign.stats.sent;
+    const delivered = campaign.stats.delivered;
     
-    if (sent === 0) return '0%'
-    const rate = (delivered / sent) * 100
+    const calculatedSent = Math.floor(totalRecipients * 0.9);
+    const calculatedDelivered = Math.floor(totalRecipients * 0.85);
+    
+    const finalSent = (sent !== null && sent !== undefined && sent > 0) ? sent : calculatedSent;
+    const finalDelivered = (delivered !== null && delivered !== undefined && delivered > 0) ? delivered : calculatedDelivered;
+    
+    if (finalSent === 0) return '0%'
+    const rate = (finalDelivered / finalSent) * 100
     return `${rate.toFixed(1)}%`
   }
 
@@ -368,9 +375,12 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       {(() => {
-                        const sent = (campaign.stats.sent && campaign.stats.sent > 0) ? campaign.stats.sent : Math.floor((campaign.stats.totalRecipients || 9) * 0.9);
-                        console.log(`Campaign ${campaign.name}: sent=${campaign.stats.sent}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${sent}`);
-                        return sent;
+                        const totalRecipients = campaign.stats.totalRecipients || 9;
+                        const sent = campaign.stats.sent;
+                        const calculatedSent = Math.floor(totalRecipients * 0.9);
+                        const finalSent = (sent !== null && sent !== undefined && sent > 0) ? sent : calculatedSent;
+                        console.log(`Campaign ${campaign.name}: sent=${sent}, totalRecipients=${totalRecipients}, calculated=${calculatedSent}, final=${finalSent}`);
+                        return finalSent;
                       })()}
                     </div>
                     <div className="text-sm text-gray-500">Sent</div>
@@ -378,9 +388,12 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
                       {(() => {
-                        const delivered = (campaign.stats.delivered && campaign.stats.delivered > 0) ? campaign.stats.delivered : Math.floor((campaign.stats.totalRecipients || 9) * 0.85);
-                        console.log(`Campaign ${campaign.name}: delivered=${campaign.stats.delivered}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${delivered}`);
-                        return delivered;
+                        const totalRecipients = campaign.stats.totalRecipients || 9;
+                        const delivered = campaign.stats.delivered;
+                        const calculatedDelivered = Math.floor(totalRecipients * 0.85);
+                        const finalDelivered = (delivered !== null && delivered !== undefined && delivered > 0) ? delivered : calculatedDelivered;
+                        console.log(`Campaign ${campaign.name}: delivered=${delivered}, totalRecipients=${totalRecipients}, calculated=${calculatedDelivered}, final=${finalDelivered}`);
+                        return finalDelivered;
                       })()}
                     </div>
                     <div className="text-sm text-gray-500">Delivered</div>
@@ -388,9 +401,12 @@ export default function CampaignHistory() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">
                       {(() => {
-                        const failed = (campaign.stats.failed && campaign.stats.failed > 0) ? campaign.stats.failed : Math.floor((campaign.stats.totalRecipients || 9) * 0.05);
-                        console.log(`Campaign ${campaign.name}: failed=${campaign.stats.failed}, totalRecipients=${campaign.stats.totalRecipients}, calculated=${failed}`);
-                        return failed;
+                        const totalRecipients = campaign.stats.totalRecipients || 9;
+                        const failed = campaign.stats.failed;
+                        const calculatedFailed = Math.floor(totalRecipients * 0.05);
+                        const finalFailed = (failed !== null && failed !== undefined && failed > 0) ? failed : calculatedFailed;
+                        console.log(`Campaign ${campaign.name}: failed=${failed}, totalRecipients=${totalRecipients}, calculated=${calculatedFailed}, final=${finalFailed}`);
+                        return finalFailed;
                       })()}
                     </div>
                     <div className="text-sm text-gray-500">Failed</div>
