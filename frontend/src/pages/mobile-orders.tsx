@@ -8,8 +8,6 @@ export default function MobileOrders() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const API_BASE_URL = 'https://backend-production-05a7e.up.railway.app/api/v1'
-
   useEffect(() => {
     if (session) {
       loadOrders()
@@ -17,50 +15,52 @@ export default function MobileOrders() {
   }, [session])
 
   const loadOrders = async () => {
+    setLoading(true)
+    setError('')
+    
     try {
-      setLoading(true)
-      setError('')
-      console.log('📱 Loading orders from:', API_BASE_URL)
+      const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+      const result = await response.json()
       
-      const response = await fetch(`${API_BASE_URL}/orders`)
-      const data = await response.json()
-      
-      console.log('✅ Orders loaded:', data)
-      
-      if (data.success) {
-        setOrders(data.data || [])
+      if (result.success) {
+        setOrders(result.data || [])
       } else {
-        throw new Error(data.message || 'Failed to load orders')
+        setError('Server error: ' + (result.message || 'Unknown error'))
       }
-    } catch (err: any) {
-      console.error('❌ Error loading orders:', err)
-      setError(`Failed to load orders: ${err.message}`)
-    } finally {
-      setLoading(false)
+    } catch (err) {
+      setError('Cannot connect to server')
     }
-  }
-
-  const testAPI = async () => {
-    try {
-      console.log('🧪 Testing API connection...')
-      const response = await fetch(`${API_BASE_URL}/orders`)
-      const data = await response.json()
-      console.log('🧪 API Test Result:', data)
-      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}`)
-    } catch (err: any) {
-      console.error('🧪 API Test Error:', err)
-      alert(`API Test: FAILED\nError: ${err.message}`)
-    }
+    
+    setLoading(false)
   }
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">X</span>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f3f4f6',
+        fontFamily: 'system-ui'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            color: 'white',
+            fontSize: '24px',
+            fontWeight: 'bold'
+          }}>
+            X
           </div>
-          <p className="text-gray-600">Loading...</p>
+          <p style={{ color: '#6b7280', fontSize: '16px' }}>Loading...</p>
         </div>
       </div>
     )
@@ -68,22 +68,64 @@ export default function MobileOrders() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-2xl">X</span>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f3f4f6',
+        padding: '20px',
+        fontFamily: 'system-ui'
+      }}>
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: '#3b82f6',
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              color: 'white',
+              fontSize: '32px',
+              fontWeight: 'bold'
+            }}>
+              X
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Xeno CRM</h1>
-            <p className="text-gray-600">Sign in to view orders</p>
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 10px' }}>
+              Xeno CRM
+            </h1>
+            <p style={{ color: '#6b7280', fontSize: '16px', margin: 0 }}>
+              Sign in to view orders
+            </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-6">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '30px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}>
             <button
               onClick={() => signIn('google')}
-              className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
             >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+              <svg style={{ width: '20px', height: '20px', marginRight: '12px' }} viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               </svg>
               Sign in with Google
@@ -95,96 +137,189 @@ export default function MobileOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#f3f4f6',
+      fontFamily: 'system-ui'
+    }}>
       <Head>
         <title>Orders - Xeno CRM</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <button
-                onClick={() => window.history.back()}
-                className="mr-3 p-2 text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">Orders</h1>
-                <p className="text-sm text-gray-600">{orders.length} total orders</p>
-              </div>
-            </div>
-            <button
-              onClick={() => signOut()}
-              className="p-2 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '20px',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={() => window.history.back()}
+            style={{
+              marginRight: '15px',
+              padding: '8px',
+              color: '#9ca3af',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: '0 0 5px' }}>
+              Orders
+            </h1>
+            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+              {orders.length} total orders
+            </p>
           </div>
         </div>
+        <button
+          onClick={() => signOut()}
+          style={{
+            padding: '8px',
+            color: '#9ca3af',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="mx-4 mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
-          <p className="text-sm text-red-700">{error}</p>
-          <div className="mt-2 flex gap-2">
-            <button
-              onClick={loadOrders}
-              className="text-sm text-red-600 underline"
-            >
-              Try again
-            </button>
-            <button
-              onClick={testAPI}
-              className="text-sm text-blue-600 underline"
-            >
-              Test API
-            </button>
-          </div>
+        <div style={{
+          margin: '20px',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          padding: '15px'
+        }}>
+          <p style={{ fontSize: '14px', color: '#dc2626', margin: '0 0 10px' }}>
+            {error}
+          </p>
+          <button
+            onClick={loadOrders}
+            style={{
+              fontSize: '14px',
+              color: '#dc2626',
+              textDecoration: 'underline',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Try again
+          </button>
         </div>
       )}
 
       {/* Orders List */}
-      <div className="p-4">
+      <div style={{ padding: '20px' }}>
         {loading ? (
-          <div className="space-y-3">
+          <div>
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg p-4 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mb-1"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+              <div key={i} style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '15px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{
+                  height: '16px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '4px',
+                  width: '25%',
+                  marginBottom: '8px'
+                }}></div>
+                <div style={{
+                  height: '12px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '4px',
+                  width: '50%',
+                  marginBottom: '4px'
+                }}></div>
+                <div style={{
+                  height: '12px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '4px',
+                  width: '33%'
+                }}></div>
               </div>
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px'
+            }}>
+              <span style={{ fontSize: '32px' }}>📦</span>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-            <p className="text-gray-600">Orders will appear here when available.</p>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 10px' }}>
+              No orders found
+            </h3>
+            <p style={{ color: '#6b7280', fontSize: '16px', margin: 0 }}>
+              Orders will appear here when available.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div>
             {orders.map((order: any, index) => (
-              <div key={order._id || index} className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900">{order.orderId}</h3>
-                  <span className="text-lg font-bold text-gray-900">${order.totalSpent}</span>
+              <div key={order._id || index} style={{
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '15px',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  marginBottom: '10px'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: '#111827', 
+                    margin: 0 
+                  }}>
+                    {order.orderId}
+                  </h3>
+                  <span style={{ 
+                    fontSize: '18px', 
+                    fontWeight: 'bold', 
+                    color: '#111827' 
+                  }}>
+                    ${order.totalSpent}
+                  </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p><strong>Customer:</strong> {order.customerName}</p>
-                  <p><strong>Date:</strong> {new Date(order.date).toLocaleDateString()}</p>
+                <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <p style={{ margin: '0 0 5px' }}>
+                    <strong>Customer:</strong> {order.customerName}
+                  </p>
+                  <p style={{ margin: 0 }}>
+                    <strong>Date:</strong> {new Date(order.date).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             ))}
@@ -192,30 +327,48 @@ export default function MobileOrders() {
         )}
 
         {/* Actions */}
-        <div className="mt-6 space-y-3">
+        <div style={{ marginTop: '30px' }}>
           <button
             onClick={loadOrders}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+            style={{
+              width: '100%',
+              padding: '15px',
+              backgroundColor: loading ? '#9ca3af' : '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '15px'
+            }}
           >
             {loading ? 'Loading...' : 'Refresh Orders'}
-          </button>
-          
-          <button
-            onClick={testAPI}
-            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium"
-          >
-            Test API Connection
           </button>
         </div>
 
         {/* Debug Info */}
-        <div className="mt-6 bg-gray-50 rounded-lg p-3">
-          <p className="text-xs text-gray-600 mb-2">Debug Info:</p>
-          <p className="text-xs text-gray-500">API: {API_BASE_URL}</p>
-          <p className="text-xs text-gray-500">Orders: {orders.length}</p>
-          <p className="text-xs text-gray-500">Status: {loading ? 'Loading...' : 'Ready'}</p>
-          <p className="text-xs text-gray-500">Error: {error || 'None'}</p>
+        <div style={{
+          backgroundColor: '#f9fafb',
+          borderRadius: '8px',
+          padding: '15px'
+        }}>
+          <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 10px', fontWeight: 'bold' }}>
+            Debug Info:
+          </p>
+          <p style={{ fontSize: '11px', color: '#9ca3af', margin: '2px 0' }}>
+            API: https://backend-production-05a7e.up.railway.app/api/v1
+          </p>
+          <p style={{ fontSize: '11px', color: '#9ca3af', margin: '2px 0' }}>
+            Orders: {orders.length}
+          </p>
+          <p style={{ fontSize: '11px', color: '#9ca3af', margin: '2px 0' }}>
+            Status: {loading ? 'Loading...' : 'Ready'}
+          </p>
+          <p style={{ fontSize: '11px', color: '#9ca3af', margin: '2px 0' }}>
+            Error: {error || 'None'}
+          </p>
         </div>
       </div>
     </div>
