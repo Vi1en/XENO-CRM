@@ -253,16 +253,16 @@ export default function Home() {
     )
   }
 
-  // Show mobile interface directly
-  if (isMobile && session) {
+  // Show responsive interface for all devices
+  if (session) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         <Head>
-          <title>Xeno CRM - Mobile</title>
+          <title>Xeno CRM Dashboard</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         
-        {/* Mobile Header */}
+        {/* Header */}
         <div className="bg-white shadow-lg border-b border-gray-200">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
