@@ -128,7 +128,7 @@ export default function CampaignHistory() {
     const sent = campaign.stats.sent;
     const failed = campaign.stats.failed;
     
-    console.log(`Delivery Rate Calculation for ${campaign.name}:`, {
+    console.log(`🚀 DELIVERY RATE CALCULATION v2.0 for ${campaign.name}:`, {
       sent, failed, totalRecipients
     });
     
@@ -139,11 +139,11 @@ export default function CampaignHistory() {
     // Always calculate delivered as sent - failed (this is the correct way)
     const actualDelivered = finalSent - finalFailed;
     
-    console.log(`Final values: sent=${finalSent}, failed=${finalFailed}, delivered=${actualDelivered}`);
+    console.log(`🎯 FINAL VALUES v2.0: sent=${finalSent}, failed=${finalFailed}, delivered=${actualDelivered}`);
     
     if (finalSent === 0) return '0%'
     const rate = (actualDelivered / finalSent) * 100
-    console.log(`Delivery rate: ${rate.toFixed(1)}%`);
+    console.log(`✅ DELIVERY RATE v2.0: ${rate.toFixed(1)}%`);
     return `${rate.toFixed(1)}%`
   }
 
@@ -401,7 +401,7 @@ export default function CampaignHistory() {
                         const finalSent = (sent !== null && sent !== undefined && sent > 0) ? sent : Math.floor(totalRecipients * 0.9);
                         const finalFailed = (failed !== null && failed !== undefined && failed > 0) ? failed : Math.floor(totalRecipients * 0.1);
                         const actualDelivered = finalSent - finalFailed;
-                        console.log(`DELIVERED CALCULATION for ${campaign.name}: sent=${sent}, failed=${failed}, finalSent=${finalSent}, finalFailed=${finalFailed}, actualDelivered=${actualDelivered} - FIXED VERSION`);
+                        console.log(`🔥 DELIVERED CALCULATION v2.0 for ${campaign.name}: sent=${sent}, failed=${failed}, finalSent=${finalSent}, finalFailed=${finalFailed}, actualDelivered=${actualDelivered}`);
                         return actualDelivered;
                       })()}
                     </div>
