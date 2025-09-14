@@ -17,15 +17,17 @@ const getApiBaseUrl = () => {
   }
   // In server-side rendering, use environment variable or fallback
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-};
+}
 
 const API_BASE_URL = getApiBaseUrl();
 
 // Debug logging (remove in production)
 if (typeof window !== 'undefined') {
-  console.log('API Base URL:', API_BASE_URL);
-  console.log('Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-  console.log('Current hostname:', window.location.hostname);
+  console.log('🔗 API Base URL:', API_BASE_URL);
+  console.log('🌍 Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('📍 Current hostname:', window.location.hostname);
+  console.log('📱 User Agent:', navigator.userAgent);
+  console.log('📐 Screen size:', window.innerWidth + 'x' + window.innerHeight);
 }
 
 export const api = axios.create({
@@ -33,7 +35,32 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    return config;
+  },
+  (error) => {
+    console.error('❌ API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  (response) => {
+    console.log('✅ API Response:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('❌ API Response Error:', error.response?.status, error.config?.url, error.message);
+    return Promise.reject(error);
+  }
+);
 
 // Customer API functions
 export const customerApi = {

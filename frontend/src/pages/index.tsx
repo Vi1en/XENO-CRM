@@ -39,6 +39,8 @@ export default function Home() {
   const loadData = async () => {
     try {
       setLoading(true)
+      console.log('📱 Loading data for mobile device...')
+      
       const [customersRes, campaignsRes, segmentsRes, ordersRes, analyticsRes] = await Promise.all([
         customerApi.getAll(),
         campaignApi.getAll(),
@@ -46,13 +48,27 @@ export default function Home() {
         orderApi.getAll(),
         aiApi.getAnalytics()
       ])
+      
+      console.log('📊 Data loaded successfully:', {
+        customers: customersRes.data.data?.length || 0,
+        campaigns: campaignsRes.data.data?.length || 0,
+        segments: segmentsRes.data.data?.length || 0,
+        orders: ordersRes.data.data?.length || 0,
+        analytics: !!analyticsRes.data
+      })
+      
       setCustomers(customersRes.data.data || [])
       setCampaigns(campaignsRes.data.data || [])
       setSegments(segmentsRes.data.data || [])
       setOrders(ordersRes.data.data || [])
       setAnalytics(analyticsRes.data.data || null)
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error('❌ Error loading data:', error)
+      console.error('❌ Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
     } finally {
       setLoading(false)
     }
@@ -325,6 +341,17 @@ export default function Home() {
         </div>
 
         <div className="p-4 lg:p-6">
+          {/* Mobile Debug Info */}
+          {typeof window !== 'undefined' && window.innerWidth < 768 && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-xs text-blue-800">
+                <strong>📱 Mobile Debug:</strong> Screen: {window.innerWidth}x{window.innerHeight} | 
+                API: {process.env.NEXT_PUBLIC_API_URL || 'Default'} | 
+                Data: {customers.length} customers, {campaigns.length} campaigns
+              </div>
+            </div>
+          )}
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8 -mt-2 lg:-mt-4">
             {/* Customers Card */}
