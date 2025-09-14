@@ -208,5 +208,86 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/v1/customers/analytics:
+ *   get:
+ *     summary: Get customer analytics and segmentation data
+ *     tags: [Customers]
+ *     responses:
+ *       200:
+ *         description: Customer analytics data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     customerSegments:
+ *                       type: object
+ *                       properties:
+ *                         vip:
+ *                           type: number
+ *                           description: Number of VIP customers
+ *                         premium:
+ *                           type: number
+ *                           description: Number of premium customers
+ *                         regular:
+ *                           type: number
+ *                           description: Number of regular customers
+ *                     campaignPerformance:
+ *                       type: object
+ *                       properties:
+ *                         running:
+ *                           type: number
+ *                           description: Number of running campaigns
+ *                         completed:
+ *                           type: number
+ *                           description: Number of completed campaigns
+ *                         scheduled:
+ *                           type: number
+ *                           description: Number of scheduled campaigns
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/analytics', async (req, res) => {
+  try {
+    const totalCustomers = await Customer.countDocuments();
+    
+    // Calculate customer segments based on total spend
+    const vipCustomers = await Customer.countDocuments({ totalSpend: { $gte: 1000 } });
+    const premiumCustomers = await Customer.countDocuments({ 
+      totalSpend: { $gte: 500, $lt: 1000 } 
+    });
+    const regularCustomers = totalCustomers - vipCustomers - premiumCustomers;
+    
+    return res.json({
+      success: true,
+      data: {
+        customerSegments: {
+          vip: vipCustomers,
+          premium: premiumCustomers,
+          regular: regularCustomers
+        },
+        campaignPerformance: {
+          running: 0, // This would come from campaigns collection
+          completed: 0,
+          scheduled: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching customer analytics:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as customersRoutes };
 

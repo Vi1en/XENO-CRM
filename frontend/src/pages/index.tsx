@@ -239,6 +239,27 @@ export default function Home() {
             </Link>
             
           </nav>
+          
+          {/* EXTERNAL Section */}
+          <div className="mt-8">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">EXTERNAL</h3>
+            <nav className="space-y-2">
+              <a 
+                href="https://backend-production-05a7e.up.railway.app/api/docs" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>API Documentation</span>
+                <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </nav>
+          </div>
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200">

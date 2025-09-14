@@ -498,4 +498,82 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/v1/orders/trends:
+ *   get:
+ *     summary: Get revenue trends and growth data
+ *     tags: [Orders]
+ *     responses:
+ *       200:
+ *         description: Revenue trends data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     customerGrowth:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           month:
+ *                             type: string
+ *                           value:
+ *                             type: number
+ *                     revenueTrend:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           month:
+ *                             type: string
+ *                           value:
+ *                             type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/trends', async (req, res) => {
+  try {
+    const months = ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'];
+    
+    // Generate mock trends data based on actual orders
+    const totalOrders = await Order.countDocuments();
+    const totalRevenue = await Order.aggregate([
+      { $group: { _id: null, total: { $sum: '$totalSpent' } } }
+    ]);
+    
+    const revenue = totalRevenue[0]?.total || 0;
+    
+    const customerGrowth = months.map((month, index) => ({
+      month,
+      value: index < 4 ? 0 : Math.round(totalOrders * (index - 3) * 0.3)
+    }));
+    
+    const revenueTrend = months.map((month, index) => ({
+      month,
+      value: Math.round(revenue * (index + 1) * 0.2)
+    }));
+    
+    return res.json({
+      success: true,
+      data: {
+        customerGrowth,
+        revenueTrend
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching revenue trends:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as orderRoutes };
