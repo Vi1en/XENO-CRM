@@ -51,10 +51,10 @@ export default function Home() {
 
   // Redirect to mobile dashboard on mobile devices
   useEffect(() => {
-    if (isMobile && session) {
+    if (isMobile) {
       router.push('/mobile-dashboard')
     }
-  }, [isMobile, session, router])
+  }, [isMobile, router])
 
   const loadData = async () => {
     try {
@@ -156,14 +156,28 @@ export default function Home() {
     }
   }
 
+  // Show loading while checking mobile
+  if (typeof window === 'undefined') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">X</span>
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-white font-bold text-2xl">X</span>
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600 text-lg">Loading your dashboard...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
