@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: xeno-crm-frontend
+    env: node
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        value: https://your-app-name.onrender.com
+      - key: NEXTAUTH_SECRET
+        value: your-secret-key
+      - key: NEXT_PUBLIC_API_URL
+        value: https://backend-production-05a7e.up.railway.app/api/v1
