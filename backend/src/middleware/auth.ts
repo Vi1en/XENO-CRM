@@ -25,7 +25,7 @@ export function authMiddleware(req: AuthenticatedRequest, res: Response, next: N
       email: decoded.email,
       name: decoded.name,
     };
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid token' });
   }
@@ -51,5 +51,5 @@ export function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response,
     // Ignore auth errors for optional auth
   }
   
-  next();
+  return next();
 }

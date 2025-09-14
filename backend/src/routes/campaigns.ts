@@ -175,8 +175,8 @@ router.post('/', async (req, res) => {
       const communicationLogId = new mongoose.Types.ObjectId().toString();
       return {
         communicationLogId,
-        campaignId: campaign._id.toString(),
-        customerId: customer._id.toString(),
+        campaignId: (campaign._id as any).toString(),
+        customerId: (customer._id as any).toString(),
         message,
         email: customer.email,
         phone: customer.phone,
@@ -185,6 +185,8 @@ router.post('/', async (req, res) => {
         customerData: {
           firstName: customer.firstName,
           lastName: customer.lastName,
+          email: customer.email,
+          phone: customer.phone,
           totalSpend: customer.totalSpend,
           visits: customer.visits,
           lastOrderAt: customer.lastOrderAt,
@@ -226,7 +228,7 @@ router.post('/', async (req, res) => {
       await campaign.save();
     }
     
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Campaign created successfully',
       data: {
@@ -245,7 +247,7 @@ router.post('/', async (req, res) => {
     }
     
     console.error('Campaign creation error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -295,15 +297,15 @@ router.get('/', async (req, res) => {
       status: 1,
       stats: 1,
       createdAt: 1,
-    }).sort({ createdAt: -1 });
+    } as any).sort({ createdAt: -1 });
     
-    res.json({
+    return res.json({
       success: true,
       data: campaigns,
     });
   } catch (error) {
     console.error('List campaigns error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -370,7 +372,7 @@ router.get('/:id', async (req, res) => {
       }
     ).populate('customerId', 'externalId email firstName lastName');
     
-    res.json({
+    return res.json({
       success: true,
       data: {
         campaign,
@@ -379,7 +381,7 @@ router.get('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Get campaign details error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -443,13 +445,13 @@ router.get('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       data: campaign,
     });
   } catch (error) {
     console.error('Get campaign error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -529,7 +531,7 @@ router.put('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Campaign updated successfully',
       data: campaign,
@@ -544,7 +546,7 @@ router.put('/:id', async (req, res) => {
     }
     
     console.error('Update campaign error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -591,13 +593,13 @@ router.delete('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Campaign deleted successfully',
     });
   } catch (error) {
     console.error('Delete campaign error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -641,13 +643,13 @@ router.get('/:id/summary', async (req, res) => {
     
     const summary = await generateCampaignSummary(id);
     
-    res.json({
+    return res.json({
       success: true,
       data: { summary },
     });
   } catch (error) {
     console.error('AI campaign summary error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -730,7 +732,7 @@ router.post('/test-personalization', async (req, res) => {
       tags: customer.tags,
     });
     
-    res.json({
+    return res.json({
       success: true,
       data: {
         originalMessage: message,
@@ -747,7 +749,7 @@ router.post('/test-personalization', async (req, res) => {
     });
   } catch (error) {
     console.error('Personalization test error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -776,14 +778,14 @@ router.put('/:id/stats', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Campaign stats updated successfully',
       data: campaign,
     });
   } catch (error) {
     console.error('Campaign stats update error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

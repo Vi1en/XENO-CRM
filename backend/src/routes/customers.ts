@@ -29,13 +29,13 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     const customers = await Customer.find().sort({ createdAt: -1 });
-    res.json({
+    return res.json({
       success: true,
       data: customers,
     });
   } catch (error) {
     console.error('Error fetching customers:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -81,13 +81,13 @@ router.get('/:id', async (req, res) => {
         message: 'Customer not found',
       });
     }
-    res.json({
+    return res.json({
       success: true,
       data: customer,
     });
   } catch (error) {
     console.error('Error fetching customer:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -143,13 +143,13 @@ router.put('/:id', async (req, res) => {
         message: 'Customer not found',
       });
     }
-    res.json({
+    return res.json({
       success: true,
       data: customer,
     });
   } catch (error) {
     console.error('Error updating customer:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -195,13 +195,13 @@ router.delete('/:id', async (req, res) => {
         message: 'Customer not found',
       });
     }
-    res.json({
+    return res.json({
       success: true,
       message: 'Customer deleted successfully',
     });
   } catch (error) {
     console.error('Error deleting customer:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

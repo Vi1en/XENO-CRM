@@ -29,7 +29,7 @@ const segmentUpdateSchema = z.object({
 });
 
 // Helper function to build MongoDB query from rules
-function buildCustomerQuery(rules: ISegmentRule[]): any {
+function buildCustomerQuery(rules: any[]): any {
   const query: any = {};
   
   for (const rule of rules) {
@@ -114,7 +114,7 @@ router.post('/preview', async (req, res) => {
     const query = buildCustomerQuery(rules);
     const count = await Customer.countDocuments(query);
     
-    res.json({ count });
+    return res.json({ count });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -125,7 +125,7 @@ router.post('/preview', async (req, res) => {
     }
     
     console.error('Segment preview error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -209,7 +209,7 @@ router.post('/', async (req, res) => {
     
     await segment.save();
     
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Segment created successfully',
       data: {
@@ -228,7 +228,7 @@ router.post('/', async (req, res) => {
     }
     
     console.error('Segment creation error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -277,13 +277,13 @@ router.get('/', async (req, res) => {
       createdAt: 1,
     }).sort({ createdAt: -1 });
     
-    res.json({
+    return res.json({
       success: true,
       data: segments,
     });
   } catch (error) {
     console.error('List segments error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -345,13 +345,13 @@ router.get('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       data: segment,
     });
   } catch (error) {
     console.error('Get segment error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -422,14 +422,20 @@ router.put('/:id', async (req, res) => {
     const updateData = segmentUpdateSchema.parse(req.body);
     
     // If rules are being updated, recalculate customer count
+    let customerCount = undefined;
     if (updateData.rules) {
       const query = buildCustomerQuery(updateData.rules);
-      updateData.customerCount = await Customer.countDocuments(query);
+      customerCount = await Customer.countDocuments(query);
+    }
+    
+    const updatePayload: any = { ...updateData, updatedAt: new Date() };
+    if (customerCount !== undefined) {
+      updatePayload.customerCount = customerCount;
     }
     
     const segment = await Segment.findByIdAndUpdate(
       id,
-      { ...updateData, updatedAt: new Date() },
+      updatePayload,
       { new: true, runValidators: true }
     );
     
@@ -440,7 +446,7 @@ router.put('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Segment updated successfully',
       data: segment,
@@ -455,7 +461,7 @@ router.put('/:id', async (req, res) => {
     }
     
     console.error('Update segment error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -502,13 +508,13 @@ router.delete('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Segment deleted successfully',
     });
   } catch (error) {
     console.error('Delete segment error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

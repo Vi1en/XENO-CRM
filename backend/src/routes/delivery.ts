@@ -74,7 +74,7 @@ router.post('/receipt', async (req, res) => {
     
     console.log(`📥 Delivery receipt received for ${validatedData.communicationLogId}: ${validatedData.status}`);
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Receipt queued for processing',
     });
@@ -88,7 +88,7 @@ router.post('/receipt', async (req, res) => {
     }
     
     console.error('Delivery receipt error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

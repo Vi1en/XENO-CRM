@@ -121,7 +121,7 @@ router.post('/customers', async (req, res) => {
     // Publish to RabbitMQ queue
     await publishToQueue('queue.customers.ingest', customerData);
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Customer data queued for processing',
       data: {
@@ -139,7 +139,7 @@ router.post('/customers', async (req, res) => {
     }
     
     console.error('Customer ingestion error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -239,7 +239,7 @@ router.post('/orders', async (req, res) => {
     // Publish to RabbitMQ queue
     await publishToQueue('queue.orders.ingest', orderData);
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Order data queued for processing',
       data: {
@@ -258,7 +258,7 @@ router.post('/orders', async (req, res) => {
     }
     
     console.error('Order ingestion error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

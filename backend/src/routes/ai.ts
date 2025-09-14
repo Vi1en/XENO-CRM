@@ -64,7 +64,7 @@ router.post('/nl-to-segment', async (req, res) => {
     
     const result = await generateSegmentRules(prompt);
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
     });
@@ -78,7 +78,7 @@ router.post('/nl-to-segment', async (req, res) => {
     }
     
     console.error('AI NL to segment error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -139,7 +139,7 @@ router.post('/message-variants', async (req, res) => {
     
     const result = await generateMessageVariants(objective, tone, offer);
     
-    res.json({
+    return res.json({
       success: true,
       data: result,
     });
@@ -153,7 +153,7 @@ router.post('/message-variants', async (req, res) => {
     }
     
     console.error('AI message variants error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -177,13 +177,13 @@ router.get('/analytics', async (req, res) => {
     
     console.log(`📊 Generated analytics: ${analytics.insights.length} insights`);
     
-    res.json({
+    return res.json({
       success: true,
       data: analytics,
     });
   } catch (error) {
     console.error('AI analytics error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });

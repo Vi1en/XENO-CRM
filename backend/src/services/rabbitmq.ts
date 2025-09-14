@@ -1,4 +1,4 @@
-import amqp from 'amqplib';
+import * as amqp from 'amqplib';
 
 let connection: amqp.Connection | null = null;
 let channel: amqp.Channel | null = null;
@@ -7,14 +7,14 @@ export async function connectToRabbitMQ(): Promise<void> {
   try {
     const rabbitmqUrl = process.env.RABBITMQ_URL || 'amqp://admin:password@localhost:5672';
     
-    connection = await amqp.connect(rabbitmqUrl);
-    channel = await connection.createChannel();
+    connection = await amqp.connect(rabbitmqUrl) as any;
+    channel = await (connection as any).createChannel();
     
     // Declare queues
-    await channel.assertQueue('queue.customers.ingest', { durable: true });
-    await channel.assertQueue('queue.orders.ingest', { durable: true });
-    await channel.assertQueue('queue.campaign.delivery', { durable: true });
-    await channel.assertQueue('queue.delivery.receipt', { durable: true });
+    await (channel as any).assertQueue('queue.customers.ingest', { durable: true });
+    await (channel as any).assertQueue('queue.orders.ingest', { durable: true });
+    await (channel as any).assertQueue('queue.campaign.delivery', { durable: true });
+    await (channel as any).assertQueue('queue.delivery.receipt', { durable: true });
     
     console.log('✅ Connected to RabbitMQ');
   } catch (error) {
@@ -30,7 +30,7 @@ export async function publishToQueue(queueName: string, message: any): Promise<v
   
   try {
     const messageBuffer = Buffer.from(JSON.stringify(message));
-    await channel.publish('', queueName, messageBuffer, { persistent: true });
+    await (channel as any).publish('', queueName, messageBuffer, { persistent: true });
     console.log(`📤 Published message to ${queueName}`);
   } catch (error) {
     console.error(`❌ Failed to publish to ${queueName}:`, error);
@@ -40,9 +40,9 @@ export async function publishToQueue(queueName: string, message: any): Promise<v
 
 export async function closeRabbitMQConnection(): Promise<void> {
   if (channel) {
-    await channel.close();
+    await (channel as any).close();
   }
   if (connection) {
-    await connection.close();
+    await (connection as any).close();
   }
 }

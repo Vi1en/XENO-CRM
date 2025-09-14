@@ -84,7 +84,7 @@ router.get('/', async (req, res) => {
 
     const total = await Order.countDocuments(query);
 
-    res.json({
+    return res.json({
       success: true,
       data: orders,
       pagination: {
@@ -96,7 +96,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Get orders error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error',
     });
@@ -114,7 +114,7 @@ router.get('/', async (req, res) => {
  *         description: Test successful
  */
 router.get('/test', (req, res) => {
-  res.json({ success: true, message: 'Orders route is working' });
+  return res.json({ success: true, message: 'Orders route is working' });
 });
 
 // Debug endpoint
@@ -127,13 +127,13 @@ router.get('/debug', async (req, res) => {
       date: new Date()
     });
     
-    res.json({ 
+    return res.json({ 
       success: true, 
       message: 'Order model test successful',
       orderId: testOrder.orderId 
     });
-  } catch (error) {
-    res.status(500).json({
+  } catch (error: any) {
+    return res.status(500).json({
       success: false,
       message: 'Order model test failed',
       error: error.message
@@ -174,14 +174,14 @@ router.post('/test-create', async (req, res) => {
     
     await order.save();
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Test order created successfully',
       data: order
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Test create error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Test create failed',
       error: error.message
