@@ -246,7 +246,7 @@ export default function Customers() {
                         </svg>
                       </Link>
                       <button
-                        onClick={() => handleDelete(customer._id)}
+                        onClick={() => handleDelete(customer)}
                         disabled={deleteLoading === customer._id}
                         className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
                       >
