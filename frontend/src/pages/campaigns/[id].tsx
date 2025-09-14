@@ -77,6 +77,23 @@ export default function CampaignDetails() {
     }
   }
 
+  // Delete campaign function
+  const handleDelete = async () => {
+    if (!campaign) return
+    
+    if (!confirm(`Are you sure you want to delete "${campaign.name}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      await campaignApi.delete(campaign._id)
+      router.push('/campaigns')
+    } catch (error) {
+      console.error('Error deleting campaign:', error)
+      setError('Failed to delete campaign')
+    }
+  }
+
   const getStatusColor = (status: string | undefined) => {
     if (!status) return 'bg-gray-100 text-gray-800'
     
@@ -259,10 +276,16 @@ export default function CampaignDetails() {
                         Cancel Schedule
                       </button>
                     )}
-                    <button className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <button 
+                      onClick={() => router.push(`/campaigns/edit?id=${campaign._id}`)}
+                      className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    >
                       Edit Campaign
                     </button>
-                    <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <button 
+                      onClick={handleDelete}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    >
                       Delete Campaign
                     </button>
                   </div>
