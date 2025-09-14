@@ -28,6 +28,7 @@ export default function Orders() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -42,6 +43,22 @@ export default function Orders() {
   })
 
   useEffect(() => {
+    // Mobile detection
+    const checkMobile = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const userAgent = navigator.userAgent
+      
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      const isSmallScreen = width < 768 || height < 600
+      const isMobileUserAgent = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+      
+      setIsMobile(isSmallScreen || isMobileUserAgent || (isTouch && (isMobileUserAgent)))
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
     if (status === 'loading') return
     if (!session) {
       router.push('/api/auth/signin')
@@ -49,6 +66,8 @@ export default function Orders() {
     }
     loadOrders()
     loadCustomers()
+    
+    return () => window.removeEventListener('resize', checkMobile)
   }, [session, status, currentPage, searchTerm])
 
   const loadOrders = async () => {
@@ -199,6 +218,133 @@ export default function Orders() {
 
   if (!session) {
     return null
+  }
+
+  // Mobile interface
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Head>
+          <title>Orders - Xeno CRM</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </Head>
+        
+        {/* Mobile Header */}
+        <div className="bg-white shadow-lg border-b border-gray-200">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => router.back()}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">Orders</h1>
+                  <p className="text-xs text-gray-500">{orders.length} orders</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Content */}
+        <div className="p-4 space-y-4">
+          {/* Search */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Order List */}
+          <div className="space-y-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-100">
+                <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                <p className="text-gray-500 mb-4">Get started by adding your first order</p>
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add Order
+                </button>
+              </div>
+            ) : (
+              orders.map((order) => (
+                <div key={order._id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-medium text-sm">#</span>
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">Order #{order.orderId}</h3>
+                          <p className="text-sm text-gray-500">{order.customerName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-lg font-semibold text-green-600">
+                          ${order.totalSpent.toFixed(2)}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(order.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setEditingOrder(order)}
+                        className="p-2 text-gray-400 hover:text-blue-600"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      Created {new Date(order.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
