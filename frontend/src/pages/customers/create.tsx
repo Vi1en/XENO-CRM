@@ -13,7 +13,6 @@ export default function CreateCustomer() {
   const [success, setSuccess] = useState(false)
 
   const [formData, setFormData] = useState({
-    externalId: '',
     email: '',
     firstName: '',
     lastName: '',
@@ -61,7 +60,6 @@ export default function CreateCustomer() {
       const lastOrderAt = formData.lastOrderAt ? new Date(formData.lastOrderAt).toISOString() : undefined
 
       const customerData = {
-        externalId: formData.externalId,
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -277,22 +275,6 @@ export default function CreateCustomer() {
 
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* External ID */}
-                  <div>
-                    <label htmlFor="externalId" className="block text-sm font-medium text-gray-700 mb-2">
-                      External ID *
-                    </label>
-                    <input
-                      type="text"
-                      id="externalId"
-                      name="externalId"
-                      value={formData.externalId}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="e.g., cust_001"
-                    />
-                  </div>
 
                   {/* Email */}
                   <div>

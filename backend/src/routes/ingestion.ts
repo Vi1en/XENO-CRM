@@ -6,7 +6,7 @@ const router = Router();
 
 // Validation schemas
 const customerSchema = z.object({
-  externalId: z.string().min(1, 'External ID is required'),
+  externalId: z.string().optional(), // Made optional - will be auto-generated
   email: z.string().email('Invalid email format'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),

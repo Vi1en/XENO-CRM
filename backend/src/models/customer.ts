@@ -28,8 +28,14 @@ const customerSchema = new Schema<ICustomer>({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Update the updatedAt field before saving
+// Auto-generate externalId before saving
 customerSchema.pre('save', function(next) {
+  if (!this.externalId) {
+    // Generate externalId based on timestamp and random number
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    this.externalId = `cust_${timestamp}_${random}`;
+  }
   this.updatedAt = new Date();
   next();
 });
