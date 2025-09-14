@@ -29,6 +29,7 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     console.log('Session status:', status)
@@ -135,8 +136,18 @@ export default function CampaignsPage() {
         <meta name="description" content="Manage marketing campaigns in Xeno CRM" />
       </Head>
       <div className="min-h-screen bg-gray-50">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}>
           <div className="flex flex-col h-full">
             {/* Logo */}
             <div className="flex items-center px-6 py-4 border-b border-gray-200">
@@ -240,9 +251,37 @@ export default function CampaignsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="pl-64">
+        <div className="lg:pl-64">
+          {/* Mobile Header */}
+          <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">X</span>
+                </div>
+                <span className="ml-2 text-xl font-semibold text-gray-900">Campaigns</span>
+              </div>
+              <Link
+                href="/campaigns/create"
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+
           {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="flex items-center text-sm text-gray-500">
@@ -256,17 +295,17 @@ export default function CampaignsPage() {
           </div>
 
           {/* Page Content */}
-          <div className="p-6">
+          <div className="p-4 lg:p-6">
             {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
+            <div className="mb-6 lg:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Campaign Management</h1>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Campaign Management</h1>
                   <p className="mt-2 text-gray-600">Create and manage your marketing campaigns</p>
                 </div>
                 <Link
                   href="/campaigns/create"
-                  className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto text-center"
                 >
                   + Create Campaign
                 </Link>
