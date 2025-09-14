@@ -62,7 +62,9 @@ router.post('/nl-to-segment', async (req, res) => {
   try {
     const { prompt } = nlToSegmentSchema.parse(req.body);
     
+    console.log('🔍 AI Segment Generation - Input prompt:', prompt);
     const result = await generateSegmentRules(prompt);
+    console.log('🔍 AI Segment Generation - Generated result:', JSON.stringify(result, null, 2));
     
     return res.json({
       success: true,
