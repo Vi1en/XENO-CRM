@@ -41,34 +41,86 @@ export default function Home() {
       setLoading(true)
       console.log('📱 Loading data for mobile device...')
       
-      const [customersRes, campaignsRes, segmentsRes, ordersRes, analyticsRes] = await Promise.all([
-        customerApi.getAll(),
-        campaignApi.getAll(),
-        segmentApi.getAll(),
-        orderApi.getAll(),
-        aiApi.getAnalytics()
+      // Try to load data with individual error handling
+      const loadCustomersData = async () => {
+        try {
+          const response = await customerApi.getAll()
+          console.log('✅ Customers loaded:', response.data.data?.length || 0)
+          return response.data.data || []
+        } catch (error) {
+          console.error('❌ Customers error:', error)
+          return []
+        }
+      }
+      
+      const loadCampaignsData = async () => {
+        try {
+          const response = await campaignApi.getAll()
+          console.log('✅ Campaigns loaded:', response.data.data?.length || 0)
+          return response.data.data || []
+        } catch (error) {
+          console.error('❌ Campaigns error:', error)
+          return []
+        }
+      }
+      
+      const loadSegmentsData = async () => {
+        try {
+          const response = await segmentApi.getAll()
+          console.log('✅ Segments loaded:', response.data.data?.length || 0)
+          return response.data.data || []
+        } catch (error) {
+          console.error('❌ Segments error:', error)
+          return []
+        }
+      }
+      
+      const loadOrdersData = async () => {
+        try {
+          const response = await orderApi.getAll()
+          console.log('✅ Orders loaded:', response.data.data?.length || 0)
+          return response.data.data || []
+        } catch (error) {
+          console.error('❌ Orders error:', error)
+          return []
+        }
+      }
+      
+      const loadAnalyticsData = async () => {
+        try {
+          const response = await aiApi.getAnalytics()
+          console.log('✅ Analytics loaded:', !!response.data)
+          return response.data.data || null
+        } catch (error) {
+          console.error('❌ Analytics error:', error)
+          return null
+        }
+      }
+      
+      // Load all data in parallel
+      const [customersData, campaignsData, segmentsData, ordersData, analyticsData] = await Promise.all([
+        loadCustomersData(),
+        loadCampaignsData(),
+        loadSegmentsData(),
+        loadOrdersData(),
+        loadAnalyticsData()
       ])
       
-      console.log('📊 Data loaded successfully:', {
-        customers: customersRes.data.data?.length || 0,
-        campaigns: campaignsRes.data.data?.length || 0,
-        segments: segmentsRes.data.data?.length || 0,
-        orders: ordersRes.data.data?.length || 0,
-        analytics: !!analyticsRes.data
+      console.log('📊 Final data loaded:', {
+        customers: customersData.length,
+        campaigns: campaignsData.length,
+        segments: segmentsData.length,
+        orders: ordersData.length,
+        analytics: !!analyticsData
       })
       
-      setCustomers(customersRes.data.data || [])
-      setCampaigns(campaignsRes.data.data || [])
-      setSegments(segmentsRes.data.data || [])
-      setOrders(ordersRes.data.data || [])
-      setAnalytics(analyticsRes.data.data || null)
+      setCustomers(customersData)
+      setCampaigns(campaignsData)
+      setSegments(segmentsData)
+      setOrders(ordersData)
+      setAnalytics(analyticsData)
     } catch (error) {
-      console.error('❌ Error loading data:', error)
-      console.error('❌ Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      })
+      console.error('❌ Critical error loading data:', error)
     } finally {
       setLoading(false)
     }

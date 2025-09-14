@@ -6,17 +6,31 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     // In browser, use the environment variable or fallback
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
+    console.log('🔗 Environment NEXT_PUBLIC_API_URL:', envUrl);
+    
     if (envUrl) {
-      return envUrl;
+      // Ensure the URL has the correct format
+      const cleanUrl = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
+      console.log('✅ Using environment URL:', cleanUrl);
+      return cleanUrl;
     }
+    
     // Fallback for production if env var is not set
     if (window.location.hostname !== 'localhost') {
-      return 'https://backend-production-05a7e.up.railway.app/api/v1';
+      const prodUrl = 'https://backend-production-05a7e.up.railway.app/api/v1';
+      console.log('🌐 Using production fallback URL:', prodUrl);
+      return prodUrl;
     }
-    return 'http://localhost:3001/api/v1';
+    
+    const localUrl = 'http://localhost:3001/api/v1';
+    console.log('🏠 Using local URL:', localUrl);
+    return localUrl;
   }
+  
   // In server-side rendering, use environment variable or fallback
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  const ssrUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  console.log('🖥️ Using SSR URL:', ssrUrl);
+  return ssrUrl;
 }
 
 const API_BASE_URL = getApiBaseUrl();
@@ -28,6 +42,19 @@ if (typeof window !== 'undefined') {
   console.log('📍 Current hostname:', window.location.hostname);
   console.log('📱 User Agent:', navigator.userAgent);
   console.log('📐 Screen size:', window.innerWidth + 'x' + window.innerHeight);
+  
+  // Test the API URL immediately
+  fetch(API_BASE_URL + '/orders')
+    .then(response => {
+      console.log('🧪 API Test Response Status:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('🧪 API Test Data:', data);
+    })
+    .catch(error => {
+      console.error('🧪 API Test Error:', error);
+    });
 }
 
 export const api = axios.create({
