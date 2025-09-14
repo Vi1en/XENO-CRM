@@ -87,13 +87,45 @@ export default function MobileDashboard() {
   const testAPI = async () => {
     try {
       console.log('🧪 Testing API connection...')
-      const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders')
+      console.log('🧪 Testing from URL:', window.location.href)
+      
+      // Test with a simple timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
+      const response = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/orders', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      })
+      
+      clearTimeout(timeoutId)
+      
+      console.log('🧪 Response status:', response.status)
+      console.log('🧪 Response headers:', Object.fromEntries(response.headers.entries()))
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
       const data = await response.json()
       console.log('🧪 API Test Result:', data)
-      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}\nStatus: ${response.status}`)
+      
+      alert(`API Test: ${data.success ? 'SUCCESS' : 'FAILED'}\nOrders: ${data.data?.length || 0}\nStatus: ${response.status}\nURL: ${window.location.href}`)
     } catch (err: any) {
       console.error('🧪 API Test Error:', err)
-      alert(`API Test: FAILED\nError: ${err.message}`)
+      let errorMsg = 'Unknown error'
+      
+      if (err.name === 'AbortError') {
+        errorMsg = 'Request timed out (10s)'
+      } else if (err.message) {
+        errorMsg = err.message
+      }
+      
+      alert(`API Test: FAILED\nError: ${errorMsg}\nURL: ${window.location.href}\nUser Agent: ${navigator.userAgent.substring(0, 50)}...`)
     }
   }
 
@@ -431,10 +463,31 @@ export default function MobileDashboard() {
               borderRadius: '8px',
               fontSize: '16px',
               fontWeight: '500',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              marginBottom: '10px'
             }}
           >
             Test API Connection
+          </button>
+          
+          <button
+            onClick={() => {
+              // Simple test - just open the API URL in a new tab
+              window.open('https://backend-production-05a7e.up.railway.app/api/v1/orders', '_blank')
+            }}
+            style={{
+              width: '100%',
+              padding: '15px',
+              backgroundColor: '#f59e0b',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            Open API in New Tab
           </button>
           
           <button
