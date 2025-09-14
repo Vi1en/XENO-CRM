@@ -339,13 +339,13 @@ export default function CampaignHistory() {
         </div>
 
         {/* Info Banner */}
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-green-800">
-              <strong>🚀 v2.0 DEPLOYED!</strong> Delivery rate calculation fixed. If you still see 100% for campaigns with failures, please hard refresh (Ctrl+F5).
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> This is a read-only view of campaign history. To edit or delete campaigns, go to the <a href="/campaigns" className="underline font-medium">main Campaigns page</a>.
             </p>
           </div>
         </div>
