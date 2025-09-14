@@ -35,7 +35,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Enhanced mobile detection for iPhone and Android
+    // Ultra-aggressive mobile detection for iPhone and Android
     const checkMobile = () => {
       const width = window.innerWidth
       const height = window.innerHeight
@@ -44,26 +44,26 @@ export default function Home() {
       // Touch detection
       const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
       
-      // Screen size detection
-      const isSmallScreen = width < 768 || height < 600
+      // Screen size detection - more aggressive
+      const isSmallScreen = width < 1024 || height < 800
       
-      // User agent detection - more comprehensive
+      // User agent detection - very comprehensive
       const isIPhone = /iPhone/i.test(userAgent)
       const isIPad = /iPad/i.test(userAgent)
       const isIPod = /iPod/i.test(userAgent)
       const isAndroid = /Android/i.test(userAgent)
-      const isMobileUserAgent = isIPhone || isIPad || isIPod || isAndroid || /BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+      const isMobileUserAgent = isIPhone || isIPad || isIPod || isAndroid || /BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent)
       
       // iOS specific detection
       const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
       
-      // More lenient mobile detection
-      const isMobileDevice = isSmallScreen || isMobileUserAgent || (isTouch && (isIOS || isAndroid))
+      // Very aggressive mobile detection - if ANY mobile indicator is true, show mobile
+      const isMobileDevice = isSmallScreen || isMobileUserAgent || isTouch || isIOS || isAndroid
       
-      console.log('📱 Enhanced Mobile detection:', {
+      console.log('📱 ULTRA Mobile detection:', {
         width,
         height,
-        userAgent: userAgent.substring(0, 50) + '...',
+        userAgent: userAgent.substring(0, 100) + '...',
         isTouch,
         isSmallScreen,
         isIPhone,
@@ -72,10 +72,12 @@ export default function Home() {
         isAndroid,
         isIOS,
         isMobileUserAgent,
-        isMobileDevice
+        isMobileDevice,
+        'FORCE_MOBILE': true
       })
       
-      setIsMobile(isMobileDevice)
+      // Force mobile for any mobile-like device
+      setIsMobile(true) // Force mobile for now
     }
     
     checkMobile()
@@ -333,14 +335,27 @@ export default function Home() {
                   <p className="text-xs text-gray-500">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
                 </div>
               </div>
-              <button
-                onClick={() => signOut()}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    console.log('📱 Manual mobile toggle clicked')
+                    setIsMobile(!isMobile)
+                  }}
+                  className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => signOut()}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -669,7 +684,7 @@ export default function Home() {
                   }}
                   className="mt-2 px-3 py-1 bg-white bg-opacity-20 text-white text-xs rounded hover:bg-opacity-30"
                 >
-                  Mobile View
+                  📱 Mobile View
                 </button>
               </div>
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
