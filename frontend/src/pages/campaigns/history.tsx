@@ -126,8 +126,11 @@ export default function CampaignHistory() {
   const getDeliveryRate = (campaign: Campaign) => {
     const totalRecipients = campaign.stats.totalRecipients || 9;
     const sent = campaign.stats.sent;
-    const delivered = campaign.stats.delivered;
     const failed = campaign.stats.failed;
+    
+    console.log(`Delivery Rate Calculation for ${campaign.name}:`, {
+      sent, failed, totalRecipients
+    });
     
     // Use fallback values if data is missing or 0
     const finalSent = (sent !== null && sent !== undefined && sent > 0) ? sent : Math.floor(totalRecipients * 0.9);
@@ -136,8 +139,11 @@ export default function CampaignHistory() {
     // Always calculate delivered as sent - failed (this is the correct way)
     const actualDelivered = finalSent - finalFailed;
     
+    console.log(`Final values: sent=${finalSent}, failed=${finalFailed}, delivered=${actualDelivered}`);
+    
     if (finalSent === 0) return '0%'
     const rate = (actualDelivered / finalSent) * 100
+    console.log(`Delivery rate: ${rate.toFixed(1)}%`);
     return `${rate.toFixed(1)}%`
   }
 
