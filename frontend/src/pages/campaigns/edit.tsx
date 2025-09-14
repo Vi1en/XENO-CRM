@@ -41,10 +41,13 @@ export default function EditCampaign() {
 
   const loadSegments = async () => {
     try {
+      console.log('Loading segments...')
       const response = await segmentApi.getAll()
+      console.log('Segments API response:', response)
       setSegments(response.data || [])
     } catch (err) {
       console.error('Error loading segments:', err)
+      setError(`Failed to load segments: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -52,18 +55,26 @@ export default function EditCampaign() {
     try {
       setLoading(true)
       setError(null)
+      console.log('Loading campaign data for ID:', campaignId)
       const response = await campaignApi.getById(campaignId)
+      console.log('Campaign API response:', response)
+      
+      if (!response.data || !response.data.data || !response.data.data.campaign) {
+        throw new Error('Invalid response structure from API')
+      }
+      
       const campaign = response.data.data.campaign
+      console.log('Campaign data:', campaign)
 
       setFormData({
-        name: campaign.name,
+        name: campaign.name || '',
         description: campaign.description || '',
         segmentId: campaign.segmentId || '',
         message: campaign.message || ''
       })
     } catch (err) {
       console.error('Error loading campaign data:', err)
-      setError('Failed to load campaign data.')
+      setError(`Failed to load campaign data: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
