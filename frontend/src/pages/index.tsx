@@ -159,12 +159,6 @@ export default function Home() {
               <span>Segments</span>
             </Link>
             
-            <Link href="/ai-dashboard" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              <span>AI Dashboard</span>
-            </Link>
           </nav>
         </div>
         
@@ -288,6 +282,199 @@ export default function Home() {
             </div>
           </div>
 
+          {/* AI Insights Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-purple-800">🤖 AI Customer Insights</h3>
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">High-Value Customers</span>
+                  <span className="text-lg font-bold text-green-600">12</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Churn Risk</span>
+                  <span className="text-lg font-bold text-red-600">3</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Engagement Score</span>
+                  <span className="text-lg font-bold text-blue-600">8.4/10</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-blue-800">📊 AI Campaign Performance</h3>
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Open Rate</span>
+                  <span className="text-lg font-bold text-green-600">24.5%</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Click Rate</span>
+                  <span className="text-lg font-bold text-blue-600">3.2%</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Conversion</span>
+                  <span className="text-lg font-bold text-purple-600">1.8%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Recommendations */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-indigo-800">💡 AI Recommendations</h3>
+              <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-white rounded-lg border border-indigo-100">
+                <h4 className="font-medium text-gray-900 mb-2">📧 Email Timing</h4>
+                <p className="text-sm text-gray-600">Send emails on Tuesday 2 PM for 25% higher open rates</p>
+              </div>
+              <div className="p-4 bg-white rounded-lg border border-indigo-100">
+                <h4 className="font-medium text-gray-900 mb-2">🎯 New Segment</h4>
+                <p className="text-sm text-gray-600">Create "Tech Enthusiasts" segment for better targeting</p>
+              </div>
+              <div className="p-4 bg-white rounded-lg border border-indigo-100">
+                <h4 className="font-medium text-gray-900 mb-2">📱 Content Type</h4>
+                <p className="text-sm text-gray-600">Video content performs 40% better for your audience</p>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Analytics Chart */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">📈 AI-Powered Analytics</h3>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full">7 Days</button>
+                <button className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">30 Days</button>
+                <button className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">90 Days</button>
+              </div>
+            </div>
+            <div className="h-64 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">AI Analytics Chart</h4>
+                <p className="text-sm text-gray-500">Interactive charts showing customer behavior patterns, campaign performance, and predictive insights</p>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Customer Behavior Graph */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 AI Customer Segmentation</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">High Value (25%)</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">25%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{width: '25%'}}></div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Medium Value (45%)</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">45%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Low Value (30%)</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">30%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-yellow-500 h-2 rounded-full" style={{width: '30%'}}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 AI Engagement Trends</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Email Opens</p>
+                      <p className="text-xs text-gray-600">+15% this week</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-green-600">2,847</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Clicks</p>
+                      <p className="text-xs text-gray-600">+8% this week</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-blue-600">342</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Conversions</p>
+                      <p className="text-xs text-gray-600">+22% this week</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-bold text-purple-600">89</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Quick Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -350,23 +537,6 @@ export default function Home() {
                   <p className="text-sm font-medium text-gray-900">Manage Segments</p>
                 </Link>
                 
-                <Link href="/ai-dashboard" className="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors text-center">
-                  <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">AI Dashboard</p>
-                </Link>
-                
-                <Link href="/ai-suggestions" className="p-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors text-center">
-                  <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">AI Suggestions</p>
-                </Link>
               </div>
             </div>
           </div>
