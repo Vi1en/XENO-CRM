@@ -30,10 +30,10 @@ export default function Dashboard() {
       
       // Load all data
       const [customersData, campaignsData, segmentsData, ordersData] = await Promise.all([
-        customerApi.getCustomers(),
-        campaignApi.getCampaigns(),
-        segmentApi.getSegments(),
-        orderApi.getOrders()
+        customerApi.getAll(),
+        campaignApi.getAll(),
+        segmentApi.getAll(),
+        orderApi.getAll()
       ])
 
       setCustomers(customersData.data || [])
