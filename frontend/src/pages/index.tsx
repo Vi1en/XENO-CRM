@@ -30,6 +30,7 @@ export default function Home() {
   const [orders, setOrders] = useState([])
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -77,6 +78,7 @@ export default function Home() {
   const loadData = async () => {
     try {
       setLoading(true)
+      setError(null)
       console.log('📱 Loading data for mobile device...')
       console.log('🔗 API Base URL:', process.env.NEXT_PUBLIC_API_URL)
       console.log('🌍 Current hostname:', window.location.hostname)
@@ -169,6 +171,7 @@ export default function Home() {
       setAnalytics(analyticsData)
     } catch (error: any) {
       console.error('❌ Critical error loading data:', error)
+      setError(error.message || 'Failed to load data')
     } finally {
       setLoading(false)
     }
