@@ -35,7 +35,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Ultra-aggressive mobile detection for iPhone and Android
+    // Proper mobile detection for iPhone and Android
     const checkMobile = () => {
       const width = window.innerWidth
       const height = window.innerHeight
@@ -44,10 +44,10 @@ export default function Home() {
       // Touch detection
       const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
       
-      // Screen size detection - more aggressive
-      const isSmallScreen = width < 1024 || height < 800
+      // Screen size detection - mobile threshold
+      const isSmallScreen = width < 768 || height < 600
       
-      // User agent detection - very comprehensive
+      // User agent detection - mobile devices
       const isIPhone = /iPhone/i.test(userAgent)
       const isIPad = /iPad/i.test(userAgent)
       const isIPod = /iPod/i.test(userAgent)
@@ -57,13 +57,13 @@ export default function Home() {
       // iOS specific detection
       const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
       
-      // Very aggressive mobile detection - if ANY mobile indicator is true, show mobile
-      const isMobileDevice = isSmallScreen || isMobileUserAgent || isTouch || isIOS || isAndroid
+      // Proper mobile detection - only show mobile for actual mobile devices
+      const isMobileDevice = isSmallScreen || (isMobileUserAgent && isTouch)
       
-      console.log('📱 ULTRA Mobile detection:', {
+      console.log('📱 Mobile detection:', {
         width,
         height,
-        userAgent: userAgent.substring(0, 100) + '...',
+        userAgent: userAgent.substring(0, 50) + '...',
         isTouch,
         isSmallScreen,
         isIPhone,
@@ -72,12 +72,10 @@ export default function Home() {
         isAndroid,
         isIOS,
         isMobileUserAgent,
-        isMobileDevice,
-        'FORCE_MOBILE': true
+        isMobileDevice
       })
       
-      // Force mobile for any mobile-like device
-      setIsMobile(true) // Force mobile for now
+      setIsMobile(isMobileDevice)
     }
     
     checkMobile()
@@ -335,27 +333,14 @@ export default function Home() {
                   <p className="text-xs text-gray-500">Welcome back, {session.user?.name?.split(' ')[0] || 'User'}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => {
-                    console.log('📱 Manual mobile toggle clicked')
-                    setIsMobile(!isMobile)
-                  }}
-                  className="p-2 text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => signOut()}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                onClick={() => signOut()}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
