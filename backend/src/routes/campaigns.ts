@@ -904,4 +904,57 @@ router.post('/:id/send', async (req, res) => {
   }
 });
 
+// Simulate delivery stats for testing
+router.post('/:id/simulate-delivery', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid campaign ID',
+      });
+    }
+
+    const campaign = await Campaign.findById(id);
+    if (!campaign) {
+      return res.status(404).json({
+        success: false,
+        message: 'Campaign not found',
+      });
+    }
+
+    // Simulate realistic delivery stats
+    const totalRecipients = campaign.stats?.totalRecipients || 9;
+    const sent = Math.floor(totalRecipients * 0.9); // 90% sent
+    const delivered = Math.floor(sent * 0.95); // 95% delivery rate
+    const failed = sent - delivered;
+    const bounced = Math.floor(totalRecipients * 0.05); // 5% bounced
+
+    campaign.stats = {
+      totalRecipients,
+      sent,
+      failed,
+      delivered,
+      bounced,
+    };
+    await campaign.save();
+
+    return res.json({
+      success: true,
+      message: 'Delivery stats simulated successfully',
+      data: {
+        campaignId: campaign._id,
+        stats: campaign.stats,
+      },
+    });
+  } catch (error) {
+    console.error('Error simulating delivery stats:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as campaignsRoutes };
