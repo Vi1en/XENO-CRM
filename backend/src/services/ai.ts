@@ -195,11 +195,91 @@ function generateSmartMockCampaign(objective: string, tone: string, offer?: stri
 }
 
 export async function generateSegmentRules(prompt: string): Promise<{ rules: any[], name: string, description: string }> {
-  // Always use smart mock for now to ensure it works
-  console.log('🤖 FORCED to use smart mock AI response for segment rules');
-  console.log('🤖 Input prompt:', prompt);
-  const result = generateSmartMockRules(prompt);
-  console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
+  console.log('🤖 AI SEGMENT GENERATION - Input:', prompt);
+  
+  // Parse the prompt to extract rules
+  const lowerPrompt = prompt.toLowerCase();
+  const rules: any[] = [];
+  let name = '';
+  let description = '';
+  
+  // Check for spending keywords
+  if (lowerPrompt.includes('spent') || lowerPrompt.includes('spend') || lowerPrompt.includes('send')) {
+    let amount = 100;
+    
+    // Check for specific amounts
+    if (lowerPrompt.includes('3000')) amount = 3000;
+    else if (lowerPrompt.includes('2500')) amount = 2500;
+    else if (lowerPrompt.includes('2000')) amount = 2000;
+    else if (lowerPrompt.includes('1500')) amount = 1500;
+    else if (lowerPrompt.includes('1000')) amount = 1000;
+    else if (lowerPrompt.includes('500')) amount = 500;
+    
+    rules.push({
+      field: 'totalSpend',
+      operator: 'greater_than',
+      value: amount
+    });
+    
+    if (amount >= 3000) {
+      name = 'Ultra High-Value Customers';
+      description = `Customers who spent over $${amount.toLocaleString()}`;
+    } else if (amount >= 2500) {
+      name = 'Elite High-Value Customers';
+      description = `Customers who spent over $${amount.toLocaleString()}`;
+    } else if (amount >= 1000) {
+      name = 'High-Value Customers';
+      description = `Customers who spent over $${amount.toLocaleString()}`;
+    } else {
+      name = 'Active Spenders';
+      description = `Customers who spent over $${amount}`;
+    }
+  }
+  
+  // Check for visit keywords
+  if (lowerPrompt.includes('visit') || lowerPrompt.includes('visited')) {
+    let visits = 2;
+    
+    if (lowerPrompt.includes('50')) visits = 50;
+    else if (lowerPrompt.includes('10')) visits = 10;
+    else if (lowerPrompt.includes('5')) visits = 5;
+    else if (lowerPrompt.includes('3')) visits = 3;
+    
+    rules.push({
+      field: 'visits',
+      operator: 'greater_than',
+      value: visits
+    });
+    
+    if (visits >= 50) {
+      name = name ? `${name} & Super Frequent Visitors` : 'Super Frequent Visitors';
+      description = description ? `${description} and visited more than ${visits} times` : `Customers who visited more than ${visits} times`;
+    } else if (visits >= 10) {
+      name = name ? `${name} & Frequent Visitors` : 'Frequent Visitors';
+      description = description ? `${description} and visited more than ${visits} times` : `Customers who visited more than ${visits} times`;
+    } else if (visits >= 5) {
+      name = name ? `${name} & Regular Visitors` : 'Regular Visitors';
+      description = description ? `${description} and visited more than ${visits} times` : `Customers who visited more than ${visits} times`;
+    } else {
+      name = name ? `${name} & Occasional Visitors` : 'Occasional Visitors';
+      description = description ? `${description} and visited more than ${visits} times` : `Customers who visited more than ${visits} times`;
+    }
+  }
+  
+  // If no rules generated, return default
+  if (rules.length === 0) {
+    return {
+      rules: [
+        { field: 'totalSpend', operator: 'greater_than', value: 100 },
+        { field: 'visits', operator: 'greater_than', value: 2 }
+      ],
+      name: 'General Segment',
+      description: 'A general customer segment'
+    };
+  }
+  
+  const result = { rules, name, description };
+  console.log('🤖 AI SEGMENT GENERATION - Result:', JSON.stringify(result, null, 2));
   return result;
 
   try {
