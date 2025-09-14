@@ -79,14 +79,23 @@ export default function CampaignDetails() {
 
   // Delete campaign function
   const handleDelete = async () => {
-    if (!campaign) return
+    console.log('handleDelete called for campaign:', campaign?._id, campaign?.name)
     
+    if (!campaign) {
+      console.log('No campaign found, cannot delete')
+      return
+    }
+    
+    console.log('Showing confirmation dialog...')
     if (!confirm(`Are you sure you want to delete "${campaign.name}"? This action cannot be undone.`)) {
+      console.log('Delete cancelled by user')
       return
     }
 
     try {
+      console.log('Calling campaignApi.delete for:', campaign._id)
       await campaignApi.delete(campaign._id)
+      console.log('Campaign deleted successfully, redirecting to /campaigns')
       router.push('/campaigns')
     } catch (error) {
       console.error('Error deleting campaign:', error)
@@ -277,13 +286,21 @@ export default function CampaignDetails() {
                       </button>
                     )}
                     <button 
-                      onClick={() => router.push(`/campaigns/edit?id=${campaign._id}`)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        console.log('Edit button clicked for campaign:', campaign._id)
+                        router.push(`/campaigns/edit?id=${campaign._id}`)
+                      }}
                       className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                     >
                       Edit Campaign
                     </button>
                     <button 
-                      onClick={handleDelete}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        console.log('Delete button clicked for campaign:', campaign._id)
+                        handleDelete()
+                      }}
                       className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                     >
                       Delete Campaign
