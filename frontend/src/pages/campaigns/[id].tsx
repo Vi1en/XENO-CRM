@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
+import { useForm } from 'react-hook-form'
 import { campaignApi, segmentApi } from '@/lib/api'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -26,11 +27,19 @@ export default function EditCampaign() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [segments, setSegments] = useState<Segment[]>([])
-  const [formData, setFormData] = useState<CampaignFormData>({
-    name: '',
-    description: '',
-    segmentId: '',
-    message: ''
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+    watch
+  } = useForm<CampaignFormData>({
+    defaultValues: {
+      name: '',
+      description: '',
+      segmentId: '',
+      message: ''
+    }
   })
 
   // Simple authentication check
@@ -82,6 +91,7 @@ export default function EditCampaign() {
       }
 
       console.log('📋 Campaign data loaded:', campaign)
+      console.log('Loaded record:', campaign)
       
       const formattedData = {
         name: campaign.name || '',
@@ -91,7 +101,9 @@ export default function EditCampaign() {
       }
       
       console.log('📝 Formatted data for form:', formattedData)
-      setFormData(formattedData)
+      
+      // Reset form with campaign data
+      reset(formattedData)
       
     } catch (error: any) {
       console.error('❌ Error loading campaign:', error)
@@ -117,30 +129,25 @@ export default function EditCampaign() {
     }
   }, [isAuthenticated, id])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
+  const onSubmit = async (data: CampaignFormData) => {
+    if (!id) return
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
     setLoading(true)
     setError(null)
     setSuccess(false)
 
     try {
-      await campaignApi.update(id as string, formData)
+      console.log('💾 Updating campaign with data:', data)
+      await campaignApi.update(id as string, data)
       setSuccess(true)
+      console.log('✅ Campaign updated successfully')
       
       // Redirect to campaigns list after 2 seconds
       setTimeout(() => {
         router.push('/campaigns')
       }, 2000)
     } catch (error: any) {
-      console.error('Error updating campaign:', error)
+      console.error('❌ Error updating campaign:', error)
       setError(error.response?.data?.message || 'Failed to update campaign')
     } finally {
       setLoading(false)
@@ -324,7 +331,7 @@ export default function EditCampaign() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">Campaign Details</h2>
                   
@@ -336,13 +343,13 @@ export default function EditCampaign() {
                       <input
                         type="text"
                         id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
+                        {...register('name', { required: 'Campaign name is required' })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Enter campaign name"
                       />
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                      )}
                     </div>
 
                     <div>
@@ -351,10 +358,7 @@ export default function EditCampaign() {
                       </label>
                       <select
                         id="segmentId"
-                        name="segmentId"
-                        value={formData.segmentId}
-                        onChange={handleChange}
-                        required
+                        {...register('segmentId', { required: 'Target segment is required' })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">Select a segment</option>
@@ -364,6 +368,9 @@ export default function EditCampaign() {
                           </option>
                         ))}
                       </select>
+                      {errors.segmentId && (
+                        <p className="mt-1 text-sm text-red-600">{errors.segmentId.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -373,9 +380,7 @@ export default function EditCampaign() {
                     </label>
                     <textarea
                       id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
+                      {...register('description')}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Describe your campaign"
@@ -388,14 +393,14 @@ export default function EditCampaign() {
                     </label>
                     <textarea
                       id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
+                      {...register('message', { required: 'Campaign message is required' })}
                       rows={6}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Write your campaign message here..."
                     />
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+                    )}
                   </div>
                 </div>
 
@@ -408,10 +413,10 @@ export default function EditCampaign() {
                   </Link>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting || loading}
                     className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                   >
-                    {loading ? 'Updating...' : 'Update Campaign'}
+                    {isSubmitting || loading ? 'Updating...' : 'Update Campaign'}
                   </button>
                 </div>
               </form>

@@ -101,6 +101,7 @@ export default function EditCustomer() {
       }
 
       console.log('📋 Customer data loaded:', customerData)
+      console.log('Loaded record:', customerData)
       setCustomer(customerData)
 
       // Format data for form
