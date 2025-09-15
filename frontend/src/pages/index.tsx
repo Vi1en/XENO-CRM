@@ -133,20 +133,35 @@ export default function Home() {
         
         // Calculate segments from customer data directly
         const customersArray = Array.isArray(customersRes.data) ? customersRes.data : []
+        console.log('🔍 Raw customers data:', customersArray)
+        console.log('🔍 First customer object:', customersArray[0])
+        console.log('🔍 First customer tags:', customersArray[0]?.tags)
+        console.log('🔍 First customer tags type:', typeof customersArray[0]?.tags)
+        console.log('🔍 First customer tags is array:', Array.isArray(customersArray[0]?.tags))
+        
         const segments: { [key: string]: number } = {}
         let regularCount = 0
         
-        customersArray.forEach((customer: any) => {
+        customersArray.forEach((customer: any, index: number) => {
+          console.log(`🔍 Customer ${index}:`, {
+            id: customer._id,
+            name: `${customer.firstName} ${customer.lastName}`,
+            tags: customer.tags,
+            tagsType: typeof customer.tags,
+            tagsIsArray: Array.isArray(customer.tags)
+          })
+          
           if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
-            // Customer has tags, count each tag
-            customer.tags.forEach((tag: string) => {
-              if (tag && typeof tag === 'string') {
-                segments[tag] = (segments[tag] || 0) + 1
-              }
-            })
+            // Customer has tags, count the first tag only for now
+            const firstTag = customer.tags[0]
+            if (firstTag && typeof firstTag === 'string') {
+              segments[firstTag] = (segments[firstTag] || 0) + 1
+              console.log(`✅ Added tag "${firstTag}" for customer ${index}`)
+            }
           } else {
             // Customer has no tags, count as regular
             regularCount++
+            console.log(`📝 Customer ${index} has no tags, counting as regular`)
           }
         })
         
@@ -155,7 +170,9 @@ export default function Home() {
           segments['regular'] = regularCount
         }
         
-        console.log('📊 Calculated segments from customer data:', segments)
+        console.log('📊 Final calculated segments:', segments)
+        console.log('📊 Regular count:', regularCount)
+        console.log('📊 Total customers processed:', customersArray.length)
         setCustomerSegments(segments)
         setUsingMockData(false)
       
@@ -728,6 +745,8 @@ export default function Home() {
                           .filter(segment => segment.count > 0) // Only show segments with customers
                         
                         console.log('📊 Final segments for chart:', segments)
+                        console.log('📊 Segments object before rendering:', segmentCounts)
+                        console.log('📊 Total customers for chart:', totalCustomers)
                         
                         // Render pie chart segments
                         let currentOffset = 0
