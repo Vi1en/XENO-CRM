@@ -31,8 +31,8 @@ export default function ApiTest() {
         const response = await api.fn()
         testResults.tests[api.name] = {
           status: 'success',
-          statusCode: response.status,
-          dataLength: response.data.data?.length || 0,
+          statusCode: 200, // Mock response
+          dataLength: response.data?.length || 0,
           fullResponse: response.data
         }
         console.log(`✅ ${api.name} API success:`, response.data)
@@ -40,12 +40,12 @@ export default function ApiTest() {
         testResults.tests[api.name] = {
           status: 'error',
           error: error.message,
-          statusCode: error.response?.status,
-          response: error.response?.data,
+          statusCode: 500, // Mock error
+          response: error,
           config: {
-            baseURL: error.config?.baseURL,
-            url: error.config?.url,
-            method: error.config?.method
+            baseURL: 'demo-mode',
+            url: 'mock-api',
+            method: 'GET'
           }
         }
         console.error(`❌ ${api.name} API error:`, error)

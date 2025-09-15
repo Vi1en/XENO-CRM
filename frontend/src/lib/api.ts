@@ -1,200 +1,178 @@
-import axios from 'axios';
+// Demo mode API - no actual API calls
+// This file provides mock API functions for demo purposes
 
-// API base configuration
-const getApiBaseUrl = () => {
-  // Check if we're in browser environment
-  if (typeof window !== 'undefined') {
-    // In browser, use the environment variable or fallback
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    console.log('🔗 Environment NEXT_PUBLIC_API_URL:', envUrl);
-    
-    if (envUrl) {
-      // Ensure the URL has the correct format
-      const cleanUrl = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
-      console.log('✅ Using environment URL:', cleanUrl);
-      return cleanUrl;
-    }
-    
-    // Fallback for production if env var is not set
-    if (window.location.hostname !== 'localhost') {
-      const prodUrl = 'https://backend-production-05a7e.up.railway.app/api/v1';
-      console.log('🌐 Using production fallback URL:', prodUrl);
-      return prodUrl;
-    }
-    
-    const localUrl = 'http://localhost:3001/api/v1';
-    console.log('🏠 Using local URL:', localUrl);
-    return localUrl;
-  }
-  
-  // In server-side rendering, use environment variable or fallback
-  const ssrUrl = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1';
-  console.log('🖥️ Using SSR URL:', ssrUrl);
-  return ssrUrl;
-}
+// Mock data for demo mode
+const mockCustomers = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+1-555-0123', status: 'active', createdAt: '2024-01-01' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '+1-555-0124', status: 'active', createdAt: '2024-01-02' },
+  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', phone: '+1-555-0125', status: 'inactive', createdAt: '2024-01-03' },
+  { id: 4, name: 'Alice Brown', email: 'alice@example.com', phone: '+1-555-0126', status: 'active', createdAt: '2024-01-04' },
+  { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', phone: '+1-555-0127', status: 'active', createdAt: '2024-01-05' },
+];
 
-const API_BASE_URL = getApiBaseUrl();
+const mockCampaigns = [
+  { id: 1, name: 'Welcome Campaign', status: 'active', sent: 150, delivered: 145, opened: 120, clicked: 45 },
+  { id: 2, name: 'Product Launch', status: 'active', sent: 200, delivered: 195, opened: 160, clicked: 60 },
+  { id: 3, name: 'Holiday Sale', status: 'completed', sent: 300, delivered: 290, opened: 200, clicked: 80 },
+];
 
-// Debug logging (remove in production)
-if (typeof window !== 'undefined') {
-  console.log('🔗 API Base URL:', API_BASE_URL);
-  console.log('🌍 Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-  console.log('📍 Current hostname:', window.location.hostname);
-  console.log('📱 User Agent:', navigator.userAgent);
-  console.log('📐 Screen size:', window.innerWidth + 'x' + window.innerHeight);
-  
-  // API test disabled due to CORS issues - using demo mode
-  console.log('🚫 API Test disabled - using demo mode');
-}
+const mockOrders = [
+  { id: 1, customerId: 1, amount: 99.99, status: 'completed', createdAt: '2024-01-10' },
+  { id: 2, customerId: 2, amount: 149.99, status: 'pending', createdAt: '2024-01-11' },
+  { id: 3, customerId: 3, amount: 79.99, status: 'completed', createdAt: '2024-01-12' },
+];
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 15000, // 15 second timeout
-  withCredentials: false, // Disable credentials to avoid CORS issues
-});
+const mockSegments = [
+  { id: 1, name: 'High Value Customers', criteria: 'orders > 100', customerCount: 25 },
+  { id: 2, name: 'New Customers', criteria: 'created_at > 30 days ago', customerCount: 15 },
+  { id: 3, name: 'Inactive Customers', criteria: 'last_order < 90 days ago', customerCount: 8 },
+];
 
-// Add request interceptor for debugging
-api.interceptors.request.use(
-  (config) => {
-    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
-    return config;
-  },
-  (error) => {
-    console.error('❌ API Request Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for debugging
-api.interceptors.response.use(
-  (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    console.error('❌ API Response Error:', error.response?.status, error.config?.url, error.message);
-    return Promise.reject(error);
-  }
-);
-
-// Retry function for failed requests - disabled for demo mode
-const retryRequest = async (fn: () => Promise<any>, retries = 3): Promise<any> => {
-  // Immediately throw error to trigger demo mode
-  console.log('🚫 API call blocked - using demo mode');
-  throw new Error('API calls disabled - using demo mode');
-}
-
-// Customer API functions
+// Mock API functions
 export const customerApi = {
-  // Get all customers
-  getAll: () => retryRequest(() => api.get('/customers')),
-  
-  // Get customer by ID
-  getById: (id: string) => retryRequest(() => api.get(`/customers/${id}`)),
-  
-  // Create customer
-  create: (data: any) => retryRequest(() => api.post('/ingest/customers', data)),
-  
-  // Update customer
-  update: (id: string, data: any) => retryRequest(() => api.put(`/customers/${id}`, data)),
-  
-  // Delete customer
-  delete: (id: string) => retryRequest(() => api.delete(`/customers/${id}`)),
-  
-  // Get customer analytics
-  getAnalytics: () => retryRequest(() => api.get('/customers/analytics')),
+  getAll: async () => {
+    console.log('📊 Demo Mode: Returning mock customers');
+    return { data: mockCustomers };
+  },
+  getById: async (id: number) => {
+    const customer = mockCustomers.find(c => c.id === id);
+    return { data: customer };
+  },
+  create: async (data: any) => {
+    console.log('📊 Demo Mode: Creating customer', data);
+    return { data: { id: Date.now(), ...data } };
+  },
+  update: async (id: number, data: any) => {
+    console.log('📊 Demo Mode: Updating customer', id, data);
+    return { data: { id, ...data } };
+  },
+  delete: async (id: number) => {
+    console.log('📊 Demo Mode: Deleting customer', id);
+    return { data: { success: true } };
+  },
+  getAnalytics: async () => {
+    return {
+      data: {
+        total: mockCustomers.length,
+        active: mockCustomers.filter(c => c.status === 'active').length,
+        inactive: mockCustomers.filter(c => c.status === 'inactive').length,
+        growth: 12.5,
+        retention: 85.2
+      }
+    };
+  }
 };
 
-// Segment API functions
-export const segmentApi = {
-  // Get all segments
-  getAll: () => retryRequest(() => api.get('/segments')),
-  
-  // Get segment by ID
-  getById: (id: string) => retryRequest(() => api.get(`/segments/${id}`)),
-  
-  // Create segment
-  create: (data: any) => retryRequest(() => api.post('/segments', data)),
-  
-  // Preview segment
-  preview: (data: any) => retryRequest(() => api.post('/segments/preview', data)),
-  
-  // Update segment
-  update: (id: string, data: any) => retryRequest(() => api.put(`/segments/${id}`, data)),
-  
-  // Delete segment
-  delete: (id: string) => retryRequest(() => api.delete(`/segments/${id}`)),
-};
-
-// Campaign API functions
 export const campaignApi = {
-  // Get all campaigns
-  getAll: () => retryRequest(() => api.get('/campaigns')),
-  
-  // Get campaign by ID
-  getById: (id: string) => retryRequest(() => api.get(`/campaigns/${id}`)),
-  
-  // Create campaign
-  create: (data: any) => retryRequest(() => api.post('/campaigns', data)),
-  
-  // Update campaign
-  update: (id: string, data: any) => retryRequest(() => api.put(`/campaigns/${id}`, data)),
-  
-  // Delete campaign
-  delete: (id: string) => retryRequest(() => api.delete(`/campaigns/${id}`)),
-  
-  // Send campaign
-  send: (id: string) => retryRequest(() => api.post(`/campaigns/${id}/send`)),
-  
-  // Get campaign summary
-  getSummary: (id: string) => retryRequest(() => api.get(`/campaigns/${id}/summary`)),
-  
-  // Get delivery statistics
-  getDeliveryStats: () => retryRequest(() => api.get('/campaigns/delivery-stats')),
+  getAll: async () => {
+    console.log('📊 Demo Mode: Returning mock campaigns');
+    return { data: mockCampaigns };
+  },
+  getById: async (id: number) => {
+    const campaign = mockCampaigns.find(c => c.id === id);
+    return { data: campaign };
+  },
+  create: async (data: any) => {
+    console.log('📊 Demo Mode: Creating campaign', data);
+    return { data: { id: Date.now(), ...data } };
+  },
+  update: async (id: number, data: any) => {
+    console.log('📊 Demo Mode: Updating campaign', id, data);
+    return { data: { id, ...data } };
+  },
+  delete: async (id: number) => {
+    console.log('📊 Demo Mode: Deleting campaign', id);
+    return { data: { success: true } };
+  },
+  getDeliveryStats: async () => {
+    return {
+      data: {
+        totalSent: 650,
+        delivered: 630,
+        opened: 480,
+        clicked: 185,
+        deliveryRate: 96.9,
+        openRate: 76.2,
+        clickRate: 28.5
+      }
+    };
+  }
 };
 
-// Order API functions
 export const orderApi = {
-  // Get all orders
-  getAll: (params?: { page?: number; limit?: number; search?: string }) => 
-    retryRequest(() => api.get('/orders', { params })),
-  
-  // Get order by ID
-  getById: (id: string) => retryRequest(() => api.get(`/orders/${id}`)),
-  
-  // Create order
-  create: (data: any) => retryRequest(() => api.post('/orders', data)),
-  
-  // Update order
-  update: (id: string, data: any) => retryRequest(() => api.put(`/orders/${id}`, data)),
-  
-  // Delete order
-  delete: (id: string) => retryRequest(() => api.delete(`/orders/${id}`)),
-  
-  // Get revenue trends
-  getTrends: () => retryRequest(() => api.get('/orders/trends')),
+  getAll: async () => {
+    console.log('📊 Demo Mode: Returning mock orders');
+    return { data: mockOrders };
+  },
+  getById: async (id: number) => {
+    const order = mockOrders.find(o => o.id === id);
+    return { data: order };
+  },
+  create: async (data: any) => {
+    console.log('📊 Demo Mode: Creating order', data);
+    return { data: { id: Date.now(), ...data } };
+  },
+  update: async (id: number, data: any) => {
+    console.log('📊 Demo Mode: Updating order', id, data);
+    return { data: { id, ...data } };
+  },
+  delete: async (id: number) => {
+    console.log('📊 Demo Mode: Deleting order', id);
+    return { data: { success: true } };
+  },
+  getTrends: async () => {
+    return {
+      data: {
+        revenue: 329.97,
+        growth: 15.3,
+        averageOrderValue: 109.99,
+        totalOrders: 3
+      }
+    };
+  }
 };
 
-// AI API functions
+export const segmentApi = {
+  getAll: async () => {
+    console.log('📊 Demo Mode: Returning mock segments');
+    return { data: mockSegments };
+  },
+  getById: async (id: number) => {
+    const segment = mockSegments.find(s => s.id === id);
+    return { data: segment };
+  },
+  create: async (data: any) => {
+    console.log('📊 Demo Mode: Creating segment', data);
+    return { data: { id: Date.now(), ...data } };
+  },
+  update: async (id: number, data: any) => {
+    console.log('📊 Demo Mode: Updating segment', id, data);
+    return { data: { id, ...data } };
+  },
+  delete: async (id: number) => {
+    console.log('📊 Demo Mode: Deleting segment', id);
+    return { data: { success: true } };
+  }
+};
+
 export const aiApi = {
-  // Generate segment rules
-  generateSegmentRules: (prompt: string) => retryRequest(() => api.post('/ai/nl-to-segment', { prompt })),
-  
-  // Generate message variants
-  generateMessageVariants: (objective: string, tone: string, offer?: string) => 
-    retryRequest(() => api.post('/ai/message-variants', { objective, tone, offer })),
-  
-  // Generate campaign summary
-  generateCampaignSummary: (campaignId: string) => retryRequest(() => api.get(`/ai/campaigns/${campaignId}/summary`)),
-  
-  // Get analytics insights
-  getAnalytics: () => retryRequest(() => api.get('/ai/analytics')),
-  
-  // Get AI insights (for AI dashboard)
-  getInsights: () => retryRequest(() => api.get('/ai/insights')),
+  getInsights: async () => {
+    return {
+      data: {
+        insights: [
+          'Customer engagement increased by 15% this month',
+          'Email campaigns show 25% higher open rates on weekends',
+          'Product recommendations could improve conversion by 30%'
+        ],
+        recommendations: [
+          'Focus on weekend email campaigns',
+          'Implement personalized product recommendations',
+          'Target high-value customer segments'
+        ]
+      }
+    };
+  }
 };
 
-export default api;
+// Export mock data for direct use
+export { mockCustomers, mockCampaigns, mockOrders, mockSegments };
