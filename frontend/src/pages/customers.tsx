@@ -165,7 +165,7 @@ export default function Customers() {
                   </svg>
                 </button>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">Customers</h1>
+                  <h1 className="text-lg font-bold text-gray-900" style={{ fontSize: '1.125rem', margin: '0' }}>Customers</h1>
                   <p className="text-xs text-gray-500">{filteredCustomers.length} customers</p>
                   <p className="text-xs text-orange-600 font-medium">📊 Demo Mode</p>
                 </div>
@@ -410,7 +410,7 @@ export default function Customers() {
             <div className="mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Customer Management</h1>
+                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Customer Management</h1>
                   <p className="mt-2 text-gray-600">Manage your customer database and relationships</p>
                 </div>
                 <div className="flex space-x-3">

@@ -222,6 +222,8 @@ export default function Home() {
         <meta httpEquiv="Expires" content="0" />
         <meta name="version" content="v4.0-no-api-calls" />
         <meta name="build" content="2024-01-15-demo-mode" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="alternate icon" href="/favicon.ico" />
       </Head>
       
       {/* Sidebar */}
@@ -232,7 +234,7 @@ export default function Home() {
               <span className="text-white font-bold text-lg">X</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Xeno CRM</h1>
+              <h1 className="text-xl font-bold text-gray-900" style={{ fontSize: '1.25rem', margin: '0' }}>Xeno CRM</h1>
               <p className="text-sm text-gray-500">Dashboard v2.1</p>
             </div>
           </div>
@@ -325,7 +327,7 @@ export default function Home() {
         <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
               <p className="text-gray-600">Welcome back, {(session as any)?.user?.name?.split(' ')[0] || 'Demo User'}!</p>
             </div>
             <div className="flex items-center space-x-4">
