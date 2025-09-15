@@ -7,10 +7,15 @@ import { campaignApi } from '@/lib/api'
 interface Campaign {
   _id: string
   name: string
+  description?: string
   type: string
   status: string
   targetSegment: string
+  audienceSize: number
   sentCount: number
+  deliveredCount: number
+  failedCount: number
+  deliveryRate: number
   openRate: number
   clickRate: number
   createdAt: string
@@ -80,18 +85,30 @@ export default function CampaignHistory() {
       const rawCampaigns = response.data.data || response.data // Handle both {data: [...]} and [...] formats
       
       // Map API data to our expected format and filter for completed campaigns
-      const apiCampaigns = rawCampaigns.map((campaign: any) => ({
-        _id: campaign._id,
-        name: campaign.name,
-        type: campaign.type || 'Email',
-        status: campaign.status,
-        targetSegment: campaign.targetSegment || 'All Customers',
-        sentCount: campaign.stats?.sent || 0,
-        openRate: campaign.stats?.openRate || 0,
-        clickRate: campaign.stats?.clickRate || 0,
-        createdAt: campaign.createdAt,
-        completedAt: campaign.completedAt
-      }))
+      const apiCampaigns = rawCampaigns.map((campaign: any) => {
+        const sent = campaign.stats?.sent || 0
+        const delivered = campaign.stats?.delivered || sent
+        const failed = campaign.stats?.failed || 0
+        const deliveryRate = sent > 0 ? (delivered / sent) * 100 : 0
+        
+        return {
+          _id: campaign._id,
+          name: campaign.name,
+          description: campaign.description || `${campaign.type} campaign for ${campaign.targetSegment || 'customers'}`,
+          type: campaign.type || 'Email',
+          status: campaign.status,
+          targetSegment: campaign.targetSegment || 'All Customers',
+          audienceSize: campaign.audienceSize || campaign.stats?.audienceSize || 0,
+          sentCount: sent,
+          deliveredCount: delivered,
+          failedCount: failed,
+          deliveryRate: Math.round(deliveryRate),
+          openRate: campaign.stats?.openRate || 0,
+          clickRate: campaign.stats?.clickRate || 0,
+          createdAt: campaign.createdAt,
+          completedAt: campaign.completedAt
+        }
+      })
       
       setCampaigns(apiCampaigns)
       setFilteredCampaigns(apiCampaigns)
@@ -103,11 +120,11 @@ export default function CampaignHistory() {
       
       // Fallback to demo data if API fails
       const demoCampaigns = [
-        { _id: '1', name: 'Welcome Series', type: 'Email', status: 'completed', targetSegment: 'New Customers', sentCount: 150, openRate: 45.2, clickRate: 12.8, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-        { _id: '2', name: 'VIP Promotion', type: 'Email', status: 'completed', targetSegment: 'VIP Customers', sentCount: 25, openRate: 68.0, clickRate: 24.0, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-        { _id: '3', name: 'Holiday Sale', type: 'Email', status: 'completed', targetSegment: 'All Customers', sentCount: 500, openRate: 52.3, clickRate: 18.7, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-        { _id: '4', name: 'Product Launch', type: 'SMS', status: 'completed', targetSegment: 'Frequent Buyers', sentCount: 80, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-        { _id: '5', name: 'Re-engagement', type: 'Email', status: 'completed', targetSegment: 'At-Risk Customers', sentCount: 45, openRate: 38.9, clickRate: 15.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() }
+        { _id: '1', name: 'Flash Sale Campaign', description: 'A professional campaign designed to navratra sale', type: 'Email', status: 'running', targetSegment: 'All Customers', audienceSize: 9, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
+        { _id: '2', name: 'Welcome New Customers', description: 'Welcome campaign for new customers', type: 'Email', status: 'draft', targetSegment: 'New Customers', audienceSize: 0, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
+        { _id: '3', name: 'VIP Exclusive Offer', description: 'Special offer for VIP customers', type: 'Email', status: 'draft', targetSegment: 'VIP Customers', audienceSize: 0, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
+        { _id: '4', name: 'Holiday Sale', description: 'Holiday promotion campaign', type: 'Email', status: 'completed', targetSegment: 'All Customers', audienceSize: 500, sentCount: 500, deliveredCount: 485, failedCount: 15, deliveryRate: 97, openRate: 52.3, clickRate: 18.7, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
+        { _id: '5', name: 'Product Launch', description: 'New product announcement', type: 'SMS', status: 'completed', targetSegment: 'Frequent Buyers', audienceSize: 80, sentCount: 80, deliveredCount: 78, failedCount: 2, deliveryRate: 98, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() }
       ]
       
       setCampaigns(demoCampaigns)
@@ -309,135 +326,125 @@ export default function CampaignHistory() {
               </div>
             </div>
 
-            {/* Campaigns List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            {/* Search and Filters */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Historical Campaigns
-                  </h2>
-                  {searchTerm && (
-                    <div className="text-sm text-gray-500">
-                      {filteredCampaigns.length} of {campaigns.length} campaigns
-                    </div>
-                  )}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search campaigns..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
                 </div>
-                <div className="mt-4">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search campaign history..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                  <option>All Statuses</option>
+                  <option>Running</option>
+                  <option>Draft</option>
+                  <option>Completed</option>
+                </select>
+                <button className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium">
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Campaigns Grid */}
+            <div className="space-y-4">
+              {loading && (
+                <div className="flex justify-center py-12">
+                  <div className="text-gray-500">Loading campaign history...</div>
                 </div>
-              </div>
+              )}
 
-              <div className="overflow-hidden">
-                {loading && (
-                  <div className="flex justify-center py-12">
-                    <div className="text-gray-500">Loading campaign history...</div>
-                  </div>
-                )}
+              {!loading && filteredCampaigns.length === 0 && campaigns.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-6xl mb-4">📊</div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No campaign history found</h3>
+                  <p className="text-gray-500 mb-6">
+                    Campaign history will appear here as campaigns are completed.
+                  </p>
+                  <Link
+                    href="/campaigns"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  >
+                    View Active Campaigns
+                  </Link>
+                </div>
+              )}
 
-                {!loading && filteredCampaigns.length === 0 && campaigns.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📊</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No campaign history found</h3>
-                    <p className="text-gray-500 mb-6">
-                      Campaign history will appear here as campaigns are completed.
-                    </p>
-                    <Link
-                      href="/campaigns"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                    >
-                      View Active Campaigns
-                    </Link>
-                  </div>
-                )}
+              {!loading && filteredCampaigns.length === 0 && campaigns.length > 0 && (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-6xl mb-4">🔍</div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
+                  <p className="text-gray-500 mb-6">
+                    No campaigns match your search criteria. Try adjusting your search terms.
+                  </p>
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )}
 
-                {!loading && filteredCampaigns.length === 0 && campaigns.length > 0 && (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
-                    <p className="text-gray-500 mb-6">
-                      No campaigns match your search criteria. Try adjusting your search terms.
-                    </p>
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Clear search
-                    </button>
-                  </div>
-                )}
-
-                {!loading && filteredCampaigns.length > 0 && (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open Rate</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Click Rate</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredCampaigns.map((campaign: Campaign) => (
-                          <tr key={campaign._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="text-2xl mr-3">{getTypeIcon(campaign.type)}</div>
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">{campaign.name}</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.type}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
-                                {campaign.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.targetSegment}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.sentCount.toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.completedAt ? new Date(campaign.completedAt).toLocaleDateString() : new Date(campaign.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              {!loading && filteredCampaigns.length > 0 && (
+                <div className="grid gap-4">
+                  {filteredCampaigns.map((campaign: Campaign) => (
+                    <div key={campaign._id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
+                              {campaign.status.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-4">{campaign.description}</p>
+                          
+                          {/* Metrics Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-600">{campaign.audienceSize}</div>
+                              <div className="text-xs text-gray-500">Audience Size</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-green-600">{campaign.sentCount}</div>
+                              <div className="text-xs text-gray-500">Sent</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-blue-600">{campaign.deliveredCount}</div>
+                              <div className="text-xs text-gray-500">Delivered</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-600">{campaign.failedCount}</div>
+                              <div className="text-xs text-gray-500">Failed</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-purple-600">{campaign.deliveryRate}%</div>
+                              <div className="text-xs text-gray-500">Delivery Rate</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-sm text-gray-500">
+                            <span>Created: {new Date(campaign.createdAt).toLocaleString()}</span>
+                            <Link href={`/campaigns/${campaign._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                              View Details
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
