@@ -26,12 +26,17 @@ export default function Home() {
 
   // Set client flag to prevent hydration issues
   useEffect(() => {
+    console.log('🔄 Setting client flag to true')
     setIsClient(true)
   }, [])
 
   useEffect(() => {
-    if (!isClient) return // Only run on client side
+    if (!isClient) {
+      console.log('⏳ Waiting for client flag...')
+      return // Only run on client side
+    }
     
+    console.log('🚀 Client ready, starting data load...')
     let isMounted = true
     
     // Clear any cached NextAuth data
@@ -46,31 +51,39 @@ export default function Home() {
       console.warn('Could not clear storage:', err)
     }
     
-    // Load data with a small delay to ensure component is mounted
+    // Load data immediately
     const loadDataAsync = async () => {
       if (isMounted) {
         try {
+          console.log('📊 Starting data load...')
           await loadData()
+          console.log('📈 Starting analytics load...')
           await loadAnalyticsData()
+          console.log('✅ All data loaded successfully')
         } catch (err) {
-          console.error('Error loading data:', err)
+          console.error('❌ Error loading data:', err)
         }
       }
     }
     
-    // Small delay to prevent hydration issues
-    const timeoutId = setTimeout(loadDataAsync, 100)
+    // Load data immediately without delay
+    loadDataAsync()
     
     return () => {
       isMounted = false
-      clearTimeout(timeoutId)
     }
   }, [isClient])
 
   const loadData = async () => {
-    // Prevent multiple simultaneous calls
-    if (loading) return
+    console.log('🔄 loadData called, loading state:', loading)
     
+    // Prevent multiple simultaneous calls
+    if (loading) {
+      console.log('⏸️ Already loading, skipping...')
+      return
+    }
+    
+    console.log('🚀 Starting data load...')
     setLoading(true)
     setError(null)
     console.log('📱 Loading demo data...')
@@ -94,6 +107,7 @@ export default function Home() {
       setUsingMockData(false)
       
       console.log('✅ Real data loaded successfully')
+      setLoading(false)
       return // Exit early if API call succeeds
     } catch (err: any) {
       console.error('❌ Error loading real data:', err)
