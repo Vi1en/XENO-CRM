@@ -19,6 +19,7 @@ export default function Home() {
   const [trendsData, setTrendsData] = useState<any>(null)
   const [deliveryData, setDeliveryData] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [usingMockData, setUsingMockData] = useState(false)
 
   useEffect(() => {
     if (session) {
@@ -37,25 +38,38 @@ export default function Home() {
       console.log('📱 Loading data...')
       console.log('🔗 API Base URL:', process.env.NEXT_PUBLIC_API_URL)
       
-      // Load all data
+      // Try to load data with a shorter timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const [customersData, campaignsData, segmentsData, ordersData] = await Promise.all([
-        customerApi.getAll(),
-        campaignApi.getAll(),
-        segmentApi.getAll(),
-        orderApi.getAll()
+        customerApi.getAll().catch(() => ({ data: [] })),
+        campaignApi.getAll().catch(() => ({ data: [] })),
+        segmentApi.getAll().catch(() => ({ data: [] })),
+        orderApi.getAll().catch(() => ({ data: [] }))
       ])
 
-      setCustomers(customersData.data || [])
-      setCampaigns(campaignsData.data || [])
-      setSegments(segmentsData.data || [])
-      setOrders(ordersData.data || [])
+      clearTimeout(timeoutId);
       
-      console.log('✅ Data loaded successfully:', {
-        customers: customersData.data?.length || 0,
-        campaigns: campaignsData.data?.length || 0,
-        segments: segmentsData.data?.length || 0,
-        orders: ordersData.data?.length || 0
-      })
+      // Check if we got any real data
+      const hasRealData = customersData.data && customersData.data.length > 0;
+      
+      if (hasRealData) {
+        setCustomers(customersData.data || [])
+        setCampaigns(campaignsData.data || [])
+        setSegments(segmentsData.data || [])
+        setOrders(ordersData.data || [])
+        setUsingMockData(false)
+        
+        console.log('✅ Real data loaded successfully:', {
+          customers: customersData.data?.length || 0,
+          campaigns: campaignsData.data?.length || 0,
+          segments: segmentsData.data?.length || 0,
+          orders: ordersData.data?.length || 0
+        })
+      } else {
+        throw new Error('No real data received, using mock data');
+      }
     } catch (err: any) {
       console.error('❌ Error loading data:', err)
       console.log('🔄 Falling back to mock data...')
@@ -133,6 +147,7 @@ export default function Home() {
       setAnalyticsData(mockAnalytics)
       setTrendsData(mockTrends)
       setDeliveryData(mockDelivery)
+      setUsingMockData(true)
       
       console.log('✅ Mock data loaded:', {
         customers: mockCustomers.length,
@@ -385,6 +400,9 @@ export default function Home() {
               <div className="text-right">
                 <p className="text-sm text-gray-500">Last updated</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
+                {usingMockData && (
+                  <p className="text-xs text-orange-600 font-medium">📊 Demo Data</p>
+                )}
               </div>
               <button
                 onClick={() => {
