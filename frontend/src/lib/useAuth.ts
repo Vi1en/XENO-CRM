@@ -43,7 +43,7 @@ export const useAuth = () => {
         if (storedToken && storedUser) {
           // Verify token with backend
           console.log('🔍 useAuth: Verifying token with backend...');
-          const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+          const response = await fetch(`${API_BASE_URL}/demo/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export const useAuth = () => {
       const verifyAndStoreToken = async () => {
         try {
           console.log('🔄 useAuth: Verifying callback token...');
-          const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+          const response = await fetch(`${API_BASE_URL}/demo/verify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -147,10 +147,43 @@ export const useAuth = () => {
     }
   }, [router.isReady, router.query.token]);
 
-  const login = () => {
-    console.log('🔐 useAuth: Starting login process...');
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1';
-    window.location.href = `${backendUrl}/auth/login`;
+  const login = async () => {
+    console.log('🔐 useAuth: Starting demo login process...');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/demo/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: 'demo@example.com' }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.token) {
+        console.log('✅ useAuth: Demo login successful');
+        
+        // Store in localStorage
+        localStorage.setItem('auth-token', result.token);
+        localStorage.setItem('auth-user', JSON.stringify(result.user));
+        
+        // Update state
+        setAuthState({
+          user: result.user,
+          token: result.token,
+          isLoading: false,
+          isAuthenticated: true,
+        });
+        
+        // Redirect to dashboard
+        router.push('/');
+      } else {
+        console.log('❌ useAuth: Demo login failed');
+      }
+    } catch (error) {
+      console.error('❌ useAuth: Error during demo login:', error);
+    }
   };
 
   const logout = () => {
@@ -168,9 +201,8 @@ export const useAuth = () => {
       isAuthenticated: false,
     });
     
-    // Redirect to backend logout
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1';
-    window.location.href = `${backendUrl}/auth/logout`;
+    // Redirect to login page
+    router.push('/login');
   };
 
   const getAuthHeaders = () => {

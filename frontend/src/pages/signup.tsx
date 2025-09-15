@@ -62,8 +62,8 @@ export default function SignUp() {
     return 'Strong'
   }
 
-  const handleGoogleSignUp = async () => {
-    console.log('🔐 SignUp: Starting Auth0 login...')
+  const handleDemoSignUp = async () => {
+    console.log('🔐 SignUp: Starting demo login...')
     login()
   }
 
@@ -208,7 +208,7 @@ export default function SignUp() {
             {/* Google Sign Up Button */}
             <div className="mb-6">
               <SmoothButton
-                onClick={handleGoogleSignUp}
+                onClick={handleDemoSignUp}
                 disabled={loading}
                 loading={loading}
                 variant="secondary"

@@ -8,8 +8,8 @@ const router = Router();
 // Initialize Auth0 client
 const auth0 = new AuthenticationClient({
   domain: process.env.AUTH0_DOMAIN || '',
-  clientId: process.env.AUTH0_CLIENT_ID || '',
-  clientSecret: process.env.AUTH0_CLIENT_SECRET || '',
+  clientId: process.env.CLIENT_ID || '',
+  clientSecret: process.env.CLIENT_SECRET || '',
 });
 
 // JWT secret for our own tokens
@@ -40,7 +40,7 @@ router.post('/login', async (req: Request, res: Response) => {
     // Generate Auth0 authorization URL manually
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: process.env.AUTH0_CLIENT_ID || '',
+      client_id: process.env.CLIENT_ID || '',
       redirect_uri: `${backendUrl}/api/v1/auth/callback`,
       scope: 'openid profile email',
       state: frontendUrl,
@@ -106,8 +106,8 @@ router.get('/callback', async (req: Request, res: Response) => {
     console.log('🔄 Auth0 Callback: Exchanging code for tokens...');
     const tokenResponse = await axios.post(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
       grant_type: 'authorization_code',
-      client_id: process.env.AUTH0_CLIENT_ID,
-      client_secret: process.env.AUTH0_CLIENT_SECRET,
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
       code: code,
       redirect_uri: `${process.env.BACKEND_URL || 'https://backend-production-05a7e.up.railway.app'}/api/v1/auth/callback`,
     }, {
@@ -187,7 +187,7 @@ router.get('/logout', async (req: Request, res: Response) => {
     console.log('👋 Auth0 Logout: Auth0 Domain:', auth0Domain);
     
     // Auth0 logout URL
-    const logoutUrl = `https://${auth0Domain}/v2/logout?returnTo=${encodeURIComponent(frontendUrl)}&client_id=${process.env.AUTH0_CLIENT_ID}`;
+    const logoutUrl = `https://${auth0Domain}/v2/logout?returnTo=${encodeURIComponent(frontendUrl)}&client_id=${process.env.CLIENT_ID}`;
     
     console.log('👋 Auth0 Logout: Generated logout URL:', logoutUrl);
     console.log('👋 Auth0 Logout: Redirecting to Auth0 logout...');

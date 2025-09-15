@@ -22,11 +22,11 @@ export default function Login() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  const handleAuth0Login = () => {
-    console.log('🔐 Login: Starting Auth0 login...')
-    setError(null)
-    login()
-  }
+        const handleDemoLogin = () => {
+          console.log('🔐 Login: Starting demo login...')
+          setError(null)
+          login()
+        }
 
   if (isLoading) {
     return (
@@ -85,26 +85,26 @@ export default function Login() {
               </div>
             )}
 
-            <div className="space-y-4">
-              <SmoothButton
-                onClick={handleAuth0Login}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
-                title="Sign in with Auth0"
-              >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <svg className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                </span>
-                Sign in with Auth0
-              </SmoothButton>
-            </div>
+                  <div className="space-y-4">
+                    <SmoothButton
+                      onClick={handleDemoLogin}
+                      className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                      title="Sign in with Demo Account"
+                    >
+                      <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <svg className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                      Sign in with Demo Account
+                    </SmoothButton>
+                  </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Secure authentication powered by Auth0
-              </p>
-            </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">
+                      Demo authentication for testing purposes
+                    </p>
+                  </div>
           </div>
         </div>
       </div>
