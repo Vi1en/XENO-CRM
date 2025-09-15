@@ -27,7 +27,12 @@ export default function EditSegment() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    rules: []
+    rules: [] as Array<{
+      id: number
+      field: string
+      operator: string
+      value: string
+    }>
   })
   const [newRule, setNewRule] = useState({
     field: '',
