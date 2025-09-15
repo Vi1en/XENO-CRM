@@ -557,7 +557,7 @@ export default function EditSegment() {
                           <div key={rule.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
                             <div className="flex items-center space-x-3">
                               <span className="text-sm font-medium text-gray-700">
-                                {rule.field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                {rule.field.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                               </span>
                               <span className="text-sm text-gray-500 font-mono">
                                 {rule.operator}
