@@ -424,10 +424,10 @@ export default function CreateSegment() {
                               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                             >
                               <option value="">Operator</option>
-                              <option value=">">></option>
-                              <option value="<"><</option>
-                              <option value=">=">>=</option>
-                              <option value="<="><=</option>
+                              <option value=">">&gt;</option>
+                              <option value="<">&lt;</option>
+                              <option value=">=">&gt;=</option>
+                              <option value="<=">&lt;=</option>
                               <option value="=">=</option>
                               <option value="!=">!=</option>
                               <option value="contains">contains</option>
