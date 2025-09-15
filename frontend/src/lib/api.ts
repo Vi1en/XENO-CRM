@@ -62,7 +62,8 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // 15 second timeout
+  withCredentials: false, // Disable credentials to avoid CORS issues
 });
 
 // Add request interceptor for debugging
