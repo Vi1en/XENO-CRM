@@ -8,6 +8,7 @@ import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
 import Navigation from '@/components/Navigation'
 import AIPromptModal from '@/components/AIPromptModal'
+import SegmentSelectionModal from '@/components/SegmentSelectionModal'
 
 interface Campaign {
   _id: string
@@ -36,6 +37,8 @@ export default function Campaigns() {
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
   const [showAIModal, setShowAIModal] = useState(false)
+  const [showSegmentModal, setShowSegmentModal] = useState(false)
+  const [selectedAICampaign, setSelectedAICampaign] = useState<any>(null)
 
   // Simple authentication check
   useEffect(() => {
@@ -162,19 +165,23 @@ export default function Campaigns() {
     console.log('AI generated campaigns from prompt:', prompt, suggestions)
   }
 
-  const createAICampaign = async (suggestion: any) => {
+  const handleAICampaignSelect = (suggestion: any) => {
+    setSelectedAICampaign(suggestion)
+    setShowSegmentModal(true)
+  }
+
+  const createAICampaign = async (segmentId: string, segmentName: string) => {
+    if (!selectedAICampaign) return
+
     try {
-      console.log('🤖 Creating AI campaign with suggestion:', suggestion)
-      
-      // Use a default segment ID for AI campaigns
-      // In a real app, you'd want to let users choose the segment
-      const segmentId = 'all'
+      console.log('🤖 Creating AI campaign with suggestion:', selectedAICampaign)
+      console.log('🎯 Selected segment:', segmentName, segmentId)
       
       const newCampaign = {
-        name: suggestion.name,
-        description: suggestion.description,
+        name: selectedAICampaign.name,
+        description: selectedAICampaign.description,
         segmentId: segmentId,
-        message: suggestion.message || suggestion.description
+        message: selectedAICampaign.message || selectedAICampaign.description
       }
       
       console.log('📝 Campaign data to create:', newCampaign)
@@ -191,7 +198,11 @@ export default function Campaigns() {
       setFilteredCampaigns(prev => [...prev, createdCampaign])
       
       // Remove from suggestions
-      setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+      setAiSuggestions(prev => prev.filter(s => s.id !== selectedAICampaign.id))
+      
+      // Close modals
+      setShowSegmentModal(false)
+      setSelectedAICampaign(null)
       
       console.log('✅ AI campaign created and added to state:', createdCampaign)
     } catch (error: any) {
@@ -364,11 +375,11 @@ export default function Campaigns() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">~{suggestion.estimatedRecipients} recipients</span>
                         <SmoothButton
-                          onClick={() => createAICampaign(suggestion)}
+                          onClick={() => handleAICampaignSelect(suggestion)}
                           variant="primary"
                           size="sm"
                         >
-                          Create
+                          Create This One
                         </SmoothButton>
                       </div>
                     </div>
@@ -544,13 +555,23 @@ export default function Campaigns() {
       </div>
 
       {/* AI Prompt Modal */}
-      <AIPromptModal
-        isOpen={showAIModal}
-        onClose={() => setShowAIModal(false)}
-        type="campaign"
-        onGenerate={handleAIGenerate}
-        onCreateSuggestion={createAICampaign}
-      />
+        <AIPromptModal
+          isOpen={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          type="campaign"
+          onGenerate={handleAIGenerate}
+        />
+        
+        <SegmentSelectionModal
+          isOpen={showSegmentModal}
+          onClose={() => {
+            setShowSegmentModal(false)
+            setSelectedAICampaign(null)
+          }}
+          onSelect={createAICampaign}
+          campaignName={selectedAICampaign?.name || ''}
+          campaignMessage={selectedAICampaign?.message || ''}
+        />
     </PageTransition>
   )
 }
