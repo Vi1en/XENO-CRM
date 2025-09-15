@@ -1,7 +1,20 @@
 import { Router } from 'express';
 import { Customer } from '../models/customer';
+import { z } from 'zod';
 
 const router = Router();
+
+// Customer creation schema
+const customerCreateSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  phone: z.string().optional(),
+  totalSpend: z.number().min(0).default(0),
+  visits: z.number().min(0).default(0),
+  lastOrderAt: z.string().datetime().optional(),
+  tags: z.array(z.string()).default([]),
+});
 
 /**
  * @swagger
@@ -35,6 +48,112 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching customers:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/customers:
+ *   post:
+ *     summary: Create a new customer
+ *     tags: [Customers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - firstName
+ *               - lastName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Customer email address
+ *               firstName:
+ *                 type: string
+ *                 description: Customer first name
+ *               lastName:
+ *                 type: string
+ *                 description: Customer last name
+ *               phone:
+ *                 type: string
+ *                 description: Customer phone number
+ *               totalSpend:
+ *                 type: number
+ *                 minimum: 0
+ *                 default: 0
+ *                 description: Total amount spent by customer
+ *               visits:
+ *                 type: integer
+ *                 minimum: 0
+ *                 default: 0
+ *                 description: Number of visits
+ *               lastOrderAt:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Date of last order
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Customer tags
+ *     responses:
+ *       201:
+ *         description: Customer created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Customer'
+ *       400:
+ *         description: Invalid input data
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/', async (req, res) => {
+  try {
+    const validatedData = customerCreateSchema.parse(req.body);
+    
+    // Generate externalId if not provided
+    const externalId = `cust_${Date.now()}_${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const customer = new Customer({
+      ...validatedData,
+      externalId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    
+    await customer.save();
+    
+    return res.status(201).json({
+      success: true,
+      message: 'Customer created successfully',
+      data: customer,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: error.errors,
+      });
+    }
+    
+    console.error('Error creating customer:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
