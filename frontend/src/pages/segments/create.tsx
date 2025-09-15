@@ -17,6 +17,11 @@ export default function CreateSegment() {
     description: '',
     rules: []
   })
+  const [newRule, setNewRule] = useState({
+    field: '',
+    operator: '',
+    value: ''
+  })
 
   // Simple authentication check
   useEffect(() => {
@@ -53,6 +58,31 @@ export default function CreateSegment() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }))
+  }
+
+  const handleRuleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setNewRule(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const addRule = () => {
+    if (newRule.field && newRule.operator && newRule.value) {
+      setFormData(prev => ({
+        ...prev,
+        rules: [...prev.rules, { ...newRule, id: Date.now() }]
+      }))
+      setNewRule({ field: '', operator: '', value: '' })
+    }
+  }
+
+  const removeRule = (ruleId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      rules: prev.rules.filter((rule: any) => rule.id !== ruleId)
     }))
   }
 
@@ -297,6 +327,130 @@ export default function CreateSegment() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter segment description"
                   />
+                </div>
+
+                {/* Rules Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Segment Rules
+                  </label>
+                  
+                  {/* Add New Rule */}
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Add New Rule</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div>
+                        <label htmlFor="ruleField" className="block text-xs font-medium text-gray-600 mb-1">
+                          Field
+                        </label>
+                        <select
+                          id="ruleField"
+                          name="field"
+                          value={newRule.field}
+                          onChange={handleRuleChange}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Select field</option>
+                          <option value="firstName">First Name</option>
+                          <option value="lastName">Last Name</option>
+                          <option value="email">Email</option>
+                          <option value="totalSpend">Total Spend</option>
+                          <option value="createdAt">Registration Date</option>
+                          <option value="lastOrderDate">Last Order Date</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="ruleOperator" className="block text-xs font-medium text-gray-600 mb-1">
+                          Operator
+                        </label>
+                        <select
+                          id="ruleOperator"
+                          name="operator"
+                          value={newRule.operator}
+                          onChange={handleRuleChange}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Select operator</option>
+                          <option value="equals">Equals</option>
+                          <option value="contains">Contains</option>
+                          <option value="startsWith">Starts with</option>
+                          <option value="endsWith">Ends with</option>
+                          <option value="greaterThan">Greater than</option>
+                          <option value="lessThan">Less than</option>
+                          <option value="greaterThanOrEqual">Greater than or equal</option>
+                          <option value="lessThanOrEqual">Less than or equal</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="ruleValue" className="block text-xs font-medium text-gray-600 mb-1">
+                          Value
+                        </label>
+                        <input
+                          type="text"
+                          id="ruleValue"
+                          name="value"
+                          value={newRule.value}
+                          onChange={handleRuleChange}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Enter value"
+                        />
+                      </div>
+                      
+                      <div className="flex items-end">
+                        <button
+                          type="button"
+                          onClick={addRule}
+                          disabled={!newRule.field || !newRule.operator || !newRule.value}
+                          className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Add Rule
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Existing Rules */}
+                  {formData.rules.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700">Current Rules</h4>
+                      {formData.rules.map((rule: any) => (
+                        <div key={rule.id} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-sm font-medium text-gray-700 capitalize">
+                              {rule.field.replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {rule.operator.replace(/([A-Z])/g, ' $1').trim()}
+                            </span>
+                            <span className="text-sm text-gray-900 font-medium">
+                              "{rule.value}"
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeRule(rule.id)}
+                            className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {formData.rules.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <p className="text-sm">No rules added yet</p>
+                      <p className="text-xs text-gray-400">Add rules to define which customers belong to this segment</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
