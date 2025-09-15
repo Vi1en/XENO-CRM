@@ -1,5 +1,6 @@
 import { useSession, signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
+// DEMO MODE - NO API CALLS - v4.0
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { customerApi, campaignApi, segmentApi, orderApi } from '@/lib/api'
@@ -32,131 +33,109 @@ export default function Home() {
   }, [session])
 
   const loadData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      console.log('📱 Loading data...')
-      
-      // For now, skip API calls due to CORS issues and use mock data directly
-      // This ensures the dashboard works perfectly while we resolve backend issues
-      console.log('🔄 Using demo data due to backend connectivity issues...')
-      
-      // Simulate a brief loading delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      throw new Error('Using demo data for demonstration purposes')
-    } catch (err: any) {
-      console.error('❌ Error loading data:', err)
-      console.log('🔄 Falling back to mock data...')
-      
-      // Fallback to mock data when API fails
-      const mockCustomers = [
-        { _id: '1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'] },
-        { _id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'] },
-        { _id: '3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'] },
-        { _id: '4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'] },
-        { _id: '5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'] }
-      ]
-      
-      const mockCampaigns = [
-        { _id: '1', name: 'Summer Sale', status: 'running', stats: { totalRecipients: 100, sent: 100, delivered: 95, failed: 5 } },
-        { _id: '2', name: 'New Product Launch', status: 'completed', stats: { totalRecipients: 200, sent: 200, delivered: 190, failed: 10 } },
-        { _id: '3', name: 'Holiday Campaign', status: 'scheduled', stats: { totalRecipients: 150, sent: 0, delivered: 0, failed: 0 } }
-      ]
-      
-      const mockSegments = [
-        { _id: '1', name: 'VIP Customers', description: 'High-value customers', customerCount: 2 },
-        { _id: '2', name: 'Premium Customers', description: 'Medium-value customers', customerCount: 2 },
-        { _id: '3', name: 'Regular Customers', description: 'Standard customers', customerCount: 1 }
-      ]
-      
-      const mockOrders = [
-        { _id: '1', customerName: 'John Doe', totalSpent: 500, date: new Date() },
-        { _id: '2', customerName: 'Jane Smith', totalSpent: 300, date: new Date() },
-        { _id: '3', customerName: 'Bob Johnson', totalSpent: 150, date: new Date() },
-        { _id: '4', customerName: 'Alice Brown', totalSpent: 800, date: new Date() },
-        { _id: '5', customerName: 'Charlie Wilson', totalSpent: 400, date: new Date() }
-      ]
-      
-      setCustomers(mockCustomers)
-      setCampaigns(mockCampaigns)
-      setSegments(mockSegments)
-      setOrders(mockOrders)
-      
-      // Generate analytics data based on mock data
-      const mockAnalytics = {
-        customerSegments: {
-          vip: Math.round(mockCustomers.length * 0.75),
-          premium: Math.round(mockCustomers.length * 0.17),
-          regular: Math.round(mockCustomers.length * 0.08)
-        },
-        campaignPerformance: {
-          running: mockCampaigns.length,
-          completed: Math.round(mockCampaigns.length * 0.8),
-          scheduled: Math.round(mockCampaigns.length * 0.3)
-        }
+    setLoading(true)
+    setError(null)
+    console.log('📱 Loading demo data...')
+    
+    // Skip all API calls - use demo data directly
+    console.log('🔄 Loading demo data - API calls disabled')
+    
+    // Simulate a brief loading delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    // Load demo data directly without any API calls
+    const mockCustomers = [
+      { _id: '1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'] },
+      { _id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'] },
+      { _id: '3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'] },
+      { _id: '4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'] },
+      { _id: '5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'] }
+    ]
+    
+    const mockCampaigns = [
+      { _id: '1', name: 'Summer Sale', status: 'running', stats: { totalRecipients: 100, sent: 100, delivered: 95, failed: 5 } },
+      { _id: '2', name: 'New Product Launch', status: 'completed', stats: { totalRecipients: 200, sent: 200, delivered: 190, failed: 10 } },
+      { _id: '3', name: 'Holiday Campaign', status: 'scheduled', stats: { totalRecipients: 150, sent: 0, delivered: 0, failed: 0 } }
+    ]
+    
+    const mockSegments = [
+      { _id: '1', name: 'VIP Customers', description: 'High-value customers', customerCount: 2 },
+      { _id: '2', name: 'Premium Customers', description: 'Medium-value customers', customerCount: 2 },
+      { _id: '3', name: 'Regular Customers', description: 'Standard customers', customerCount: 1 }
+    ]
+    
+    const mockOrders = [
+      { _id: '1', customerName: 'John Doe', totalSpent: 500, date: new Date() },
+      { _id: '2', customerName: 'Jane Smith', totalSpent: 300, date: new Date() },
+      { _id: '3', customerName: 'Bob Johnson', totalSpent: 150, date: new Date() },
+      { _id: '4', customerName: 'Alice Brown', totalSpent: 800, date: new Date() },
+      { _id: '5', customerName: 'Charlie Wilson', totalSpent: 400, date: new Date() }
+    ]
+    
+    setCustomers(mockCustomers)
+    setCampaigns(mockCampaigns)
+    setSegments(mockSegments)
+    setOrders(mockOrders)
+    
+    // Generate analytics data based on mock data
+    const mockAnalytics = {
+      customerSegments: {
+        vip: Math.round(mockCustomers.length * 0.75),
+        premium: Math.round(mockCustomers.length * 0.17),
+        regular: Math.round(mockCustomers.length * 0.08)
+      },
+      campaignPerformance: {
+        running: mockCampaigns.length,
+        completed: Math.round(mockCampaigns.length * 0.8),
+        scheduled: Math.round(mockCampaigns.length * 0.3)
       }
-      
-      const mockTrends = {
-        customerGrowth: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
-          month,
-          value: index < 4 ? 0 : Math.round(mockCustomers.length * (index - 3) * 0.3)
-        })),
-        revenueTrend: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
-          month,
-          value: Math.round(mockOrders.length * (index + 1) * 0.2)
-        }))
-      }
-      
-      const mockDelivery = {
-        deliveryRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
-          day,
-          rate: Math.round(85 + Math.random() * 15 + mockCampaigns.length * 0.5)
-        })),
-        successRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
-          day,
-          rate: Math.round(90 + Math.random() * 10 + mockCampaigns.length * 0.3)
-        }))
-      }
-      
-      setAnalyticsData(mockAnalytics)
-      setTrendsData(mockTrends)
-      setDeliveryData(mockDelivery)
-      setUsingMockData(true)
-      
-      console.log('✅ Mock data loaded:', {
-        customers: mockCustomers.length,
-        campaigns: mockCampaigns.length,
-        segments: mockSegments.length,
-        orders: mockOrders.length
-      })
-    } finally {
-      setLoading(false)
     }
+    
+    const mockTrends = {
+      customerGrowth: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
+        month,
+        value: index < 4 ? 0 : Math.round(mockCustomers.length * (index - 3) * 0.3)
+      })),
+      revenueTrend: ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25'].map((month, index) => ({
+        month,
+        value: Math.round(mockOrders.length * (index + 1) * 0.2)
+      }))
+    }
+    
+    const mockDelivery = {
+      deliveryRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
+        day,
+        rate: Math.round(85 + Math.random() * 15 + mockCampaigns.length * 0.5)
+      })),
+      successRates: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => ({
+        day,
+        rate: Math.round(90 + Math.random() * 10 + mockCampaigns.length * 0.3)
+      }))
+    }
+    
+    setAnalyticsData(mockAnalytics)
+    setTrendsData(mockTrends)
+    setDeliveryData(mockDelivery)
+    setUsingMockData(true)
+    
+    console.log('✅ Demo data loaded successfully:', {
+      customers: mockCustomers.length,
+      campaigns: mockCampaigns.length,
+      segments: mockSegments.length,
+      orders: mockOrders.length
+    })
+    
+    setLoading(false)
   }
 
   const loadAnalyticsData = async () => {
-    try {
-      setAnalyticsLoading(true)
-      console.log('📊 Loading analytics data...')
-      
-      // Skip API calls due to CORS issues and use mock data directly
-      console.log('🔄 Using demo analytics data...')
-      
-      // Simulate a brief loading delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      throw new Error('Using demo analytics data')
-    } catch (err: any) {
-      console.error('❌ Error loading analytics data:', err)
-      console.log('🔄 Using mock analytics data...')
-      // Fallback to mock data
-      setAnalyticsData(generateMockAnalytics())
-      setTrendsData(generateMockTrends())
-      setDeliveryData(generateMockDelivery())
-    } finally {
-      setAnalyticsLoading(false)
-    }
+    setAnalyticsLoading(true)
+    console.log('📊 Loading demo analytics data...')
+    
+    // Skip API calls - analytics data is already loaded in loadData
+    console.log('🔄 Analytics data already loaded with demo data')
+    
+    setAnalyticsLoading(false)
   }
 
   const generateMockAnalytics = () => {
@@ -260,7 +239,8 @@ export default function Home() {
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
-        <meta name="version" content="v3.0-demo-mode" />
+        <meta name="version" content="v4.0-no-api-calls" />
+        <meta name="build" content="2024-01-15-demo-mode" />
       </Head>
       
       {/* Sidebar */}
