@@ -334,116 +334,175 @@ export default function CreateSegment() {
                   />
                 </div>
 
-                {/* Rules Section */}
+                {/* Rule Builder Section */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-4">
-                    Segment Rules
-                  </label>
-                  
-                  {/* Add New Rule */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3">Add New Rule</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                      <div>
-                        <label htmlFor="ruleField" className="block text-xs font-medium text-gray-600 mb-1">
-                          Field
-                        </label>
-                        <select
-                          id="ruleField"
-                          name="field"
-                          value={newRule.field}
-                          onChange={handleRuleChange}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="">Select field</option>
-                          <option value="firstName">First Name</option>
-                          <option value="lastName">Last Name</option>
-                          <option value="email">Email</option>
-                          <option value="totalSpend">Total Spend</option>
-                          <option value="createdAt">Registration Date</option>
-                          <option value="lastOrderDate">Last Order Date</option>
-                        </select>
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Rule Builder
+                    </label>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                    >
+                      + Add Rule Group
+                    </button>
+                  </div>
+
+                  {/* Example Rule */}
+                  <div className="mb-6">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value="Example: Customers inactive for 6 months & spent > 5000"
+                        readOnly
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                      <button
+                        type="button"
+                        className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                      >
+                        Convert to Rules
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Rule Groups */}
+                  <div className="space-y-4">
+                    {/* Rule Group 1 */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-medium text-gray-700">Rule Group 1</h4>
+                        <div className="flex items-center space-x-2">
+                          <select className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                            <option value="AND">AND</option>
+                            <option value="OR">OR</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      
-                      <div>
-                        <label htmlFor="ruleOperator" className="block text-xs font-medium text-gray-600 mb-1">
-                          Operator
-                        </label>
-                        <select
-                          id="ruleOperator"
-                          name="operator"
-                          value={newRule.operator}
-                          onChange={handleRuleChange}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="">Select operator</option>
-                          <option value="equals">Equals</option>
-                          <option value="contains">Contains</option>
-                          <option value="startsWith">Starts with</option>
-                          <option value="endsWith">Ends with</option>
-                          <option value="greaterThan">Greater than</option>
-                          <option value="lessThan">Less than</option>
-                          <option value="greaterThanOrEqual">Greater than or equal</option>
-                          <option value="lessThanOrEqual">Less than or equal</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="ruleValue" className="block text-xs font-medium text-gray-600 mb-1">
-                          Value
-                        </label>
-                        <input
-                          type="text"
-                          id="ruleValue"
-                          name="value"
-                          value={newRule.value}
-                          onChange={handleRuleChange}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Enter value"
-                        />
-                      </div>
-                      
-                      <div className="flex items-end">
+
+                      {/* Rule Row */}
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-1">
+                            <select
+                              id="ruleField"
+                              name="field"
+                              value={newRule.field}
+                              onChange={handleRuleChange}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Select Field</option>
+                              <option value="visits_count">Visits Count</option>
+                              <option value="last_active">Last Active</option>
+                              <option value="total_spend">Total Spend</option>
+                              <option value="created_at">Created At</option>
+                              <option value="name">Name</option>
+                              <option value="email">Email</option>
+                              <option value="phone">Phone</option>
+                              <option value="company">Company</option>
+                              <option value="location">Location</option>
+                              <option value="last_order_date">Last Order Date</option>
+                              <option value="order_count">Order Count</option>
+                              <option value="avg_order_value">Average Order Value</option>
+                            </select>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <select
+                              id="ruleOperator"
+                              name="operator"
+                              value={newRule.operator}
+                              onChange={handleRuleChange}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Operator</option>
+                              <option value=">">></option>
+                              <option value="<"><</option>
+                              <option value=">=">>=</option>
+                              <option value="<="><=</option>
+                              <option value="=">=</option>
+                              <option value="!=">!=</option>
+                              <option value="contains">contains</option>
+                              <option value="not_contains">not contains</option>
+                              <option value="starts_with">starts with</option>
+                              <option value="ends_with">ends with</option>
+                              <option value="is_empty">is empty</option>
+                              <option value="is_not_empty">is not empty</option>
+                            </select>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              id="ruleValue"
+                              name="value"
+                              value={newRule.value}
+                              onChange={handleRuleChange}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Value"
+                            />
+                          </div>
+                          
+                          <button
+                            type="button"
+                            className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                            </svg>
+                          </button>
+                        </div>
+
                         <button
                           type="button"
                           onClick={addRule}
                           disabled={!newRule.field || !newRule.operator || !newRule.value}
-                          className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Add Rule
+                          + Add Rule
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Existing Rules */}
+                  {/* Existing Rules Display */}
                   {formData.rules.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">Current Rules</h4>
-                      {formData.rules.map((rule: any) => (
-                        <div key={rule.id} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3">
-                          <div className="flex items-center space-x-3">
-                            <span className="text-sm font-medium text-gray-700 capitalize">
-                              {rule.field.replace(/([A-Z])/g, ' $1').trim()}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              {rule.operator.replace(/([A-Z])/g, ' $1').trim()}
-                            </span>
-                            <span className="text-sm text-gray-900 font-medium">
-                              "{rule.value}"
-                            </span>
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Active Rules</h4>
+                      <div className="space-y-2">
+                        {formData.rules.map((rule: any) => (
+                          <div key={rule.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
+                            <div className="flex items-center space-x-3">
+                              <span className="text-sm font-medium text-gray-700">
+                                {rule.field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </span>
+                              <span className="text-sm text-gray-500 font-mono">
+                                {rule.operator}
+                              </span>
+                              <span className="text-sm text-gray-900 font-medium">
+                                "{rule.value}"
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeRule(rule.id)}
+                              className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeRule(rule.id)}
-                            className="p-1 text-red-400 hover:text-red-600 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
 
