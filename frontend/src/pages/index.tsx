@@ -274,21 +274,36 @@ export default function Home() {
   const loadAnalyticsData = async () => {
     setAnalyticsLoading(true)
     console.log('📊 Loading analytics data from real data...')
+    console.log('📊 Current customers state:', customers)
+    console.log('📊 Current campaigns state:', campaigns)
+    console.log('📊 Current orders state:', orders)
     
     try {
       // Generate analytics data from real customer/campaign data
+      console.log('📊 Calling generateRealAnalytics...')
       const analyticsData = generateRealAnalytics()
+      console.log('📊 Analytics data generated:', analyticsData)
+      
+      console.log('📊 Calling generateRealTrends...')
       const trendsData = generateRealTrends()
+      console.log('📊 Trends data generated:', trendsData)
+      
+      console.log('📊 Calling generateRealDelivery...')
       const deliveryData = generateRealDelivery()
+      console.log('📊 Delivery data generated:', deliveryData)
       
       setAnalyticsData(analyticsData)
       setTrendsData(trendsData)
       setDeliveryData(deliveryData)
       
       console.log('✅ Real analytics data loaded successfully')
+      console.log('📊 Analytics state set:', { analyticsData, trendsData, deliveryData })
     } catch (err: any) {
       console.error('❌ Error generating analytics data:', err)
+      console.error('❌ Error details:', err.message)
+      console.error('❌ Error stack:', err.stack)
       // Fallback to mock data
+      console.log('🔄 Falling back to mock data...')
       setAnalyticsData(generateMockAnalytics())
       setTrendsData(generateMockTrends())
       setDeliveryData(generateMockDelivery())
@@ -301,35 +316,55 @@ export default function Home() {
     console.log('📊 Generating real analytics from data...')
     console.log('📊 Customers count:', customers.length)
     console.log('📊 Campaigns count:', campaigns.length)
+    console.log('📊 Customers data:', customers)
+    console.log('📊 Campaigns data:', campaigns)
     
     // Calculate customer segments from real data
     const segments: { [key: string]: number } = {}
     let regularCount = 0
     
-    customers.forEach((customer: any) => {
-      if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
-        const firstTag = customer.tags[0]
-        if (firstTag && typeof firstTag === 'string') {
-          segments[firstTag] = (segments[firstTag] || 0) + 1
+    if (customers && customers.length > 0) {
+      customers.forEach((customer: any, index: number) => {
+        console.log(`📊 Processing customer ${index}:`, {
+          name: `${customer.firstName} ${customer.lastName}`,
+          tags: customer.tags,
+          tagsType: typeof customer.tags,
+          tagsIsArray: Array.isArray(customer.tags)
+        })
+        
+        if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
+          const firstTag = customer.tags[0]
+          if (firstTag && typeof firstTag === 'string') {
+            segments[firstTag] = (segments[firstTag] || 0) + 1
+            console.log(`✅ Added tag "${firstTag}" for customer ${index}`)
+          }
+        } else {
+          regularCount++
+          console.log(`📝 Customer ${index} has no tags, counting as regular`)
         }
-      } else {
-        regularCount++
-      }
-    })
+      })
+    } else {
+      console.log('⚠️ No customers data available')
+    }
     
     if (regularCount > 0) {
       segments['regular'] = regularCount
     }
     
     // Calculate campaign performance from real data
-    const runningCampaigns = campaigns.filter((c: any) => c.status === 'running' || c.status === 'active').length
-    const completedCampaigns = campaigns.filter((c: any) => c.status === 'completed' || c.status === 'finished').length
-    const scheduledCampaigns = campaigns.filter((c: any) => c.status === 'scheduled' || c.status === 'pending').length
+    let runningCampaigns = 0
+    let completedCampaigns = 0
+    let scheduledCampaigns = 0
     
-    console.log('📊 Real segments calculated:', segments)
-    console.log('📊 Campaign performance:', { running: runningCampaigns, completed: completedCampaigns, scheduled: scheduledCampaigns })
+    if (campaigns && campaigns.length > 0) {
+      runningCampaigns = campaigns.filter((c: any) => c.status === 'running' || c.status === 'active').length
+      completedCampaigns = campaigns.filter((c: any) => c.status === 'completed' || c.status === 'finished').length
+      scheduledCampaigns = campaigns.filter((c: any) => c.status === 'scheduled' || c.status === 'pending').length
+    } else {
+      console.log('⚠️ No campaigns data available')
+    }
     
-    return {
+    const result = {
       customerSegments: segments,
       campaignPerformance: {
         running: runningCampaigns,
@@ -337,6 +372,9 @@ export default function Home() {
         scheduled: scheduledCampaigns
       }
     }
+    
+    console.log('📊 Real analytics result:', result)
+    return result
   }
 
   const generateRealTrends = () => {
