@@ -1,25 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Use static export for Netlify
+  output: 'export',
+  trailingSlash: true,
   images: {
     unoptimized: true
   },
-  // Railway optimizations
-  experimental: {
-    outputFileTracingRoot: undefined,
-  },
   // Cache busting for demo mode
   generateBuildId: async () => {
-    return 'demo-mode-v3-' + Date.now()
-  },
-  // Ensure proper routing
-  async rewrites() {
-    return [
-      {
-        source: '/',
-        destination: '/',
-      },
-    ]
+    return 'demo-mode-v4-' + Date.now()
   },
 }
 

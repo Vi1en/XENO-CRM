@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from 'next-auth/react'
+// Removed NextAuth imports - using static export
 import Link from 'next/link'
 // DEMO MODE - NO API CALLS - v4.0
 import { useState, useEffect } from 'react'
@@ -7,7 +7,9 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 
 export default function Home() {
-  const { data: session, status } = useSession()
+  // Demo mode - no authentication required
+  const session = null
+  const status = 'unauthenticated'
   const router = useRouter()
   const [customers, setCustomers] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
@@ -198,7 +200,7 @@ export default function Home() {
 
 
   // Skip authentication for demo mode - always render dashboard
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -302,22 +304,19 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-sm font-medium">{(session as any)?.user?.name?.charAt(0) || 'U'}</span>
+              <span className="text-gray-600 text-sm font-medium">D</span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{(session as any)?.user?.name?.split(' ')[0] || 'User'}</p>
-              <p className="text-xs text-gray-500">{(session as any)?.user?.email || 'user@example.com'}</p>
+              <p className="text-sm font-medium text-gray-900">Demo User</p>
+              <p className="text-xs text-gray-500">demo@xenocrm.com</p>
             </div>
           </div>
-          <button
-            onClick={() => signOut()}
-            className="w-full flex items-center space-x-2 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors mt-2"
-          >
+          <div className="w-full flex items-center space-x-2 px-4 py-3 text-gray-700 bg-gray-50 rounded-lg mt-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-sm">Sign Out</span>
-          </button>
+            <span className="text-sm">Demo Mode</span>
+          </div>
         </div>
       </div>
 
@@ -328,7 +327,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {(session as any)?.user?.name?.split(' ')[0] || 'Demo User'}!</p>
+              <p className="text-gray-600">Welcome to Xeno CRM Demo!</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
