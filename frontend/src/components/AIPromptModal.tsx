@@ -6,12 +6,14 @@ interface AIPromptModalProps {
   onClose: () => void
   type: 'segment' | 'campaign'
   onGenerate: (prompt: string, suggestions: any[]) => void
+  onCreateSuggestion?: (suggestion: any) => Promise<void>
 }
 
-export default function AIPromptModal({ isOpen, onClose, type, onGenerate }: AIPromptModalProps) {
+export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCreateSuggestion }: AIPromptModalProps) {
   const [prompt, setPrompt] = useState('')
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<any[]>([])
+  const [creatingIds, setCreatingIds] = useState<Set<string>>(new Set())
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -87,14 +89,44 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate }: AIP
     }
   }
 
-  const handleCreateSuggestion = (suggestion: any) => {
-    onGenerate(prompt, [suggestion])
-    onClose()
+  const handleCreateSuggestion = async (suggestion: any) => {
+    if (onCreateSuggestion) {
+      setCreatingIds(prev => new Set(prev).add(suggestion.id))
+      try {
+        await onCreateSuggestion(suggestion)
+        // Remove the created suggestion from the list
+        setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+      } catch (error) {
+        console.error('Error creating suggestion:', error)
+      } finally {
+        setCreatingIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(suggestion.id)
+          return newSet
+        })
+      }
+    } else {
+      onGenerate(prompt, [suggestion])
+      onClose()
+    }
   }
 
-  const handleCreateAll = () => {
-    onGenerate(prompt, suggestions)
-    onClose()
+  const handleCreateAll = async () => {
+    if (onCreateSuggestion) {
+      try {
+        // Create all suggestions one by one
+        for (const suggestion of suggestions) {
+          await onCreateSuggestion(suggestion)
+        }
+        setSuggestions([]) // Clear all suggestions
+        onClose()
+      } catch (error) {
+        console.error('Error creating all suggestions:', error)
+      }
+    } else {
+      onGenerate(prompt, suggestions)
+      onClose()
+    }
   }
 
   if (!isOpen) return null
@@ -231,10 +263,12 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate }: AIP
                       </div>
                       <SmoothButton
                         onClick={() => handleCreateSuggestion(suggestion)}
+                        disabled={creatingIds.has(suggestion.id)}
+                        loading={creatingIds.has(suggestion.id)}
                         variant="primary"
                         size="sm"
                       >
-                        Create This One
+                        {creatingIds.has(suggestion.id) ? 'Creating...' : 'Create This One'}
                       </SmoothButton>
                     </div>
                   </div>

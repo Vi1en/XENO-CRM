@@ -420,6 +420,7 @@ export default function Segments() {
         onClose={() => setShowAIModal(false)}
         type="segment"
         onGenerate={handleAIGenerate}
+        onCreateSuggestion={createAISegment}
       />
     </PageTransition>
   )

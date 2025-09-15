@@ -536,6 +536,7 @@ export default function Campaigns() {
         onClose={() => setShowAIModal(false)}
         type="campaign"
         onGenerate={handleAIGenerate}
+        onCreateSuggestion={createAICampaign}
       />
     </PageTransition>
   )
