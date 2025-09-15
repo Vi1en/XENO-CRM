@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api'
 import Head from 'next/head'
+import AIInsightsDashboard from '@/components/AIInsightsDashboard'
+import AIStatusIndicator from '@/components/AIStatusIndicator'
 
 export default function Home() {
   const router = useRouter()
@@ -948,6 +950,116 @@ export default function Home() {
                   <p className="text-sm font-medium text-gray-900">Manage Segments</p>
                 </Link>
                 
+              </div>
+            </div>
+          </div>
+
+          {/* AI Features Section */}
+          <div className="mb-8">
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-sm border border-purple-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">🤖 AI-Powered Insights</h3>
+                  <p className="text-sm text-gray-600">Intelligent analytics and recommendations powered by AI</p>
+                </div>
+                <AIStatusIndicator />
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* AI Quick Stats */}
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">AI Health Status</p>
+                        <p className="text-2xl font-bold text-green-600">Healthy</p>
+                      </div>
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Smart Recommendations</p>
+                        <p className="text-2xl font-bold text-blue-600">5 Active</p>
+                      </div>
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Predictive Insights</p>
+                        <p className="text-2xl font-bold text-purple-600">3 Forecasts</p>
+                      </div>
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* AI Actions */}
+                <div className="space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h4 className="font-medium text-gray-900 mb-3">AI Quick Actions</h4>
+                    <div className="space-y-2">
+                      <button className="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Generate Smart Segments</p>
+                            <p className="text-xs text-gray-600">AI-powered customer segmentation</p>
+                          </div>
+                        </div>
+                      </button>
+                      
+                      <button className="w-full text-left p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Create AI Campaigns</p>
+                            <p className="text-xs text-gray-600">Intelligent message generation</p>
+                          </div>
+                        </div>
+                      </button>
+                      
+                      <button className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">View AI Insights</p>
+                            <p className="text-xs text-gray-600">Comprehensive AI dashboard</p>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
