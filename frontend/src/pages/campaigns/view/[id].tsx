@@ -317,8 +317,8 @@ export default function CampaignDetails() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{campaign.name}</h1>
-                <p className="text-gray-600">{campaign.description}</p>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{campaign.name || 'Untitled Campaign'}</h1>
+                <p className="text-gray-600">{campaign.description || 'No description available'}</p>
               </div>
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                 campaign.status === 'running' ? 'bg-green-100 text-green-800' :
@@ -327,7 +327,7 @@ export default function CampaignDetails() {
                 campaign.status === 'sent' ? 'bg-blue-100 text-blue-800' :
                 'bg-red-100 text-red-800'
               }`}>
-                {campaign.status.toUpperCase()}
+                {campaign.status ? campaign.status.toUpperCase() : 'UNKNOWN'}
               </span>
             </div>
 
@@ -335,24 +335,24 @@ export default function CampaignDetails() {
             {campaign.stats && (
               <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.totalRecipients}</div>
+                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.totalRecipients || 0}</div>
                   <div className="text-sm text-gray-500">Total Recipients</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{campaign.stats.sent}</div>
+                  <div className="text-2xl font-bold text-green-600">{campaign.stats.sent || 0}</div>
                   <div className="text-sm text-gray-500">Sent</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.delivered}</div>
+                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.delivered || 0}</div>
                   <div className="text-sm text-gray-500">Delivered</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">{campaign.stats.failed}</div>
+                  <div className="text-2xl font-bold text-red-600">{campaign.stats.failed || 0}</div>
                   <div className="text-sm text-gray-500">Failed</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">
-                    {campaign.stats.sent > 0 ? Math.round((campaign.stats.delivered / campaign.stats.sent) * 100) : 0}%
+                    {(campaign.stats.sent && campaign.stats.sent > 0) ? Math.round(((campaign.stats.delivered || 0) / campaign.stats.sent) * 100) : 0}%
                   </div>
                   <div className="text-sm text-gray-500">Delivery Rate</div>
                 </div>
@@ -363,7 +363,7 @@ export default function CampaignDetails() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Campaign Message</h3>
               <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-700 whitespace-pre-wrap">{campaign.message}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{campaign.message || 'No message available'}</p>
               </div>
             </div>
 
@@ -384,19 +384,19 @@ export default function CampaignDetails() {
                 <dl className="space-y-2">
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Campaign ID</dt>
-                    <dd className="text-sm text-gray-900">{campaign._id}</dd>
+                    <dd className="text-sm text-gray-900">{campaign._id || 'N/A'}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Segment ID</dt>
-                    <dd className="text-sm text-gray-900">{campaign.segmentId}</dd>
+                    <dd className="text-sm text-gray-900">{campaign.segmentId || 'N/A'}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Created</dt>
-                    <dd className="text-sm text-gray-900">{new Date(campaign.createdAt).toLocaleString()}</dd>
+                    <dd className="text-sm text-gray-900">{campaign.createdAt ? new Date(campaign.createdAt).toLocaleString() : 'N/A'}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-                    <dd className="text-sm text-gray-900">{new Date(campaign.updatedAt).toLocaleString()}</dd>
+                    <dd className="text-sm text-gray-900">{campaign.updatedAt ? new Date(campaign.updatedAt).toLocaleString() : 'N/A'}</dd>
                   </div>
                   {campaign.scheduledAt && (
                     <div>

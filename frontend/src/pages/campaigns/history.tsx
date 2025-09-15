@@ -410,7 +410,7 @@ export default function CampaignHistory() {
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
-                              {campaign.status.toUpperCase()}
+                              {campaign.status ? campaign.status.toUpperCase() : 'UNKNOWN'}
                             </span>
                           </div>
                           <p className="text-gray-600 text-sm mb-4">{campaign.description}</p>
