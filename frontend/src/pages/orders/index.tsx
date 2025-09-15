@@ -266,7 +266,6 @@ export default function Orders() {
               </button>
             </div>
           </div>
-          </div>
         </div>
 
         {/* Main Content */}
