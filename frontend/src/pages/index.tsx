@@ -624,9 +624,10 @@ export default function Home() {
                     {/* Pie Chart - Calculate real percentages based on customer data */}
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                       {(() => {
-                        const totalCustomers = customers.length || 1
-                        const vipCustomers = customers.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
-                        const premiumCustomers = customers.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
+                        const customersArray = Array.isArray(customers) ? customers : []
+                        const totalCustomers = customersArray.length || 1
+                        const vipCustomers = customersArray.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
+                        const premiumCustomers = customersArray.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
                         const regularCustomers = totalCustomers - vipCustomers - premiumCustomers
                         
                         const vipPercent = Math.round((vipCustomers / totalCustomers) * 100)
@@ -684,9 +685,10 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 mt-4">
                   {(() => {
-                    const totalCustomers = customers.length || 1
-                    const vipCustomers = customers.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
-                    const premiumCustomers = customers.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
+                    const customersArray = Array.isArray(customers) ? customers : []
+                    const totalCustomers = customersArray.length || 1
+                    const vipCustomers = customersArray.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
+                    const premiumCustomers = customersArray.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
                     const regularCustomers = totalCustomers - vipCustomers - premiumCustomers
                     
                     const vipPercent = Math.round((vipCustomers / totalCustomers) * 100)
@@ -741,9 +743,10 @@ export default function Home() {
                   </div>
                   <div className="flex-1 flex items-end justify-center space-x-4">
                     {(() => {
-                      const runningCampaigns = campaigns.filter(c => c.status === 'running' || c.status === 'active').length
-                      const completedCampaigns = campaigns.filter(c => c.status === 'completed' || c.status === 'sent').length
-                      const scheduledCampaigns = campaigns.filter(c => c.status === 'scheduled' || c.status === 'draft').length
+                      const campaignsArray = Array.isArray(campaigns) ? campaigns : []
+                      const runningCampaigns = campaignsArray.filter(c => c.status === 'running' || c.status === 'active').length
+                      const completedCampaigns = campaignsArray.filter(c => c.status === 'completed' || c.status === 'sent').length
+                      const scheduledCampaigns = campaignsArray.filter(c => c.status === 'scheduled' || c.status === 'draft').length
                       
                       return (
                         <>
@@ -781,7 +784,7 @@ export default function Home() {
                 </div>
                 <div className="mt-4 text-center">
                   <span className="text-sm text-green-600 font-semibold">
-                    {campaigns.filter(c => c.status === 'running' || c.status === 'active').length} Active Campaigns
+                    {Array.isArray(campaigns) ? campaigns.filter(c => c.status === 'running' || c.status === 'active').length : 0} Active Campaigns
                   </span>
                 </div>
               </div>
@@ -863,8 +866,9 @@ export default function Home() {
                     
                     {(() => {
                       // Calculate customer growth based on real data
+                      const customersArray = Array.isArray(customers) ? customers : []
                       const months = ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25']
-                      const currentCustomers = customers.length
+                      const currentCustomers = customersArray.length
                       const growthData = months.map((_, index) => {
                         if (index < 4) return 0 // No growth in first 4 months
                         const growth = Math.round(currentCustomers * (index - 3) * 0.3)
@@ -936,9 +940,10 @@ export default function Home() {
                     
                     {(() => {
                       // Calculate revenue trend based on real order data
+                      const ordersArray = Array.isArray(orders) ? orders : []
                       const months = ['Apr 25', 'May 25', 'Jun 25', 'Jul 25', 'Aug 25', 'Sep 25']
-                      const currentOrders = orders.length
-                      const totalRevenue = orders.reduce((sum, order) => {
+                      const currentOrders = ordersArray.length
+                      const totalRevenue = ordersArray.reduce((sum, order) => {
                         return sum + (order.totalSpent || order.totalSpend || 0)
                       }, 0)
                       
@@ -983,17 +988,18 @@ export default function Home() {
               <div className="flex items-center space-x-4">
                 {(() => {
                   // Calculate real success and delivery rates from campaign data
-                  const totalSent = campaigns.reduce((sum, campaign) => {
+                  const campaignsArray = Array.isArray(campaigns) ? campaigns : []
+                  const totalSent = campaignsArray.reduce((sum, campaign) => {
                     const sent = campaign.stats?.sent || campaign.sentCount || 0
                     return sum + sent
                   }, 0)
                   
-                  const totalDelivered = campaigns.reduce((sum, campaign) => {
+                  const totalDelivered = campaignsArray.reduce((sum, campaign) => {
                     const delivered = campaign.stats?.delivered || 0
                     return sum + delivered
                   }, 0)
                   
-                  const totalOpens = campaigns.reduce((sum, campaign) => {
+                  const totalOpens = campaignsArray.reduce((sum, campaign) => {
                     const opens = campaign.stats?.opens || 0
                     return sum + opens
                   }, 0)
@@ -1041,9 +1047,10 @@ export default function Home() {
                   
                   {(() => {
                     // Calculate real delivery rates for the past 7 days
+                    const campaignsArray = Array.isArray(campaigns) ? campaigns : []
                     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                    const baseRate = campaigns.length > 0 ? 85 : 90
-                    const variation = campaigns.length > 0 ? campaigns.length * 2 : 5
+                    const baseRate = campaignsArray.length > 0 ? 85 : 90
+                    const variation = campaignsArray.length > 0 ? campaignsArray.length * 2 : 5
                     
                     const rates = days.map((_, index) => {
                       const randomVariation = (Math.random() - 0.5) * 10
