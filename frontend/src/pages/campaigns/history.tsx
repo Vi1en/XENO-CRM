@@ -24,14 +24,14 @@ interface Campaign {
 
 export default function CampaignHistory() {
   const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
 
   // Simple authentication check
   useEffect(() => {
@@ -56,6 +56,13 @@ export default function CampaignHistory() {
 
     checkAuth()
   }, [])
+
+  const handleSignOut = () => {
+    setUser(null)
+    setIsAuthenticated(false)
+    localStorage.removeItem('xeno-user')
+    router.push('/')
+  }
 
   // Filter campaigns based on search term
   useEffect(() => {
@@ -82,7 +89,7 @@ export default function CampaignHistory() {
     try {
       console.log('🔄 Loading campaign history from API...')
       const response = await campaignApi.getAll()
-      const rawCampaigns = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      const rawCampaigns = response.data.data || response.data
       
       // Map API data to our expected format and filter for completed campaigns
       const apiCampaigns = rawCampaigns.map((campaign: any) => {
@@ -136,13 +143,6 @@ export default function CampaignHistory() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800'
@@ -151,15 +151,6 @@ export default function CampaignHistory() {
       case 'draft': return 'bg-gray-100 text-gray-800'
       case 'paused': return 'bg-orange-100 text-orange-800'
       default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Email': return '📧'
-      case 'SMS': return '📱'
-      case 'Push': return '🔔'
-      default: return '📢'
     }
   }
 
