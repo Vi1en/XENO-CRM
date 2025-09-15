@@ -3,18 +3,16 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { customerApi, campaignApi, segmentApi, orderApi } from '@/lib/api'
-import { User, getUser } from '@/lib/auth'
+import { useAuth } from '@/lib/useAuth'
 import Head from 'next/head'
 import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
-import ProtectedRoute from '@/components/ProtectedRoute'
-import EnhancedNavigation from '@/components/EnhancedNavigation'
+import AuthNavigation from '@/components/AuthNavigation'
 
 export default function Home() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isLoading: authLoading, isAuthenticated, logout, getAuthHeaders } = useAuth()
   const [customers, setCustomers] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [segments, setSegments] = useState<any[]>([])
@@ -31,33 +29,21 @@ export default function Home() {
   const [pageLoading, setPageLoading] = useState(false)
   // Removed client-side loading logic - using proper authentication
 
-  // Load user data
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const loadUser = () => {
-      try {
-        console.log('🏠 Dashboard: Loading user data...')
-        const userData = getUser()
-        
-        if (userData) {
-          console.log('✅ Dashboard: User loaded successfully:', {
-            name: userData.name,
-            email: userData.email,
-            provider: userData.provider
-          })
-          setUser(userData)
-          loadData()
-        } else {
-          console.log('❌ Dashboard: No user found in localStorage')
-        }
-      } catch (error) {
-        console.error('❌ Dashboard: Error loading user:', error)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Dashboard: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    loadUser()
-  }, [])
+  // Load data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('✅ Dashboard: User authenticated, loading data')
+      loadData()
+    }
+  }, [isAuthenticated, user])
 
   // Load data when user is available
   useEffect(() => {
@@ -67,31 +53,7 @@ export default function Home() {
     }
   }, [user, customers.length])
 
-  // Simple sign in function
-  const handleSignIn = () => {
-    const userData: User = {
-      name: 'John Doe',
-      email: 'john@example.com',
-      id: 'user-123',
-      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=3b82f6&color=ffffff',
-      provider: 'email',
-      createdAt: new Date().toISOString()
-    }
-    setUser(userData)
-    localStorage.setItem('xeno-user', JSON.stringify(userData))
-    console.log('✅ User signed in:', userData.name)
-  }
-
-  // Simple sign out function
-  const handleSignOut = () => {
-    setUser(null)
-    localStorage.removeItem('xeno-user')
-    setCustomers([])
-    setCampaigns([])
-    setSegments([])
-    setOrders([])
-    console.log('✅ User signed out')
-  }
+  // Auth functions removed - now handled by useAuth hook
 
   // Smooth navigation with loading state
   const handleNavigation = (href: string) => {
@@ -612,25 +574,22 @@ export default function Home() {
 
 
   return (
-    <ProtectedRoute>
-      <PageTransition>
-        <Head>
-          <title>Xeno CRM Dashboard</title>
-          <meta name="description" content="Customer Relationship Management Dashboard" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-          <meta httpEquiv="Pragma" content="no-cache" />
-          <meta httpEquiv="Expires" content="0" />
-          <meta name="version" content="v4.0-no-api-calls" />
+    <PageTransition>
+      <Head>
+        <title>Xeno CRM Dashboard</title>
+        <meta name="description" content="Customer Relationship Management Dashboard" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
+        <meta name="version" content="v4.0-no-api-calls" />
           <meta name="build" content="2024-01-15-real-data-v1" />
           <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
           <link rel="alternate icon" href="/favicon.ico" />
         </Head>
         
         <div className="min-h-screen bg-gray-50 flex">
-      
-        {/* Enhanced Navigation with User Info */}
-        <EnhancedNavigation currentPath={router.pathname} user={user} />
+          <AuthNavigation currentPath={router.pathname} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -1444,6 +1403,5 @@ export default function Home() {
       </div>
     </div>
       </PageTransition>
-    </ProtectedRoute>
   )
 }

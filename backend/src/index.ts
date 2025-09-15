@@ -15,6 +15,7 @@ import { deliveryRoutes } from './routes/delivery';
 import { aiRoutes } from './routes/ai';
 import { orderRoutes } from './routes/orders';
 import authRoutes from './routes/auth';
+import auth0Routes from './routes/auth0';
 import { connectToDatabase } from './services/database';
 import { connectToRabbitMQ } from './services/rabbitmq';
 
@@ -113,6 +114,7 @@ app.use('/api/v1/delivery', deliveryRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', auth0Routes);
 
 // Swagger UI
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
