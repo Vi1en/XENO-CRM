@@ -29,7 +29,41 @@ export default function AuthNavigation({ currentPath }: AuthNavigationProps) {
   ]
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white shadow-lg z-40">
+    <>
+      {/* Mobile backdrop */}
+      <div 
+        className="sidebar-backdrop lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30 opacity-0 pointer-events-none transition-opacity duration-300"
+        onClick={() => {
+          const sidebar = document.querySelector('.sidebar-nav')
+          const backdrop = document.querySelector('.sidebar-backdrop')
+          if (sidebar) {
+            sidebar.classList.add('-translate-x-full')
+            sidebar.classList.remove('translate-x-0')
+          }
+          if (backdrop) {
+            backdrop.classList.add('opacity-0', 'pointer-events-none')
+            backdrop.classList.remove('opacity-100', 'pointer-events-auto')
+          }
+        }}
+      />
+      
+      <div className="sidebar-nav fixed left-0 top-0 h-full w-64 bg-gray-900 text-white shadow-lg z-40 lg:translate-x-0 transform -translate-x-full transition-transform duration-300 ease-in-out">
+      {/* Mobile close button */}
+      <button
+        onClick={() => {
+          const sidebar = document.querySelector('.sidebar-nav')
+          if (sidebar) {
+            sidebar.classList.add('-translate-x-full')
+            sidebar.classList.remove('translate-x-0')
+          }
+        }}
+        className="lg:hidden absolute top-4 right-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+      >
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-8">
           <div className="text-2xl">🚀</div>
@@ -97,5 +131,6 @@ export default function AuthNavigation({ currentPath }: AuthNavigationProps) {
         </button>
       </div>
     </div>
+    </>
   )
 }

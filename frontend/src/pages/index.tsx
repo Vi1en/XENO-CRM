@@ -588,17 +588,41 @@ export default function Home() {
           <link rel="alternate icon" href="/favicon.ico" />
         </Head>
         
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-50">
           <AuthNavigation currentPath={router.pathname} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
         {/* Header */}
         <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
-              <p className="text-gray-600">Welcome to Xeno CRM!</p>
+            <div className="flex items-center space-x-4">
+              {/* Mobile menu button */}
+              <button
+                onClick={() => {
+                  const sidebar = document.querySelector('.sidebar-nav')
+                  const backdrop = document.querySelector('.sidebar-backdrop')
+                  if (sidebar) {
+                    sidebar.classList.toggle('translate-x-0')
+                    sidebar.classList.toggle('-translate-x-full')
+                  }
+                  if (backdrop) {
+                    backdrop.classList.toggle('opacity-0')
+                    backdrop.classList.toggle('pointer-events-none')
+                    backdrop.classList.toggle('opacity-100')
+                    backdrop.classList.toggle('pointer-events-auto')
+                  }
+                }}
+                className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
+                <p className="text-gray-600">Welcome to Xeno CRM!</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">

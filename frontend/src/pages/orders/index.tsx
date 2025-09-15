@@ -3,114 +3,76 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { orderApi } from '@/lib/api'
+import { useAuth } from '@/lib/useAuth'
+import PageTransition from '@/components/PageTransition'
+import SkeletonLoader from '@/components/SkeletonLoader'
+import SmoothButton from '@/components/SmoothButton'
+import AuthNavigation from '@/components/AuthNavigation'
 
 interface Order {
   _id: string
-  orderNumber: string
+  orderId: string
   customerId: string
   customerName: string
-  total: number
+  totalAmount: number
   status: string
   createdAt: string
-  items: any[]
+  items: Array<{
+    productId: string
+    productName: string
+    quantity: number
+    price: number
+  }>
 }
 
 export default function Orders() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isLoading: authLoading, isAuthenticated, getAuthHeaders } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-          loadOrders()
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Orders: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    checkAuth()
-  }, [])
-
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
-
-  // Filter orders based on search term
+  // Load orders when authenticated
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredOrders(orders)
-    } else {
-      const filtered = orders.filter(order => {
-        const searchLower = searchTerm.toLowerCase()
-        return (
-          order.orderNumber.toLowerCase().includes(searchLower) ||
-          order.customerName.toLowerCase().includes(searchLower) ||
-          order.status.toLowerCase().includes(searchLower)
-        )
-      })
-      setFilteredOrders(filtered)
+    if (isAuthenticated && user) {
+      console.log('✅ Orders: User authenticated, loading orders')
+      loadOrders()
     }
-  }, [orders, searchTerm])
+  }, [isAuthenticated, user])
 
   const loadOrders = async () => {
     setLoading(true)
     setError(null)
     
     try {
-      console.log('🔄 Loading orders from API...')
+      console.log('📦 Loading orders...')
       const response = await orderApi.getAll()
-      const rawOrders = response.data.data || response.data
       
-      // Map API data to our expected format
-      const apiOrders = rawOrders.map((order: any) => ({
-        _id: order._id,
-        orderNumber: order.orderId || order.orderNumber,
-        customerId: order.customerId || order._id,
-        customerName: order.customerName,
-        total: order.totalSpent || order.total || 0,
-        status: order.status || 'completed',
-        createdAt: order.date || order.createdAt,
-        items: order.items || []
-      }))
+      console.log('📦 Orders response:', response.data)
       
-      setOrders(apiOrders)
-      setFilteredOrders(apiOrders)
-      console.log('✅ Real orders loaded from API:', apiOrders.length)
+      // Handle nested data structure
+      const ordersData = response.data?.data || response.data || []
+      setOrders(Array.isArray(ordersData) ? ordersData : [])
       
+      console.log('✅ Orders loaded:', ordersData.length)
     } catch (error: any) {
-      console.error('❌ Error loading orders from API:', error)
-      setError('Failed to load order data from database')
-      setOrders([])
-      setFilteredOrders([])
+      console.error('❌ Error loading orders:', error)
+      setError('Failed to load orders. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this order?')) {
       return
     }
 
@@ -119,336 +81,252 @@ export default function Orders() {
       await orderApi.delete(orderId)
       
       // Remove from local state
-      const updatedOrders = orders.filter(order => order._id !== orderId)
-      setOrders(updatedOrders)
-      setFilteredOrders(updatedOrders)
-      
+      setOrders(orders.filter(o => o._id !== orderId))
       console.log('✅ Order deleted successfully')
     } catch (error: any) {
       console.error('❌ Error deleting order:', error)
-      setError(`Failed to delete order: ${error.response?.data?.message || error.message}`)
+      alert('Failed to delete order. Please try again.')
     }
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
-      case 'processing': return 'bg-blue-100 text-blue-800'
-      default: return 'bg-gray-100 text-gray-800'
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-100 text-green-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      case 'processing':
+        return 'bg-blue-100 text-blue-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">X</span>
+      <PageTransition>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center animate-fade-in">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
+              <span className="text-white font-bold text-xl">X</span>
+            </div>
+            <p className="text-gray-600 animate-pulse">Loading orders...</p>
           </div>
-          <p className="text-gray-600">Loading orders...</p>
         </div>
-      </div>
+      </PageTransition>
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">X</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
-          <p className="text-gray-600 mb-6">You need to be signed in to view orders.</p>
-          <button
-            onClick={() => router.push('/')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Go to Sign In
-          </button>
-        </div>
-      </div>
-    )
+  if (!isAuthenticated || !user) {
+    return null
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Orders</title>
         <meta name="description" content="Manage orders in Xeno CRM" />
       </Head>
+      
       <div className="min-h-screen bg-gray-50">
-        {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white">
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center px-6 py-4 border-b border-gray-700">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-xl font-semibold text-white">Xeno CRM</span>
-                  <p className="text-sm text-gray-400">Dashboard</p>
-                </div>
-              </div>
-            </div>
-
-            <nav className="space-y-2">
-              <Link href="/" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                </svg>
-                <span>Dashboard</span>
-              </Link>
-              
-              <Link href="/customers" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-                <span>Customers</span>
-              </Link>
-              
-              <Link href="/campaigns" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                <span>Campaigns</span>
-              </Link>
-              
-              <Link href="/campaigns/history" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Campaign History</span>
-              </Link>
-              
-              <Link href="/orders" className="flex items-center space-x-3 px-4 py-3 bg-blue-600 text-white rounded-lg">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span className="font-medium">Orders</span>
-              </Link>
-              
-              <Link href="/segments" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                <span>Segments</span>
-              </Link>
-            </nav>
-
-            {/* EXTERNAL Section */}
-            <div className="mt-8">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">EXTERNAL</h3>
-              <nav className="space-y-2">
-                <a 
-                  href="https://backend-production-05a7e.up.railway.app/api/docs" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>API Documentation</span>
-                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </nav>
-            </div>
-          </div>
-          
-          {/* User Info */}
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-gray-400">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="p-1 text-gray-400 hover:text-white"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
+        <AuthNavigation currentPath={router.pathname} />
+        
         {/* Main Content */}
-        <div className="pl-64">
-          {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          {/* Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="flex items-center text-sm text-gray-500">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <div className="flex items-center space-x-4">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar-nav')
+                    const backdrop = document.querySelector('.sidebar-backdrop')
+                    if (sidebar) {
+                      sidebar.classList.toggle('translate-x-0')
+                      sidebar.classList.toggle('-translate-x-full')
+                    }
+                    if (backdrop) {
+                      backdrop.classList.toggle('opacity-0')
+                      backdrop.classList.toggle('pointer-events-none')
+                      backdrop.classList.toggle('opacity-100')
+                      backdrop.classList.toggle('pointer-events-auto')
+                    }
+                  }}
+                  className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>/orders</span>
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+                  <p className="text-gray-600">Manage your customer orders</p>
                 </div>
               </div>
-              <div className="flex space-x-3">
-                <button
+              <div className="flex items-center space-x-4">
+                <SmoothButton
                   onClick={loadOrders}
                   disabled={loading}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                  loading={loading}
+                  variant="primary"
+                  size="md"
                 >
-                  {loading ? 'Refreshing...' : 'Refresh'}
-                </button>
-                <Link
-                  href="/orders/create"
-                  className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  Refresh
+                </SmoothButton>
+                <SmoothButton
+                  onClick={() => router.push('/orders/create')}
+                  variant="secondary"
+                  size="md"
                 >
-                  Create Order
-                </Link>
+                  Add Order
+                </SmoothButton>
               </div>
             </div>
           </div>
 
-          {/* Page Content */}
-          <div className="p-6">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Orders</h1>
-                  <p className="mt-2 text-gray-600">Manage and track customer orders</p>
+          {/* Content */}
+          <div className="flex-1 p-6">
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Error
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      {error}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Orders List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {loading ? (
+              <SkeletonLoader type="table" />
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Order List ({orders.length})
+                  </h3>
+                </div>
+                
+                {orders.length === 0 ? (
+                  <div className="px-6 py-12 text-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    All Orders
-                  </h2>
-                  {searchTerm && (
-                    <div className="text-sm text-gray-500">
-                      {filteredOrders.length} of {orders.length} orders
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
+                    <p className="mt-1 text-sm text-gray-500">Get started by adding your first order.</p>
+                    <div className="mt-6">
+                      <SmoothButton
+                        onClick={() => router.push('/orders/create')}
+                        variant="primary"
+                        size="md"
+                      >
+                        Add Order
+                      </SmoothButton>
                     </div>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search orders..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
                   </div>
-                </div>
-              </div>
-
-              <div className="overflow-hidden">
-                {loading && (
-                  <div className="flex justify-center py-12">
-                    <div className="text-gray-500">Loading orders...</div>
-                  </div>
-                )}
-
-                {!loading && filteredOrders.length === 0 && orders.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📦</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-                    <p className="text-gray-500 mb-6">
-                      Orders will appear here as they are created.
-                    </p>
-                    <Link
-                      href="/orders/create"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-                    >
-                      Create First Order
-                    </Link>
-                  </div>
-                )}
-
-                {!loading && filteredOrders.length === 0 && orders.length > 0 && (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-                    <p className="text-gray-500 mb-6">
-                      No orders match your search criteria. Try adjusting your search terms.
-                    </p>
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Clear search
-                    </button>
-                  </div>
-                )}
-
-                {!loading && filteredOrders.length > 0 && (
+                ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Order
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Customer
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total Amount
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Items
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredOrders.map((order: Order) => (
-                          <tr key={order._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {order.orderNumber || 'N/A'}
+                        {orders.map((order, index) => (
+                          <tr key={order._id || index} className="hover:bg-gray-50 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                    <span className="text-sm font-medium text-white">
+                                      #{order.orderId?.slice(-4) || 'N/A'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {order.orderId || 'N/A'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">
+                                    ID: {order._id?.slice(-8)}
+                                  </div>
+                                </div>
+                              </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {order.customerName || 'Unknown Customer'}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">{order.customerName || 'Unknown Customer'}</div>
+                              <div className="text-sm text-gray-500">{order.customerId}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ${(order.total || 0).toFixed(2)}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                ${(order.totalAmount || 0).toLocaleString()}
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                {order.status}
+                                {order.status || 'Unknown'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {order.items?.length || 0} items
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Link
-                                href={`/orders/edit/${order._id}`}
-                                className="text-blue-600 hover:text-blue-900 mr-4"
-                              >
-                                Edit
-                              </Link>
-                              <button 
-                                onClick={() => handleDeleteOrder(order._id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Delete
-                              </button>
+                              <div className="flex space-x-2">
+                                <SmoothButton
+                                  onClick={() => router.push(`/orders/edit/${order._id}`)}
+                                  variant="secondary"
+                                  size="sm"
+                                >
+                                  Edit
+                                </SmoothButton>
+                                <SmoothButton
+                                  onClick={() => handleDeleteOrder(order._id)}
+                                  variant="danger"
+                                  size="sm"
+                                >
+                                  Delete
+                                </SmoothButton>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -457,10 +335,10 @@ export default function Orders() {
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }

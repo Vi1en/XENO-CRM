@@ -6,7 +6,8 @@ import { campaignApi } from '@/lib/api'
 import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
-import Navigation from '@/components/Navigation'
+import AuthNavigation from '@/components/AuthNavigation'
+import { useAuth } from '@/lib/useAuth'
 import AIPromptModal from '@/components/AIPromptModal'
 import SegmentSelectionModal from '@/components/SegmentSelectionModal'
 
@@ -297,25 +298,40 @@ export default function Campaigns() {
         <title>Xeno CRM - Campaigns</title>
         <meta name="description" content="Manage marketing campaigns in Xeno CRM" />
       </Head>
-      <div className="min-h-screen bg-gray-50 flex">
-        {/* Navigation Sidebar */}
-        <Navigation 
-          currentPath="/campaigns" 
-          user={user} 
-          onSignOut={handleSignOut} 
-        />
+      <div className="min-h-screen bg-gray-50">
+        <AuthNavigation currentPath={router.pathname} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-64">
-          {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          {/* Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="flex items-center text-sm text-gray-500">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <div className="flex items-center space-x-4">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar-nav')
+                    const backdrop = document.querySelector('.sidebar-backdrop')
+                    if (sidebar) {
+                      sidebar.classList.toggle('translate-x-0')
+                      sidebar.classList.toggle('-translate-x-full')
+                    }
+                    if (backdrop) {
+                      backdrop.classList.toggle('opacity-0')
+                      backdrop.classList.toggle('pointer-events-none')
+                      backdrop.classList.toggle('opacity-100')
+                      backdrop.classList.toggle('pointer-events-auto')
+                    }
+                  }}
+                  className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>/campaigns</span>
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
+                  <p className="text-gray-600">Manage your marketing campaigns</p>
                 </div>
               </div>
             </div>
