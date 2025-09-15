@@ -66,8 +66,16 @@ export default function EditCustomer() {
   }
 
   const loadCustomer = async () => {
-    if (!id) return
+    console.log('🚀 loadCustomer function called!')
+    console.log('🔍 ID at start of function:', id)
+    alert('loadCustomer function called with ID: ' + id)
     
+    if (!id) {
+      console.log('❌ No ID provided, returning early')
+      return
+    }
+    
+    console.log('✅ ID exists, proceeding with load...')
     setLoading(true)
     setError(null)
     try {
