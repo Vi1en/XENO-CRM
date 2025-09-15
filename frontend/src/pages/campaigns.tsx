@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { campaignApi } from '@/lib/api'
 
 interface Campaign {
   _id: string
@@ -72,22 +73,36 @@ export default function Campaigns() {
   const loadCampaigns = async () => {
     setLoading(true)
     setError(null)
-    console.log('Loading demo campaigns...')
     
-    // Use demo data
-    const demoCampaigns = [
-      { _id: '1', name: 'Welcome Series', type: 'Email', status: 'active', targetSegment: 'New Customers', sentCount: 150, openRate: 45.2, clickRate: 12.8, createdAt: new Date().toISOString() },
-      { _id: '2', name: 'VIP Promotion', type: 'Email', status: 'completed', targetSegment: 'VIP Customers', sentCount: 25, openRate: 68.0, clickRate: 24.0, createdAt: new Date().toISOString() },
-      { _id: '3', name: 'Re-engagement', type: 'Email', status: 'scheduled', targetSegment: 'At-Risk Customers', sentCount: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString(), scheduledAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
-      { _id: '4', name: 'Product Launch', type: 'SMS', status: 'active', targetSegment: 'Frequent Buyers', sentCount: 80, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString() },
-      { _id: '5', name: 'Holiday Sale', type: 'Email', status: 'draft', targetSegment: 'All Customers', sentCount: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() }
-    ]
-    
-    setCampaigns(demoCampaigns)
-    setFilteredCampaigns(demoCampaigns)
-    console.log('Demo campaigns loaded:', demoCampaigns.length)
-    
-    setLoading(false)
+    try {
+      console.log('🔄 Loading campaigns from API...')
+      const response = await campaignApi.getAll()
+      const apiCampaigns = response.data
+      
+      setCampaigns(apiCampaigns)
+      setFilteredCampaigns(apiCampaigns)
+      console.log('✅ Real campaigns loaded from API:', apiCampaigns.length)
+      
+    } catch (error: any) {
+      console.error('❌ Error loading campaigns from API:', error)
+      console.log('📱 Falling back to demo data...')
+      
+      // Fallback to demo data if API fails
+      const demoCampaigns = [
+        { _id: '1', name: 'Welcome Series', type: 'Email', status: 'active', targetSegment: 'New Customers', sentCount: 150, openRate: 45.2, clickRate: 12.8, createdAt: new Date().toISOString() },
+        { _id: '2', name: 'VIP Promotion', type: 'Email', status: 'completed', targetSegment: 'VIP Customers', sentCount: 25, openRate: 68.0, clickRate: 24.0, createdAt: new Date().toISOString() },
+        { _id: '3', name: 'Re-engagement', type: 'Email', status: 'scheduled', targetSegment: 'At-Risk Customers', sentCount: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString(), scheduledAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
+        { _id: '4', name: 'Product Launch', type: 'SMS', status: 'active', targetSegment: 'Frequent Buyers', sentCount: 80, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString() },
+        { _id: '5', name: 'Holiday Sale', type: 'Email', status: 'draft', targetSegment: 'All Customers', sentCount: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() }
+      ]
+      
+      setCampaigns(demoCampaigns)
+      setFilteredCampaigns(demoCampaigns)
+      setError('API unavailable - showing demo data')
+      console.log('📊 Demo campaigns loaded:', demoCampaigns.length)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSignOut = () => {

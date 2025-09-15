@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { segmentApi } from '@/lib/api'
 
 interface Segment {
   _id: string
@@ -67,22 +68,36 @@ export default function Segments() {
   const loadSegments = async () => {
     setLoading(true)
     setError(null)
-    console.log('Loading demo segments...')
     
-    // Use demo data
-    const demoSegments = [
-      { _id: '1', name: 'VIP Customers', description: 'High-value customers with significant spending', criteria: {}, customerCount: 25, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '2', name: 'New Customers', description: 'Recently registered customers', criteria: {}, customerCount: 150, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '3', name: 'At-Risk Customers', description: 'Customers who haven\'t purchased recently', criteria: {}, customerCount: 45, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '4', name: 'Frequent Buyers', description: 'Customers with multiple purchases', criteria: {}, customerCount: 80, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '5', name: 'Premium Members', description: 'Customers with premium subscriptions', criteria: {}, customerCount: 30, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-    ]
-    
-    setSegments(demoSegments)
-    setFilteredSegments(demoSegments)
-    console.log('Demo segments loaded:', demoSegments.length)
-    
-    setLoading(false)
+    try {
+      console.log('🔄 Loading segments from API...')
+      const response = await segmentApi.getAll()
+      const apiSegments = response.data
+      
+      setSegments(apiSegments)
+      setFilteredSegments(apiSegments)
+      console.log('✅ Real segments loaded from API:', apiSegments.length)
+      
+    } catch (error: any) {
+      console.error('❌ Error loading segments from API:', error)
+      console.log('📱 Falling back to demo data...')
+      
+      // Fallback to demo data if API fails
+      const demoSegments = [
+        { _id: '1', name: 'VIP Customers', description: 'High-value customers with significant spending', criteria: {}, customerCount: 25, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '2', name: 'New Customers', description: 'Recently registered customers', criteria: {}, customerCount: 150, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '3', name: 'At-Risk Customers', description: 'Customers who haven\'t purchased recently', criteria: {}, customerCount: 45, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '4', name: 'Frequent Buyers', description: 'Customers with multiple purchases', criteria: {}, customerCount: 80, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '5', name: 'Premium Members', description: 'Customers with premium subscriptions', criteria: {}, customerCount: 30, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      ]
+      
+      setSegments(demoSegments)
+      setFilteredSegments(demoSegments)
+      setError('API unavailable - showing demo data')
+      console.log('📊 Demo segments loaded:', demoSegments.length)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSignOut = () => {

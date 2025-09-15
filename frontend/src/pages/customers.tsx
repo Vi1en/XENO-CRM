@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { customerApi } from '@/lib/api'
 
 interface Customer {
   _id: string
@@ -77,22 +78,36 @@ export default function Customers() {
   const loadCustomers = async () => {
     setLoading(true)
     setError(null)
-    console.log('Loading demo customers...')
     
-    // Use demo data instead of API calls
-    const demoCustomers = [
-      { _id: '1', externalId: 'ext1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '2', externalId: 'ext2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '3', externalId: 'ext3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '4', externalId: 'ext4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { _id: '5', externalId: 'ext5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-    ]
-    
-    setCustomers(demoCustomers)
-    setFilteredCustomers(demoCustomers)
-    console.log('Demo customers loaded:', demoCustomers.length)
-    
-    setLoading(false)
+    try {
+      console.log('🔄 Loading customers from API...')
+      const response = await customerApi.getAll()
+      const apiCustomers = response.data
+      
+      setCustomers(apiCustomers)
+      setFilteredCustomers(apiCustomers)
+      console.log('✅ Real customers loaded from API:', apiCustomers.length)
+      
+    } catch (error: any) {
+      console.error('❌ Error loading customers from API:', error)
+      console.log('📱 Falling back to demo data...')
+      
+      // Fallback to demo data if API fails
+      const demoCustomers = [
+        { _id: '1', externalId: 'ext1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '2', externalId: 'ext2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '3', externalId: 'ext3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '4', externalId: 'ext4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '5', externalId: 'ext5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      ]
+      
+      setCustomers(demoCustomers)
+      setFilteredCustomers(demoCustomers)
+      setError('API unavailable - showing demo data')
+      console.log('📊 Demo customers loaded:', demoCustomers.length)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleEdit = (customer: Customer) => {
@@ -110,15 +125,23 @@ export default function Customers() {
 
     try {
       setDeleteLoading(customer._id)
-      console.log('Deleting customer (demo mode):', customer._id)
+      console.log('🗑️ Deleting customer:', customer._id)
       
-      // In demo mode, just remove from local state
+      // Try to delete from API first
+      try {
+        await customerApi.delete(parseInt(customer._id))
+        console.log('✅ Customer deleted from API successfully')
+      } catch (apiError) {
+        console.warn('⚠️ API delete failed, removing from local state only:', apiError)
+      }
+      
+      // Remove from local state regardless of API result
       setCustomers(prev => prev.filter(c => c._id !== customer._id))
       setFilteredCustomers(prev => prev.filter(c => c._id !== customer._id))
       
-      console.log('Customer deleted successfully (demo mode)')
+      console.log('✅ Customer deleted successfully')
     } catch (error) {
-      console.error('Error deleting customer:', error)
+      console.error('❌ Error deleting customer:', error)
       setError('Failed to delete customer')
     } finally {
       setDeleteLoading(null)

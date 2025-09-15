@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { orderApi } from '@/lib/api'
 
 interface Order {
   _id: string
@@ -69,22 +70,36 @@ export default function Orders() {
   const loadOrders = async () => {
     setLoading(true)
     setError(null)
-    console.log('Loading demo orders...')
     
-    // Use demo data
-    const demoOrders = [
-      { _id: '1', orderNumber: 'ORD-001', customerId: '1', customerName: 'John Doe', total: 299.99, status: 'completed', createdAt: new Date().toISOString(), items: [] },
-      { _id: '2', orderNumber: 'ORD-002', customerId: '2', customerName: 'Jane Smith', total: 149.50, status: 'pending', createdAt: new Date().toISOString(), items: [] },
-      { _id: '3', orderNumber: 'ORD-003', customerId: '3', customerName: 'Bob Johnson', total: 89.99, status: 'shipped', createdAt: new Date().toISOString(), items: [] },
-      { _id: '4', orderNumber: 'ORD-004', customerId: '4', customerName: 'Alice Brown', total: 450.00, status: 'completed', createdAt: new Date().toISOString(), items: [] },
-      { _id: '5', orderNumber: 'ORD-005', customerId: '5', customerName: 'Charlie Wilson', total: 199.99, status: 'cancelled', createdAt: new Date().toISOString(), items: [] }
-    ]
-    
-    setOrders(demoOrders)
-    setFilteredOrders(demoOrders)
-    console.log('Demo orders loaded:', demoOrders.length)
-    
-    setLoading(false)
+    try {
+      console.log('🔄 Loading orders from API...')
+      const response = await orderApi.getAll()
+      const apiOrders = response.data
+      
+      setOrders(apiOrders)
+      setFilteredOrders(apiOrders)
+      console.log('✅ Real orders loaded from API:', apiOrders.length)
+      
+    } catch (error: any) {
+      console.error('❌ Error loading orders from API:', error)
+      console.log('📱 Falling back to demo data...')
+      
+      // Fallback to demo data if API fails
+      const demoOrders = [
+        { _id: '1', orderNumber: 'ORD-001', customerId: '1', customerName: 'John Doe', total: 299.99, status: 'completed', createdAt: new Date().toISOString(), items: [] },
+        { _id: '2', orderNumber: 'ORD-002', customerId: '2', customerName: 'Jane Smith', total: 149.50, status: 'pending', createdAt: new Date().toISOString(), items: [] },
+        { _id: '3', orderNumber: 'ORD-003', customerId: '3', customerName: 'Bob Johnson', total: 89.99, status: 'shipped', createdAt: new Date().toISOString(), items: [] },
+        { _id: '4', orderNumber: 'ORD-004', customerId: '4', customerName: 'Alice Brown', total: 450.00, status: 'completed', createdAt: new Date().toISOString(), items: [] },
+        { _id: '5', orderNumber: 'ORD-005', customerId: '5', customerName: 'Charlie Wilson', total: 199.99, status: 'cancelled', createdAt: new Date().toISOString(), items: [] }
+      ]
+      
+      setOrders(demoOrders)
+      setFilteredOrders(demoOrders)
+      setError('API unavailable - showing demo data')
+      console.log('📊 Demo orders loaded:', demoOrders.length)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSignOut = () => {
