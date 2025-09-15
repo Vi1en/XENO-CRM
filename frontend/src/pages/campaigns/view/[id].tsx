@@ -91,6 +91,7 @@ export default function CampaignDetails() {
       }
 
       console.log('📋 Campaign data loaded:', campaignData)
+      console.log('Loaded record:', campaignData)
       setCampaign(campaignData)
       
     } catch (error: any) {
