@@ -292,7 +292,6 @@ export default function Customers() {
               </button>
             </div>
           </div>
-          </div>
         </div>
 
         {/* Main Content */}
