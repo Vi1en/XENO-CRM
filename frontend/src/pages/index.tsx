@@ -124,21 +124,39 @@ export default function Home() {
           orderApi.getAll()
         ])
         
-        setCustomers(customersRes.data)
-        setCampaigns(campaignsRes.data)
-        setSegments(segmentsRes.data)
-        setOrders(ordersRes.data)
+        // Extract data from API responses
+        const customersData = customersRes.data?.data || customersRes.data || []
+        const campaignsData = campaignsRes.data?.data || campaignsRes.data || []
+        const segmentsData = segmentsRes.data?.data || segmentsRes.data || []
+        const ordersData = ordersRes.data?.data || ordersRes.data || []
+        
+        console.log('🔍 Extracted data lengths:', {
+          customers: customersData.length,
+          campaigns: campaignsData.length,
+          segments: segmentsData.length,
+          orders: ordersData.length
+        })
+        
+        setCustomers(customersData)
+        setCampaigns(campaignsData)
+        setSegments(segmentsData)
+        setOrders(ordersData)
         
         // Calculate segments from customer data directly
-        const customersArray = Array.isArray(customersRes.data) ? customersRes.data : []
-        console.log('🔍 Raw customers data length:', customersArray.length)
-        console.log('🔍 First customer object:', customersArray[0])
+        console.log('🔍 Using extracted customers data for segments:', customersData)
         
         const segments: { [key: string]: number } = {}
         let regularCount = 0
         
         // Process each customer
-        customersArray.forEach((customer: any, index: number) => {
+        customersData.forEach((customer: any, index: number) => {
+          console.log(`🔍 Processing customer ${index}:`, {
+            name: `${customer.firstName} ${customer.lastName}`,
+            tags: customer.tags,
+            tagsType: typeof customer.tags,
+            tagsIsArray: Array.isArray(customer.tags)
+          })
+          
           // Check if customer has tags
           if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
             // Customer has tags, count the first tag
@@ -160,7 +178,7 @@ export default function Home() {
         }
         
         console.log('📊 Final segments calculated:', segments)
-        console.log('📊 Total customers:', customersArray.length)
+        console.log('📊 Total customers:', customersData.length)
         console.log('📊 Regular customers:', regularCount)
         setCustomerSegments(segments)
         setUsingMockData(false)
