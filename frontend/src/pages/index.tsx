@@ -63,15 +63,6 @@ export default function Home() {
       loadData()
       loadAnalyticsData()
       
-      // Test segments API directly
-      console.log('🧪 Testing segments API directly...')
-      customerApi.getSegments()
-        .then(response => {
-          console.log('✅ Segments API test successful:', response.data)
-        })
-        .catch(error => {
-          console.error('❌ Segments API test failed:', error)
-        })
     }
   }, [isAuthenticated, customers.length])
 
@@ -127,30 +118,51 @@ export default function Home() {
     console.log('🔄 Loading real data from API...')
     
     try {
-      // Load data from real API
-      const [customersRes, campaignsRes, segmentsRes, ordersRes, segmentsDataRes] = await Promise.all([
-        customerApi.getAll(),
-        campaignApi.getAll(),
-        segmentApi.getAll(),
-        orderApi.getAll(),
-        customerApi.getSegments().catch(err => {
-          console.log('⚠️ Segments API not available, will use frontend calculation')
-          return { data: { data: { segments: {} } } }
+        // Load data from real API
+        const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
+          customerApi.getAll(),
+          campaignApi.getAll(),
+          segmentApi.getAll(),
+          orderApi.getAll()
+        ])
+        
+        setCustomers(customersRes.data)
+        setCampaigns(campaignsRes.data)
+        setSegments(segmentsRes.data)
+        setOrders(ordersRes.data)
+        
+        // Calculate segments from customer data directly
+        const customersArray = Array.isArray(customersRes.data) ? customersRes.data : []
+        const segments: { [key: string]: number } = {}
+        let regularCount = 0
+        
+        customersArray.forEach((customer: any) => {
+          if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
+            // Customer has tags, count each tag
+            customer.tags.forEach((tag: string) => {
+              if (tag && typeof tag === 'string') {
+                segments[tag] = (segments[tag] || 0) + 1
+              }
+            })
+          } else {
+            // Customer has no tags, count as regular
+            regularCount++
+          }
         })
-      ])
-      
-      setCustomers(customersRes.data)
-      setCampaigns(campaignsRes.data)
-      setSegments(segmentsRes.data)
-      setOrders(ordersRes.data)
-      setCustomerSegments(segmentsDataRes.data.data?.segments || segmentsDataRes.data.segments || {})
-      setUsingMockData(false)
+        
+        // Add regular count if there are any
+        if (regularCount > 0) {
+          segments['regular'] = regularCount
+        }
+        
+        console.log('📊 Calculated segments from customer data:', segments)
+        setCustomerSegments(segments)
+        setUsingMockData(false)
       
       console.log('✅ Real data loaded successfully')
       console.log('🔍 Customer data structure:', customersRes.data)
       console.log('🔍 First customer tags:', customersRes.data[0]?.tags)
       console.log('🔍 Customer count:', customersRes.data.length)
-      console.log('🔍 Segments API response:', segmentsDataRes.data)
       console.log('🔍 Customer segments data:', customerSegments)
       setLoading(false)
       return // Exit early if API call succeeds
@@ -685,53 +697,16 @@ export default function Home() {
                         let totalCustomers = customers.length || 1
                         
                         if (customerSegments && Object.keys(customerSegments).length > 0) {
-                          console.log('📊 Using API segments data:', customerSegments)
-                          console.log('📊 API segments keys:', Object.keys(customerSegments))
-                          console.log('📊 API segments values:', Object.values(customerSegments))
+                          console.log('📊 Using calculated segments data:', customerSegments)
+                          console.log('📊 Segments keys:', Object.keys(customerSegments))
+                          console.log('📊 Segments values:', Object.values(customerSegments))
                           segmentCounts = customerSegments
                           totalCustomers = Object.values(customerSegments).reduce((sum: number, count: any) => sum + Number(count), 0)
-                          console.log('📊 Total customers from API:', totalCustomers)
+                          console.log('📊 Total customers from segments:', totalCustomers)
                         } else {
-                          console.log('📊 Using frontend calculation for segments')
-                          const customersArray = Array.isArray(customers) ? customers : []
-                          
-                          // Fallback to frontend calculation
-                          segmentCounts = {
-                            vip: customersArray.filter(c => 
-                              c.tags?.some((tag: string) => 
-                                tag.toLowerCase().includes('vip') || 
-                                tag.toLowerCase().includes('premium')
-                              ) || c.totalSpend > 1000
-                            ).length,
-                            loyal: customersArray.filter(c => 
-                              c.tags?.some((tag: string) => 
-                                tag.toLowerCase().includes('loyal') || 
-                                tag.toLowerCase().includes('returning')
-                              )
-                            ).length,
-                            'new-customer': customersArray.filter(c => 
-                              c.tags?.some((tag: string) => 
-                                tag.toLowerCase().includes('new') || 
-                                tag.toLowerCase().includes('new-customer')
-                              )
-                            ).length,
-                            'potential-vip': customersArray.filter(c => 
-                              c.tags?.some((tag: string) => 
-                                tag.toLowerCase().includes('potential') || 
-                                tag.toLowerCase().includes('potential-vip')
-                              )
-                            ).length,
-                            test: customersArray.filter(c => 
-                              c.tags?.some((tag: string) => 
-                                tag.toLowerCase().includes('test')
-                              )
-                            ).length,
-                            regular: 0
-                          }
-                          
-                          // Calculate regular customers (those without specific tags)
-                          const taggedCustomers = Object.values(segmentCounts).reduce((sum: number, count: any) => sum + Number(count), 0) - (segmentCounts.regular || 0)
-                          segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
+                          console.log('📊 No segments data available, using fallback')
+                          segmentCounts = { regular: customers.length || 1 }
+                          totalCustomers = customers.length || 1
                         }
                         
                         // Define segments with colors and calculate percentages
