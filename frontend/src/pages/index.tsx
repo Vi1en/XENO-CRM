@@ -23,18 +23,31 @@ export default function Home() {
   const [usingMockData, setUsingMockData] = useState(false)
 
   useEffect(() => {
+    let isMounted = true
+    
     // Load demo data immediately for demo mode
-    if (!customers.length) {
-      loadData()
-      loadAnalyticsData()
+    const loadDataAsync = async () => {
+      if (isMounted) {
+        await loadData()
+        await loadAnalyticsData()
+      }
+    }
+    
+    loadDataAsync()
+    
+    return () => {
+      isMounted = false
     }
   }, [])
 
   const loadData = async () => {
+    // Prevent multiple simultaneous calls
+    if (loading) return
+    
     setLoading(true)
     setError(null)
     console.log('📱 Loading demo data...')
-    
+
     // Skip all API calls - use demo data directly
     console.log('🔄 Loading demo data - API calls disabled')
     
@@ -184,11 +197,8 @@ export default function Home() {
   }
 
 
+  // Skip authentication for demo mode - always render dashboard
   if (status === 'loading') {
-    // Load demo data immediately without waiting for session
-    if (!customers.length) {
-      loadData()
-    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -199,14 +209,6 @@ export default function Home() {
         </div>
       </div>
     )
-  }
-
-  if (!session) {
-    // Load demo data even without session for demo mode
-    if (!customers.length) {
-      loadData()
-    }
-    // Continue to render dashboard with demo data
   }
 
   return (
