@@ -67,7 +67,7 @@ export default function EditCampaign() {
     if (!id) return
     
     try {
-      const response = await campaignApi.getById(parseInt(id as string))
+      const response = await campaignApi.getById(id as string)
       const campaign = response.data
       setFormData({
         name: campaign.name || '',
@@ -114,7 +114,7 @@ export default function EditCampaign() {
     setSuccess(false)
 
     try {
-      await campaignApi.update(parseInt(id as string), formData)
+      await campaignApi.update(id as string, formData)
       setSuccess(true)
       
       // Redirect to campaigns list after 2 seconds

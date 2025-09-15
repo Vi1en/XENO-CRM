@@ -134,16 +134,16 @@ export const campaignApi = {
   getAll: async () => {
     return retryRequest(() => api.get('/campaigns'));
   },
-  getById: async (id: number) => {
+  getById: async (id: string) => {
     return retryRequest(() => api.get(`/campaigns/${id}`));
   },
   create: async (data: any) => {
     return retryRequest(() => api.post('/campaigns', data));
   },
-  update: async (id: number, data: any) => {
+  update: async (id: string, data: any) => {
     return retryRequest(() => api.put(`/campaigns/${id}`, data));
   },
-  delete: async (id: number) => {
+  delete: async (id: string) => {
     return retryRequest(() => api.delete(`/campaigns/${id}`));
   },
   getDeliveryStats: async () => {

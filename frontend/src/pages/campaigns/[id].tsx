@@ -76,7 +76,7 @@ export default function CampaignDetails() {
     setError(null)
     
     try {
-      const response = await campaignApi.getById(parseInt(id as string))
+      const response = await campaignApi.getById(id as string)
       setCampaign(response.data)
     } catch (error: any) {
       console.error('Error loading campaign:', error)

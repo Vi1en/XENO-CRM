@@ -138,7 +138,7 @@ export default function Campaigns() {
       
       // Try to delete from API first
       try {
-        await campaignApi.delete(parseInt(campaign._id))
+        await campaignApi.delete(campaign._id)
         console.log('✅ Campaign deleted from API successfully')
       } catch (apiError) {
         console.warn('⚠️ API delete failed, removing from local state only:', apiError)
@@ -166,10 +166,14 @@ export default function Campaigns() {
     try {
       console.log('🤖 Creating AI campaign with suggestion:', suggestion)
       
+      // Use a default segment ID for AI campaigns
+      // In a real app, you'd want to let users choose the segment
+      const segmentId = 'all'
+      
       const newCampaign = {
         name: suggestion.name,
         description: suggestion.description,
-        segmentId: 'all', // Use 'all' as default segment ID for now
+        segmentId: segmentId,
         message: suggestion.message || suggestion.description
       }
       
