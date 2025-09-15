@@ -149,6 +149,9 @@ export const campaignApi = {
   delete: async (id: string) => {
     return retryRequest(() => api.delete(`/campaigns/${id}`));
   },
+  getSummary: async (id: string) => {
+    return retryRequest(() => api.get(`/campaigns/${id}/summary`));
+  },
   getDeliveryStats: async () => {
     return retryRequest(() => api.get('/campaigns/delivery-stats'), 3, true);
   }

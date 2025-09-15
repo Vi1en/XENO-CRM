@@ -124,12 +124,14 @@ export default function CampaignDetails() {
     
     setAiSummaryLoading(true)
     try {
-      const response = await aiApi.getInsights()
-      setAiSummary(response.data.summary || 'AI summary not available')
+      console.log('🤖 Generating AI summary for campaign:', campaign._id)
+      const response = await campaignApi.getSummary(campaign._id)
+      console.log('🤖 AI Summary response:', response.data)
+      setAiSummary(response.data?.data?.summary || response.data?.summary || 'AI summary not available')
       setShowAiSummary(true)
     } catch (error: any) {
       console.error('Error generating AI summary:', error)
-      setAiSummary('Failed to generate AI summary')
+      setAiSummary('Failed to generate AI summary. Using fallback response.')
       setShowAiSummary(true)
     } finally {
       setAiSummaryLoading(false)
