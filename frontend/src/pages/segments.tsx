@@ -7,6 +7,7 @@ import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
 import Navigation from '@/components/Navigation'
+import AIPromptModal from '@/components/AIPromptModal'
 
 interface Segment {
   _id: string
@@ -30,6 +31,7 @@ export default function Segments() {
   const [authLoading, setAuthLoading] = useState(true)
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
+  const [showAIModal, setShowAIModal] = useState(false)
 
   // Simple authentication check
   useEffect(() => {
@@ -117,45 +119,9 @@ export default function Segments() {
     }
   }
 
-  const generateAISegments = async () => {
-    setAiGenerating(true)
-    try {
-      // Simulate AI segment generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const suggestions = [
-        {
-          id: 'ai-1',
-          name: 'High-Value Customers',
-          description: 'Customers with total spend > $1000 in the last 6 months',
-          rules: [{ field: 'totalSpend', operator: '>', value: 1000 }],
-          estimatedCount: 45,
-          confidence: 92
-        },
-        {
-          id: 'ai-2',
-          name: 'At-Risk Customers',
-          description: 'Customers who haven\'t made a purchase in 60+ days',
-          rules: [{ field: 'lastOrderAt', operator: '<', value: '60 days ago' }],
-          estimatedCount: 23,
-          confidence: 87
-        },
-        {
-          id: 'ai-3',
-          name: 'Frequent Buyers',
-          description: 'Customers with 5+ orders in the last 3 months',
-          rules: [{ field: 'orderCount', operator: '>=', value: 5 }],
-          estimatedCount: 67,
-          confidence: 89
-        }
-      ]
-      
-      setAiSuggestions(suggestions)
-    } catch (error) {
-      console.error('Error generating AI segments:', error)
-    } finally {
-      setAiGenerating(false)
-    }
+  const handleAIGenerate = (prompt: string, suggestions: any[]) => {
+    setAiSuggestions(suggestions)
+    console.log('AI generated segments from prompt:', prompt, suggestions)
   }
 
   const createAISegment = async (suggestion: any) => {
@@ -273,9 +239,7 @@ export default function Segments() {
                     Refresh
                   </SmoothButton>
                   <SmoothButton
-                    onClick={generateAISegments}
-                    disabled={aiGenerating}
-                    loading={aiGenerating}
+                    onClick={() => setShowAIModal(true)}
                     variant="primary"
                     size="md"
                     className="animate-fade-in"
@@ -449,6 +413,14 @@ export default function Segments() {
           </div>
         </div>
       </div>
+
+      {/* AI Prompt Modal */}
+      <AIPromptModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        type="segment"
+        onGenerate={handleAIGenerate}
+      />
     </PageTransition>
   )
 }

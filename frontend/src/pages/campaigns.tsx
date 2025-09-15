@@ -7,6 +7,7 @@ import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
 import Navigation from '@/components/Navigation'
+import AIPromptModal from '@/components/AIPromptModal'
 
 interface Campaign {
   _id: string
@@ -34,6 +35,7 @@ export default function Campaigns() {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
+  const [showAIModal, setShowAIModal] = useState(false)
 
   // Simple authentication check
   useEffect(() => {
@@ -155,48 +157,9 @@ export default function Campaigns() {
     }
   }
 
-  const generateAICampaigns = async () => {
-    setAiGenerating(true)
-    try {
-      // Simulate AI campaign generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const suggestions = [
-        {
-          id: 'ai-1',
-          name: 'Welcome Series Campaign',
-          description: 'Automated welcome email sequence for new customers',
-          type: 'Email',
-          targetSegment: 'New Customers',
-          estimatedRecipients: 150,
-          confidence: 94
-        },
-        {
-          id: 'ai-2',
-          name: 'Abandoned Cart Recovery',
-          description: 'Re-engage customers who left items in their cart',
-          type: 'Email',
-          targetSegment: 'Cart Abandoners',
-          estimatedRecipients: 75,
-          confidence: 89
-        },
-        {
-          id: 'ai-3',
-          name: 'Loyalty Program Promotion',
-          description: 'Reward high-value customers with exclusive offers',
-          type: 'Email',
-          targetSegment: 'VIP Customers',
-          estimatedRecipients: 45,
-          confidence: 91
-        }
-      ]
-      
-      setAiSuggestions(suggestions)
-    } catch (error) {
-      console.error('Error generating AI campaigns:', error)
-    } finally {
-      setAiGenerating(false)
-    }
+  const handleAIGenerate = (prompt: string, suggestions: any[]) => {
+    setAiSuggestions(suggestions)
+    console.log('AI generated campaigns from prompt:', prompt, suggestions)
   }
 
   const createAICampaign = async (suggestion: any) => {
@@ -342,9 +305,7 @@ export default function Campaigns() {
                     Refresh
                   </SmoothButton>
                   <SmoothButton
-                    onClick={generateAICampaigns}
-                    disabled={aiGenerating}
-                    loading={aiGenerating}
+                    onClick={() => setShowAIModal(true)}
                     variant="primary"
                     size="md"
                     className="animate-fade-in"
@@ -568,6 +529,14 @@ export default function Campaigns() {
           </div>
         </div>
       </div>
+
+      {/* AI Prompt Modal */}
+      <AIPromptModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        type="campaign"
+        onGenerate={handleAIGenerate}
+      />
     </PageTransition>
   )
 }

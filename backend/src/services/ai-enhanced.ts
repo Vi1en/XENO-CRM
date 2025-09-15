@@ -426,25 +426,25 @@ class EnhancedAIService {
     // Urgent tone variants
     if (lowerTone.includes('urgent') || lowerTone.includes('urgent')) {
       variants.push(
-        `🚨 URGENT: ${objective}! ${offer ? `Don't miss out on ${offer}` : 'Limited time offer - act now!'}`,
-        `⏰ Time-sensitive: ${objective}. ${offer || 'This won't last long!'}`,
+        `🚨 URGENT: ${objective}! ${offer ? 'Don\'t miss out on ' + offer : 'Limited time offer - act now!'}`,
+        `⏰ Time-sensitive: ${objective}. ${offer || 'This won\'t last long!'}`,
         `🔥 Last chance: ${objective.toLowerCase()}. ${offer || 'Limited quantities available!'}`
       );
     }
     // Friendly tone variants
     else if (lowerTone.includes('friendly') || lowerTone.includes('casual')) {
       variants.push(
-        `Hey there! ${objective}. ${offer ? `Here's what we have for you: ${offer}` : 'We think you'll love this!'}`,
+        `Hey there! ${objective}. ${offer ? 'Here\'s what we have for you: ' + offer : 'We think you\'ll love this!'}`,
         `Hi! We wanted to share: ${objective.toLowerCase()}. ${offer || 'Check it out!'}`,
-        `Hello! ${objective}. ${offer ? `Special for you: ${offer}` : 'Hope you enjoy!'}`
+        `Hello! ${objective}. ${offer ? 'Special for you: ' + offer : 'Hope you enjoy!'}`
       );
     }
     // Professional tone variants
     else if (lowerTone.includes('professional') || lowerTone.includes('formal')) {
       variants.push(
-        `We're excited to share: ${objective}. ${offer ? `Our special offer: ${offer}` : 'Please find details below.'}`,
+        `We're excited to share: ${objective}. ${offer ? 'Our special offer: ' + offer : 'Please find details below.'}`,
         `Important update: ${objective.toLowerCase()}. ${offer || 'We appreciate your business.'}`,
-        `We're pleased to announce: ${objective}. ${offer ? `Exclusive opportunity: ${offer}` : 'Thank you for your continued support.'}`
+        `We're pleased to announce: ${objective}. ${offer ? 'Exclusive opportunity: ' + offer : 'Thank you for your continued support.'}`
       );
     }
     // Default variants

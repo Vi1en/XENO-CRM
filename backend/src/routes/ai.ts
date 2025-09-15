@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { generateSegmentRules, generateMessageVariants, generateAnalyticsInsights, getAIHealthStatus } from '../services/ai-enhanced';
 import { aiInsights } from '../services/ai-insights';
+import { AnalyticsAIService } from '../services/analytics-ai';
 import { Customer } from '../models/customer';
 import { Campaign } from '../models/campaign';
 import { Order } from '../models/order';
