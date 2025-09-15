@@ -196,6 +196,21 @@ export const segmentApi = {
 export const aiApi = {
   getInsights: async () => {
     return retryRequest(() => api.get('/ai/insights'));
+  },
+  getDashboardInsights: async () => {
+    return retryRequest(() => api.get('/ai/dashboard-insights'));
+  },
+  getHealthStatus: async () => {
+    return retryRequest(() => api.get('/ai/health'));
+  },
+  clearCache: async () => {
+    return retryRequest(() => api.post('/ai/clear-cache'));
+  },
+  generateSegmentRules: async (prompt: string) => {
+    return retryRequest(() => api.post('/ai/nl-to-segment', { prompt }));
+  },
+  generateMessageVariants: async (objective: string, tone: string, offer?: string, brandVoice?: string) => {
+    return retryRequest(() => api.post('/ai/message-variants', { objective, tone, offer, brandVoice }));
   }
 };
 

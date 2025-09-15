@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { generateSegmentRules, generateMessageVariants, generateCampaignSummary } from '../services/ai';
-import { AnalyticsAIService } from '../services/analytics-ai';
+import { generateSegmentRules, generateMessageVariants, generateAnalyticsInsights, getAIHealthStatus } from '../services/ai-enhanced';
+import { aiInsights } from '../services/ai-insights';
 import { Customer } from '../models/customer';
 import { Campaign } from '../models/campaign';
 import { Order } from '../models/order';
@@ -17,6 +17,7 @@ const messageVariantsSchema = z.object({
   objective: z.string().min(1, 'Objective is required'),
   tone: z.string().min(1, 'Tone is required'),
   offer: z.string().optional(),
+  brandVoice: z.string().optional(),
 });
 
 /**
@@ -192,5 +193,161 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /api/v1/ai/analytics:
+ *   get:
+ *     summary: Get AI-powered analytics insights
+ *     tags: [AI]
+ *     responses:
+ *       200:
+ *         description: Analytics insights generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/analytics', async (req, res) => {
+  try {
+    console.log('🤖 AI Analytics request received');
+    const insights = await generateAnalyticsInsights();
+    
+    return res.json({
+      success: true,
+      data: insights,
+    });
+  } catch (error) {
+    console.error('AI Analytics error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/ai/dashboard-insights:
+ *   get:
+ *     summary: Get comprehensive dashboard insights
+ *     tags: [AI]
+ *     responses:
+ *       200:
+ *         description: Dashboard insights generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/dashboard-insights', async (req, res) => {
+  try {
+    console.log('📊 Dashboard insights request received');
+    const insights = await aiInsights.getDashboardInsights();
+    
+    return res.json({
+      success: true,
+      data: insights,
+    });
+  } catch (error) {
+    console.error('Dashboard insights error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/ai/health:
+ *   get:
+ *     summary: Get AI service health status
+ *     tags: [AI]
+ *     responses:
+ *       200:
+ *         description: AI health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/health', async (req, res) => {
+  try {
+    console.log('🔍 AI Health check request received');
+    const healthStatus = await getAIHealthStatus();
+    
+    return res.json({
+      success: true,
+      data: healthStatus,
+    });
+  } catch (error) {
+    console.error('AI Health check error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/ai/clear-cache:
+ *   post:
+ *     summary: Clear AI insights cache
+ *     tags: [AI]
+ *     responses:
+ *       200:
+ *         description: Cache cleared successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/clear-cache', async (req, res) => {
+  try {
+    console.log('🗑️ AI Cache clear request received');
+    aiInsights.clearCache();
+    
+    return res.json({
+      success: true,
+      message: 'AI insights cache cleared successfully',
+    });
+  } catch (error) {
+    console.error('AI Cache clear error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
 
 export { router as aiRoutes };
