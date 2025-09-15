@@ -10,6 +10,10 @@ export interface ICustomer extends Document {
   visits: number;
   lastOrderAt?: Date;
   tags: string[];
+  provider?: string;
+  googleId?: string;
+  profilePicture?: string;
+  isActive?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +28,10 @@ const customerSchema = new Schema<ICustomer>({
   visits: { type: Number, required: true, default: 0 },
   lastOrderAt: { type: Date },
   tags: { type: [String], default: [] },
+  provider: { type: String, default: 'email' },
+  googleId: { type: String },
+  profilePicture: { type: String },
+  isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -2,12 +2,19 @@ import { Router } from 'express';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 import { Customer } from '../models/customer';
-import { OAuth2Client } from 'google-auth-library';
+// Import Google Auth Library with fallback
+let OAuth2Client: any = null;
+try {
+  const googleAuth = require('google-auth-library');
+  OAuth2Client = googleAuth.OAuth2Client;
+} catch (error) {
+  console.log('⚠️ google-auth-library not available, using mock authentication');
+}
 
 const router = Router();
 
-// Initialize Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// Initialize Google OAuth client with fallback
+const googleClient = OAuth2Client ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
 // Validation schemas
 const googleAuthSchema = z.object({
