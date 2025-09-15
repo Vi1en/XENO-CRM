@@ -1,14 +1,15 @@
-// Original CRM with authentication
+// CRM with simplified authentication for static export
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { useSession, signIn, signOut } from 'next-auth/react'
 import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api'
 import Head from 'next/head'
 
 export default function Home() {
-  const { data: session, status } = useSession()
   const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [customers, setCustomers] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [segments, setSegments] = useState<any[]>([])
@@ -23,17 +24,64 @@ export default function Home() {
   const [usingMockData, setUsingMockData] = useState(false)
   // Removed client-side loading logic - using proper authentication
 
+  // Simple authentication check
   useEffect(() => {
-    // Only load data when authenticated
-    if (status === 'loading') return
-    if (status === 'unauthenticated') return
-    
-    if (session && customers.length === 0) {
+    const checkAuth = () => {
+      try {
+        const storedUser = localStorage.getItem('xeno-user')
+        if (storedUser) {
+          const userData = JSON.parse(storedUser)
+          setUser(userData)
+          setIsAuthenticated(true)
+          console.log('✅ User authenticated:', userData.name)
+        } else {
+          setIsAuthenticated(false)
+          console.log('❌ No user found, showing sign-in')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setIsAuthenticated(false)
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  // Load data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && customers.length === 0) {
       console.log('🚀 User authenticated, starting data load...')
       loadData()
       loadAnalyticsData()
     }
-  }, [session, status, customers.length])
+  }, [isAuthenticated, customers.length])
+
+  // Simple sign in function
+  const handleSignIn = () => {
+    const userData = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      id: 'user-123'
+    }
+    setUser(userData)
+    setIsAuthenticated(true)
+    localStorage.setItem('xeno-user', JSON.stringify(userData))
+    console.log('✅ User signed in:', userData.name)
+  }
+
+  // Simple sign out function
+  const handleSignOut = () => {
+    setUser(null)
+    setIsAuthenticated(false)
+    localStorage.removeItem('xeno-user')
+    setCustomers([])
+    setCampaigns([])
+    setSegments([])
+    setOrders([])
+    console.log('✅ User signed out')
+  }
 
   const loadData = async () => {
     console.log('🔄 loadData called, loading state:', loading)
@@ -242,8 +290,8 @@ export default function Home() {
   }
 
 
-  // Show loading state during authentication
-  if (status === 'loading' || loading) {
+  // Show loading state during authentication check
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -256,8 +304,8 @@ export default function Home() {
     )
   }
 
-  // Redirect to sign in if not authenticated
-  if (status === 'unauthenticated') {
+  // Show sign in if not authenticated
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -267,10 +315,10 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Xeno CRM</h1>
           <p className="text-gray-600 mb-6">Please sign in to access your dashboard</p>
           <button
-            onClick={() => signIn('google')}
+            onClick={handleSignIn}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Sign in with Google
+            Sign In
           </button>
         </div>
       </div>
@@ -369,15 +417,15 @@ export default function Home() {
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <span className="text-gray-600 text-sm font-medium">
-                {session?.user?.name?.charAt(0) || 'U'}
+                {user?.name?.charAt(0) || 'U'}
               </span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
-              <p className="text-xs text-gray-500">{session?.user?.email}</p>
+              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+              <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
             <button
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="p-1 text-gray-400 hover:text-gray-600"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -407,7 +455,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-500">Welcome back, {session?.user?.name?.split(' ')[0] || 'User'}!</p>
+                <p className="text-sm text-gray-500">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
                 {usingMockData && (
                   <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - API Offline</p>
