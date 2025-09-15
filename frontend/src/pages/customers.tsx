@@ -82,7 +82,7 @@ export default function Customers() {
     try {
       console.log('🔄 Loading customers from API...')
       const response = await customerApi.getAll()
-      const apiCustomers = response.data
+      const apiCustomers = response.data.data || response.data // Handle both {data: [...]} and [...] formats
       
       setCustomers(apiCustomers)
       setFilteredCustomers(apiCustomers)

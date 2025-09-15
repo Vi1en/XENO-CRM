@@ -72,7 +72,7 @@ export default function Segments() {
     try {
       console.log('🔄 Loading segments from API...')
       const response = await segmentApi.getAll()
-      const apiSegments = response.data
+      const apiSegments = response.data.data || response.data // Handle both {data: [...]} and [...] formats
       
       setSegments(apiSegments)
       setFilteredSegments(apiSegments)

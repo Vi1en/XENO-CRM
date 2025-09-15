@@ -2,23 +2,25 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { orderApi } from '@/lib/api'
+import { campaignApi } from '@/lib/api'
 
-interface Order {
+interface Campaign {
   _id: string
-  orderNumber: string
-  customerId: string
-  customerName: string
-  total: number
+  name: string
+  type: string
   status: string
+  targetSegment: string
+  sentCount: number
+  openRate: number
+  clickRate: number
   createdAt: string
-  items: any[]
+  completedAt?: string
 }
 
-export default function Orders() {
+export default function CampaignHistory() {
   const router = useRouter()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -35,7 +37,7 @@ export default function Orders() {
           const userData = JSON.parse(storedUser)
           setUser(userData)
           setIsAuthenticated(true)
-          loadOrders()
+          loadCampaigns()
         } else {
           setIsAuthenticated(false)
         }
@@ -50,53 +52,68 @@ export default function Orders() {
     checkAuth()
   }, [])
 
-  // Filter orders based on search term
+  // Filter campaigns based on search term
   useEffect(() => {
     if (!searchTerm.trim()) {
-      setFilteredOrders(orders)
+      setFilteredCampaigns(campaigns)
     } else {
-      const filtered = orders.filter(order => {
+      const filtered = campaigns.filter(campaign => {
         const searchLower = searchTerm.toLowerCase()
         return (
-          order.orderNumber.toLowerCase().includes(searchLower) ||
-          order.customerName.toLowerCase().includes(searchLower) ||
-          order.status.toLowerCase().includes(searchLower)
+          campaign.name.toLowerCase().includes(searchLower) ||
+          campaign.type.toLowerCase().includes(searchLower) ||
+          campaign.status.toLowerCase().includes(searchLower) ||
+          campaign.targetSegment.toLowerCase().includes(searchLower)
         )
       })
-      setFilteredOrders(filtered)
+      setFilteredCampaigns(filtered)
     }
-  }, [orders, searchTerm])
+  }, [campaigns, searchTerm])
 
-  const loadOrders = async () => {
+  const loadCampaigns = async () => {
     setLoading(true)
     setError(null)
     
     try {
-      console.log('🔄 Loading orders from API...')
-      const response = await orderApi.getAll()
-      const apiOrders = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      console.log('🔄 Loading campaign history from API...')
+      const response = await campaignApi.getAll()
+      const rawCampaigns = response.data.data || response.data // Handle both {data: [...]} and [...] formats
       
-      setOrders(apiOrders)
-      setFilteredOrders(apiOrders)
-      console.log('✅ Real orders loaded from API:', apiOrders.length)
+      // Map API data to our expected format and filter for completed campaigns
+      const apiCampaigns = rawCampaigns.map((campaign: any) => ({
+        _id: campaign._id,
+        name: campaign.name,
+        type: campaign.type || 'Email',
+        status: campaign.status,
+        targetSegment: campaign.targetSegment || 'All Customers',
+        sentCount: campaign.stats?.sent || 0,
+        openRate: campaign.stats?.openRate || 0,
+        clickRate: campaign.stats?.clickRate || 0,
+        createdAt: campaign.createdAt,
+        completedAt: campaign.completedAt
+      }))
+      
+      setCampaigns(apiCampaigns)
+      setFilteredCampaigns(apiCampaigns)
+      console.log('✅ Real campaign history loaded from API:', apiCampaigns.length)
       
     } catch (error: any) {
-      console.error('❌ Error loading orders from API:', error)
+      console.error('❌ Error loading campaign history from API:', error)
       console.log('📱 Falling back to demo data...')
       
       // Fallback to demo data if API fails
-      const demoOrders = [
-        { _id: '1', orderNumber: 'ORD-001', customerId: '1', customerName: 'John Doe', total: 299.99, status: 'completed', createdAt: new Date().toISOString(), items: [] },
-        { _id: '2', orderNumber: 'ORD-002', customerId: '2', customerName: 'Jane Smith', total: 149.50, status: 'pending', createdAt: new Date().toISOString(), items: [] },
-        { _id: '3', orderNumber: 'ORD-003', customerId: '3', customerName: 'Bob Johnson', total: 89.99, status: 'shipped', createdAt: new Date().toISOString(), items: [] },
-        { _id: '4', orderNumber: 'ORD-004', customerId: '4', customerName: 'Alice Brown', total: 450.00, status: 'completed', createdAt: new Date().toISOString(), items: [] },
-        { _id: '5', orderNumber: 'ORD-005', customerId: '5', customerName: 'Charlie Wilson', total: 199.99, status: 'cancelled', createdAt: new Date().toISOString(), items: [] }
+      const demoCampaigns = [
+        { _id: '1', name: 'Welcome Series', type: 'Email', status: 'completed', targetSegment: 'New Customers', sentCount: 150, openRate: 45.2, clickRate: 12.8, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
+        { _id: '2', name: 'VIP Promotion', type: 'Email', status: 'completed', targetSegment: 'VIP Customers', sentCount: 25, openRate: 68.0, clickRate: 24.0, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
+        { _id: '3', name: 'Holiday Sale', type: 'Email', status: 'completed', targetSegment: 'All Customers', sentCount: 500, openRate: 52.3, clickRate: 18.7, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
+        { _id: '4', name: 'Product Launch', type: 'SMS', status: 'completed', targetSegment: 'Frequent Buyers', sentCount: 80, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
+        { _id: '5', name: 'Re-engagement', type: 'Email', status: 'completed', targetSegment: 'At-Risk Customers', sentCount: 45, openRate: 38.9, clickRate: 15.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() }
       ]
       
-      setOrders(demoOrders)
-      setFilteredOrders(demoOrders)
+      setCampaigns(demoCampaigns)
+      setFilteredCampaigns(demoCampaigns)
       setError('API unavailable - showing demo data')
-      console.log('📊 Demo orders loaded:', demoOrders.length)
+      console.log('📊 Demo campaign history loaded:', demoCampaigns.length)
     } finally {
       setLoading(false)
     }
@@ -112,10 +129,20 @@ export default function Orders() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'shipped': return 'bg-blue-100 text-blue-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
+      case 'running': return 'bg-blue-100 text-blue-800'
+      case 'scheduled': return 'bg-yellow-100 text-yellow-800'
+      case 'draft': return 'bg-gray-100 text-gray-800'
+      case 'paused': return 'bg-orange-100 text-orange-800'
       default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Email': return '📧'
+      case 'SMS': return '📱'
+      case 'Push': return '🔔'
+      default: return '📢'
     }
   }
 
@@ -127,7 +154,7 @@ export default function Orders() {
           <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading orders...</p>
+          <p className="text-gray-600">Loading campaign history...</p>
         </div>
       </div>
     )
@@ -142,7 +169,7 @@ export default function Orders() {
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
-          <p className="text-gray-600 mb-6">You need to be signed in to view orders.</p>
+          <p className="text-gray-600 mb-6">You need to be signed in to view campaign history.</p>
           <button
             onClick={() => router.push('/')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -157,8 +184,8 @@ export default function Orders() {
   return (
     <>
       <Head>
-        <title>Xeno CRM - Orders</title>
-        <meta name="description" content="Manage your orders in Xeno CRM" />
+        <title>Xeno CRM - Campaign History</title>
+        <meta name="description" content="View campaign history in Xeno CRM" />
       </Head>
       <div className="min-h-screen bg-gray-50">
         {/* Navigation Sidebar */}
@@ -187,7 +214,7 @@ export default function Orders() {
                   </svg>
                   Dashboard
                 </Link>
-                <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
+                <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
                   <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
@@ -210,6 +237,12 @@ export default function Orders() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   Campaigns
+                </Link>
+                <Link href="/campaigns/history" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Campaign History
                 </Link>
               </div>
             </nav>
@@ -249,7 +282,7 @@ export default function Orders() {
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span>/orders</span>
+                  <span>/campaigns/history</span>
                 </div>
               </div>
             </div>
@@ -261,12 +294,12 @@ export default function Orders() {
             <div className="mb-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Order Management</h1>
-                  <p className="mt-2 text-gray-600">Track and manage customer orders</p>
+                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Campaign History</h1>
+                  <p className="mt-2 text-gray-600">View completed and historical marketing campaigns</p>
                 </div>
                 <div className="flex space-x-3">
                   <button
-                    onClick={loadOrders}
+                    onClick={loadCampaigns}
                     disabled={loading}
                     className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
                   >
@@ -276,19 +309,19 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* Orders List */}
+            {/* Campaigns List */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900 flex items-center">
                     <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Order List
+                    Historical Campaigns
                   </h2>
                   {searchTerm && (
                     <div className="text-sm text-gray-500">
-                      {filteredOrders.length} of {orders.length} orders
+                      {filteredCampaigns.length} of {campaigns.length} campaigns
                     </div>
                   )}
                 </div>
@@ -301,7 +334,7 @@ export default function Orders() {
                     </div>
                     <input
                       type="text"
-                      placeholder="Search orders..."
+                      placeholder="Search campaign history..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -313,26 +346,32 @@ export default function Orders() {
               <div className="overflow-hidden">
                 {loading && (
                   <div className="flex justify-center py-12">
-                    <div className="text-gray-500">Loading orders...</div>
+                    <div className="text-gray-500">Loading campaign history...</div>
                   </div>
                 )}
 
-                {!loading && filteredOrders.length === 0 && orders.length === 0 && (
+                {!loading && filteredCampaigns.length === 0 && campaigns.length === 0 && (
                   <div className="text-center py-12">
-                    <div className="text-gray-400 text-6xl mb-4">📦</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                    <div className="text-gray-400 text-6xl mb-4">📊</div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No campaign history found</h3>
                     <p className="text-gray-500 mb-6">
-                      Orders will appear here when customers make purchases.
+                      Campaign history will appear here as campaigns are completed.
                     </p>
+                    <Link
+                      href="/campaigns"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                    >
+                      View Active Campaigns
+                    </Link>
                   </div>
                 )}
 
-                {!loading && filteredOrders.length === 0 && orders.length > 0 && (
+                {!loading && filteredCampaigns.length === 0 && campaigns.length > 0 && (
                   <div className="text-center py-12">
                     <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns found</h3>
                     <p className="text-gray-500 mb-6">
-                      No orders match your search criteria. Try adjusting your search terms.
+                      No campaigns match your search criteria. Try adjusting your search terms.
                     </p>
                     <button
                       onClick={() => setSearchTerm('')}
@@ -343,37 +382,54 @@ export default function Orders() {
                   </div>
                 )}
 
-                {!loading && filteredOrders.length > 0 && (
+                {!loading && filteredCampaigns.length > 0 && (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open Rate</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Click Rate</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredOrders.map((order: Order) => (
-                          <tr key={order._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {order.orderNumber}
+                        {filteredCampaigns.map((campaign: Campaign) => (
+                          <tr key={campaign._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="text-2xl mr-3">{getTypeIcon(campaign.type)}</div>
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">{campaign.name}</div>
+                                </div>
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {order.customerName}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ${order.total.toFixed(2)}
+                              {campaign.type}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                {order.status}
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
+                                {campaign.status}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(order.createdAt).toLocaleDateString()}
+                              {campaign.targetSegment}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {campaign.sentCount.toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {campaign.completedAt ? new Date(campaign.completedAt).toLocaleDateString() : new Date(campaign.createdAt).toLocaleDateString()}
                             </td>
                           </tr>
                         ))}

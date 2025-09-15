@@ -77,7 +77,21 @@ export default function Campaigns() {
     try {
       console.log('🔄 Loading campaigns from API...')
       const response = await campaignApi.getAll()
-      const apiCampaigns = response.data
+      const rawCampaigns = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      
+      // Map API data to our expected format
+      const apiCampaigns = rawCampaigns.map((campaign: any) => ({
+        _id: campaign._id,
+        name: campaign.name,
+        type: campaign.type || 'Email', // Default to Email if not specified
+        status: campaign.status,
+        targetSegment: campaign.targetSegment || 'All Customers', // Default if not specified
+        sentCount: campaign.stats?.sent || 0,
+        openRate: campaign.stats?.openRate || 0,
+        clickRate: campaign.stats?.clickRate || 0,
+        createdAt: campaign.createdAt,
+        scheduledAt: campaign.scheduledAt
+      }))
       
       setCampaigns(apiCampaigns)
       setFilteredCampaigns(apiCampaigns)
