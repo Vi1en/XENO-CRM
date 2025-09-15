@@ -142,7 +142,7 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate }: AIP
               />
               
               <div className="flex flex-wrap gap-2">
-                {type === 'segment' ? [
+                {(type === 'segment' ? [
                   "High-value customers",
                   "Recent purchasers", 
                   "Inactive users",
@@ -154,7 +154,7 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate }: AIP
                   "Seasonal promotion",
                   "Re-engagement",
                   "Loyalty program"
-                ]}.map((suggestion) => (
+                ]).map((suggestion) => (
                   <button
                     key={suggestion}
                     onClick={() => setPrompt(suggestion)}
