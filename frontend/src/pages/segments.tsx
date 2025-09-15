@@ -152,7 +152,7 @@ export default function Segments() {
       setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
       
       console.log('✅ AI segment created and added to state:', createdSegment)
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error creating AI segment:', error)
       console.error('❌ Error details:', error.response?.data || error.message)
       setError('Failed to create AI segment: ' + (error.response?.data?.message || error.message))

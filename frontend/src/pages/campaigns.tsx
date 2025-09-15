@@ -191,7 +191,7 @@ export default function Campaigns() {
       setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
       
       console.log('✅ AI campaign created and added to state:', createdCampaign)
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error creating AI campaign:', error)
       console.error('❌ Error details:', error.response?.data || error.message)
       setError('Failed to create AI campaign: ' + (error.response?.data?.message || error.message))
