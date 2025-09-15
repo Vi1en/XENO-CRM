@@ -438,32 +438,54 @@ router.get('/segments', async (req, res) => {
   try {
     console.log('📊 Fetching customer segments...');
     
-    // Aggregate customers by tags
-    const result = await Customer.aggregate([
-      {
-        $project: {
-          tags: {
-            $cond: {
-              if: { $isArray: "$tags" },
-              then: "$tags",
-              else: ["regular"] // fallback if no tags
+    // First, let's check if we have any customers at all
+    const customerCount = await Customer.countDocuments();
+    console.log('📊 Total customers in database:', customerCount);
+    
+    if (customerCount === 0) {
+      return res.json({
+        success: true,
+        data: { segments: { regular: 0 } }
+      });
+    }
+    
+    // Get a sample customer to see the structure
+    const sampleCustomer = await Customer.findOne();
+    console.log('📊 Sample customer structure:', sampleCustomer);
+    
+        // Aggregate customers by tags
+        const result = await Customer.aggregate([
+          {
+            $project: {
+              tags: {
+                $cond: {
+                  if: { 
+                    $and: [
+                      { $ne: ["$tags", null] },
+                      { $ne: ["$tags", undefined] },
+                      { $isArray: "$tags" },
+                      { $gt: [{ $size: "$tags" }, 0] }
+                    ]
+                  },
+                  then: "$tags",
+                  else: ["regular"] // fallback if no tags or empty array
+                }
+              }
             }
+          },
+          {
+            $unwind: "$tags"
+          },
+          {
+            $group: {
+              _id: "$tags",
+              count: { $sum: 1 }
+            }
+          },
+          {
+            $sort: { count: -1 }
           }
-        }
-      },
-      {
-        $unwind: "$tags"
-      },
-      {
-        $group: {
-          _id: "$tags",
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { count: -1 }
-      }
-    ]);
+        ]);
 
     console.log('📊 Raw aggregation result:', result);
 
@@ -490,9 +512,12 @@ router.get('/segments', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error fetching customer segments:', error);
+    console.error('❌ Error details:', error.message);
+    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({
       success: false,
-      error: 'Failed to fetch customer segments'
+      error: 'Failed to fetch customer segments',
+      details: error.message
     });
   }
 });
