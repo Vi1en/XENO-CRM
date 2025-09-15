@@ -22,37 +22,50 @@ export default function Home() {
   const [deliveryData, setDeliveryData] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const [usingMockData, setUsingMockData] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set client flag to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
+    if (!isClient) return // Only run on client side
+    
     let isMounted = true
     
     // Clear any cached NextAuth data
-    if (typeof window !== 'undefined') {
-      // Clear NextAuth session storage
+    try {
       localStorage.removeItem('nextauth.message')
       localStorage.removeItem('nextauth.csrf-token')
       sessionStorage.removeItem('nextauth.message')
       sessionStorage.removeItem('nextauth.csrf-token')
-      
-      // Clear any cached API calls
       localStorage.removeItem('api-cache')
       sessionStorage.clear()
+    } catch (err) {
+      console.warn('Could not clear storage:', err)
     }
     
-    // Load demo data immediately for demo mode
+    // Load data with a small delay to ensure component is mounted
     const loadDataAsync = async () => {
       if (isMounted) {
-        await loadData()
-        await loadAnalyticsData()
+        try {
+          await loadData()
+          await loadAnalyticsData()
+        } catch (err) {
+          console.error('Error loading data:', err)
+        }
       }
     }
     
-    loadDataAsync()
+    // Small delay to prevent hydration issues
+    const timeoutId = setTimeout(loadDataAsync, 100)
     
     return () => {
       isMounted = false
+      clearTimeout(timeoutId)
     }
-  }, [])
+  }, [isClient])
 
   const loadData = async () => {
     // Prevent multiple simultaneous calls
@@ -178,21 +191,32 @@ export default function Home() {
 
   const loadAnalyticsData = async () => {
     setAnalyticsLoading(true)
-    console.log('📊 Loading real analytics data from API...')
+    console.log('📊 Loading analytics data...')
     
     try {
-      // Load analytics data from real API
-      const [analyticsRes, trendsRes, deliveryRes] = await Promise.all([
-        customerApi.getAnalytics(),
-        orderApi.getTrends(),
-        campaignApi.getDeliveryStats()
-      ])
+      // Try to load analytics data from API, but don't fail if some endpoints are down
+      const promises = [
+        customerApi.getAnalytics().catch(err => {
+          console.warn('⚠️ Analytics endpoint failed, using fallback:', err.message)
+          return { data: generateMockAnalytics() }
+        }),
+        orderApi.getTrends().catch(err => {
+          console.warn('⚠️ Trends endpoint failed, using fallback:', err.message)
+          return { data: generateMockTrends() }
+        }),
+        campaignApi.getDeliveryStats().catch(err => {
+          console.warn('⚠️ Delivery stats endpoint failed, using fallback:', err.message)
+          return { data: generateMockDelivery() }
+        })
+      ]
+      
+      const [analyticsRes, trendsRes, deliveryRes] = await Promise.all(promises)
       
       setAnalyticsData(analyticsRes.data)
       setTrendsData(trendsRes.data)
       setDeliveryData(deliveryRes.data)
       
-      console.log('✅ Real analytics data loaded successfully')
+      console.log('✅ Analytics data loaded successfully')
     } catch (err: any) {
       console.error('❌ Error loading analytics data:', err)
       // Fallback to mock data generation
@@ -252,15 +276,15 @@ export default function Home() {
   }
 
 
-  // Skip authentication for demo mode - always render dashboard
-  if (loading) {
+  // Show loading state during initial render to prevent hydration issues
+  if (!isClient || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading demo data...</p>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     )
