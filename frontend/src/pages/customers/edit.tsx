@@ -59,7 +59,7 @@ export default function EditCustomer() {
     
     setLoading(true)
     try {
-      const response = await customerApi.getById(parseInt(id as string))
+      const response = await customerApi.getById(id as string)
       const customer = response.data
       setFormData({
         email: customer.email || '',
@@ -119,7 +119,7 @@ export default function EditCustomer() {
         lastOrderAt: formData.lastOrderAt ? new Date(formData.lastOrderAt).toISOString() : undefined
       }
 
-      await customerApi.update(parseInt(id as string), customerData)
+      await customerApi.update(id as string, customerData)
       setSuccess(true)
       
       setTimeout(() => {

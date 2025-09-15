@@ -100,7 +100,7 @@ export const customerApi = {
   getAll: async () => {
     return retryRequest(() => api.get('/customers'));
   },
-  getById: async (id: number) => {
+  getById: async (id: string) => {
     return retryRequest(() => api.get(`/customers/${id}`));
   },
   create: async (data: any) => {
@@ -118,10 +118,10 @@ export const customerApi = {
       return retryRequest(() => api.post('/ingest/customers', ingestionData));
     }
   },
-  update: async (id: number, data: any) => {
+  update: async (id: string, data: any) => {
     return retryRequest(() => api.put(`/customers/${id}`, data));
   },
-  delete: async (id: number) => {
+  delete: async (id: string) => {
     return retryRequest(() => api.delete(`/customers/${id}`));
   },
   getAnalytics: async () => {

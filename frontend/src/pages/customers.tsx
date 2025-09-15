@@ -121,7 +121,7 @@ export default function Customers() {
       
       // Try to delete from API first
       try {
-        await customerApi.delete(parseInt(customer._id))
+        await customerApi.delete(customer._id)
         console.log('✅ Customer deleted from API successfully')
       } catch (apiError) {
         console.warn('⚠️ API delete failed, removing from local state only:', apiError)
