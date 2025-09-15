@@ -14,6 +14,7 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [creatingIds, setCreatingIds] = useState<Set<string>>(new Set())
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
@@ -94,10 +95,14 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
       setCreatingIds(prev => new Set(prev).add(suggestion.id))
       try {
         await onCreateSuggestion(suggestion)
-        // Remove the created suggestion from the list
+        // Only remove from list if creation was successful
         setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+        setSuccessMessage(`✅ ${suggestion.name} created successfully!`)
+        setTimeout(() => setSuccessMessage(null), 3000)
+        console.log('✅ Suggestion created successfully and removed from list')
       } catch (error) {
-        console.error('Error creating suggestion:', error)
+        console.error('❌ Error creating suggestion:', error)
+        // Don't remove from list if creation failed
       } finally {
         setCreatingIds(prev => {
           const newSet = new Set(prev)
@@ -113,15 +118,26 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
 
   const handleCreateAll = async () => {
     if (onCreateSuggestion) {
+      const successfulCreations: string[] = []
       try {
         // Create all suggestions one by one
         for (const suggestion of suggestions) {
-          await onCreateSuggestion(suggestion)
+          try {
+            await onCreateSuggestion(suggestion)
+            successfulCreations.push(suggestion.id)
+            console.log(`✅ Successfully created: ${suggestion.name}`)
+          } catch (error) {
+            console.error(`❌ Failed to create: ${suggestion.name}`, error)
+          }
         }
-        setSuggestions([]) // Clear all suggestions
-        onClose()
+        // Only remove successfully created suggestions
+        setSuggestions(prev => prev.filter(s => !successfulCreations.includes(s.id)))
+        console.log(`✅ Created ${successfulCreations.length} out of ${suggestions.length} suggestions`)
+        if (successfulCreations.length === suggestions.length) {
+          onClose()
+        }
       } catch (error) {
-        console.error('Error creating all suggestions:', error)
+        console.error('Error in create all process:', error)
       }
     } else {
       onGenerate(prompt, suggestions)
@@ -212,6 +228,13 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
               {loading ? 'AI is thinking...' : `🤖 Generate ${type === 'segment' ? 'Segments' : 'Campaigns'}`}
             </SmoothButton>
           </div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
+              {successMessage}
+            </div>
+          )}
 
           {/* Suggestions */}
           {suggestions.length > 0 && (
