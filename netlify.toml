@@ -1,12 +1,20 @@
 [build]
-  # Build command for static export
-  command = "cd frontend && npm ci && npm run build"
+  # Build command for static export with network resilience
+  command = "cd frontend && npm run build:netlify"
   # Publish directory for static files
   publish = "frontend/out"
 
 [build.environment]
   # Disable Next.js serverless functions
   NEXT_TELEMETRY_DISABLED = "1"
+  # Disable Next.js plugin
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  # Network resilience
+  NPM_CONFIG_PREFER_OFFLINE = "true"
+  NPM_CONFIG_AUDIT = "false"
+  NPM_CONFIG_FUND = "false"
+  # Build optimization
+  NODE_ENV = "production"
 
 # Redirect rules for SPA routing
 # Specific API auth redirects first
