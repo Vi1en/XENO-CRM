@@ -62,8 +62,8 @@ export default function SignUp() {
     return 'Strong'
   }
 
-  const handleDemoSignUp = async () => {
-    console.log('🔐 SignUp: Starting demo login...')
+  const handleGoogleSignUp = async () => {
+    console.log('🔐 SignUp: Starting Google OAuth login...')
     login()
   }
 
@@ -208,7 +208,7 @@ export default function SignUp() {
             {/* Google Sign Up Button */}
             <div className="mb-6">
               <SmoothButton
-                onClick={handleDemoSignUp}
+                onClick={handleGoogleSignUp}
                 disabled={loading}
                 loading={loading}
                 variant="secondary"
