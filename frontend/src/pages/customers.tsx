@@ -91,6 +91,9 @@ export default function Customers() {
       setCustomers(apiCustomers)
       setFilteredCustomers(apiCustomers)
       console.log('✅ Real customers loaded from API:', apiCustomers.length)
+      console.log('📋 Customers data:', apiCustomers)
+      console.log('🔍 First customer ID:', apiCustomers[0]?._id)
+      console.log('📏 First customer ID length:', apiCustomers[0]?._id?.length)
       
     } catch (error: any) {
       console.error('❌ Error loading customers from API:', error)
@@ -103,6 +106,11 @@ export default function Customers() {
   }
 
   const handleEdit = (customer: Customer) => {
+    console.log('🔄 Edit button clicked for customer:', customer)
+    console.log('🆔 Customer ID:', customer._id)
+    console.log('🔍 Customer ID type:', typeof customer._id)
+    console.log('📏 Customer ID length:', customer._id?.length)
+    
     // Navigate to edit page with customer data
     router.push({
       pathname: '/customers/edit',

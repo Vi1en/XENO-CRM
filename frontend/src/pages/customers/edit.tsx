@@ -58,9 +58,15 @@ export default function EditCustomer() {
     if (!id) return
     
     setLoading(true)
+    setError(null)
     try {
+      console.log('🔄 Loading customer with ID:', id)
       const response = await customerApi.getById(id as string)
+      console.log('✅ Customer API response:', response)
+      
       const customer = response.data
+      console.log('📋 Customer data:', customer)
+      
       setFormData({
         email: customer.email || '',
         firstName: customer.firstName || '',
@@ -70,9 +76,20 @@ export default function EditCustomer() {
         tags: customer.tags || '',
         lastOrderAt: customer.lastOrderAt || ''
       })
+      console.log('✅ Form data set successfully')
     } catch (error: any) {
-      console.error('Error loading customer:', error)
-      setError('Failed to load customer details')
+      console.error('❌ Error loading customer:', error)
+      console.error('❌ Error details:', error.response?.data)
+      console.error('❌ Error status:', error.response?.status)
+      console.error('❌ Error message:', error.message)
+      
+      if (error.response?.status === 404) {
+        setError(`Customer with ID "${id}" not found. Please check the customer ID and try again.`)
+      } else if (error.response?.status === 500) {
+        setError('Server error occurred while loading customer. Please try again later.')
+      } else {
+        setError(`Failed to load customer details: ${error.response?.data?.message || error.message}`)
+      }
     } finally {
       setLoading(false)
     }
