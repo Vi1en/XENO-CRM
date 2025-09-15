@@ -89,7 +89,18 @@ export default function Campaigns() {
     try {
       console.log('🔄 Loading campaigns from API...')
       const response = await campaignApi.getAll()
+      console.log('✅ Campaigns API response:', response)
+      console.log('📊 Response data:', response.data)
+      console.log('📊 Response data type:', typeof response.data)
+      console.log('📊 Response data keys:', response.data ? Object.keys(response.data) : 'No data')
+      
       const rawCampaigns = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      console.log('📋 Raw campaigns data:', rawCampaigns)
+      console.log('📋 Raw campaigns length:', rawCampaigns ? rawCampaigns.length : 0)
+      if (rawCampaigns && rawCampaigns.length > 0) {
+        console.log('📋 First campaign:', rawCampaigns[0])
+        console.log('📋 First campaign keys:', Object.keys(rawCampaigns[0]))
+      }
       
       // Map API data to our expected format using real MongoDB data
       const apiCampaigns = rawCampaigns.map((campaign: any) => {

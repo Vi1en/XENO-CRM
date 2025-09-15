@@ -77,20 +77,34 @@ export default function EditCampaign() {
     
     try {
       console.log('🔄 Loading campaign with ID:', id)
+      console.log('🔗 API URL:', `/campaigns/${id}`)
+      
       const response = await campaignApi.getById(id as string)
       console.log('✅ Campaign API response:', response)
+      console.log('📊 Response status:', response.status)
+      console.log('📊 Response data:', response.data)
+      console.log('📊 Response data type:', typeof response.data)
+      console.log('📊 Response data keys:', response.data ? Object.keys(response.data) : 'No data')
       
       // Extract campaign data from nested API response
       let campaign: any
       if (response.data && response.data.success && response.data.data) {
+        console.log('🔍 Found nested data structure: response.data.data')
         campaign = response.data.data
       } else if (response.data) {
+        console.log('🔍 Using direct data structure: response.data')
         campaign = response.data
       } else {
+        console.log('❌ No data found in response')
         throw new Error('Invalid response format')
       }
 
       console.log('📋 Campaign data loaded:', campaign)
+      console.log('📋 Campaign data type:', typeof campaign)
+      console.log('📋 Campaign data keys:', campaign ? Object.keys(campaign) : 'No campaign data')
+      console.log('📋 Campaign name:', campaign?.name)
+      console.log('📋 Campaign description:', campaign?.description)
+      console.log('📋 Campaign status:', campaign?.status)
       console.log('Loaded record:', campaign)
       
       const formattedData = {
