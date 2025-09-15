@@ -5,8 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 export default function EditCustomer() {
+  console.log('🎬 Customer Edit Page - Component rendering')
+  
   const router = useRouter()
   const { id } = router.query
+  console.log('🔍 Router query ID:', id)
+  console.log('🔍 ID type:', typeof id)
+  console.log('🔍 ID length:', id?.length)
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -26,20 +32,25 @@ export default function EditCustomer() {
 
   // Simple authentication check
   useEffect(() => {
+    console.log('🔐 Auth useEffect triggered')
     const checkAuth = () => {
       try {
         const storedUser = localStorage.getItem('xeno-user')
+        console.log('🔍 User data from localStorage:', storedUser)
         if (storedUser) {
           const userData = JSON.parse(storedUser)
+          console.log('✅ User authenticated:', userData)
           setUser(userData)
           setIsAuthenticated(true)
         } else {
+          console.log('❌ No user data found in localStorage')
           setIsAuthenticated(false)
         }
       } catch (error) {
-        console.error('Auth check error:', error)
+        console.error('❌ Auth check error:', error)
         setIsAuthenticated(false)
       } finally {
+        console.log('🔐 Auth check complete, setting authLoading to false')
         setAuthLoading(false)
       }
     }
@@ -190,8 +201,24 @@ export default function EditCustomer() {
   }
 
   useEffect(() => {
+    console.log('🚀 Customer Edit Page - useEffect triggered')
+    console.log('🔍 Is authenticated:', isAuthenticated)
+    console.log('🔍 Customer ID:', id)
+    console.log('🔍 ID type:', typeof id)
+    console.log('🔍 ID length:', id?.length)
+    
     if (isAuthenticated && id) {
+      console.log('✅ Both authenticated and ID present, loading customer...')
       loadCustomer()
+    } else {
+      console.log('❌ Missing requirements - authenticated:', isAuthenticated, 'id:', id)
+      if (!isAuthenticated) {
+        console.log('❌ User not authenticated')
+      }
+      if (!id) {
+        console.log('❌ No customer ID provided')
+        alert('No customer ID found in URL')
+      }
     }
   }, [isAuthenticated, id])
 
