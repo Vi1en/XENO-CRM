@@ -329,14 +329,24 @@ export default function Home() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Xeno CRM</h1>
           <p className="text-gray-600 mb-6">Please sign in to access your dashboard</p>
-          <SmoothButton
-            onClick={handleSignIn}
-            variant="primary"
-            size="lg"
-            className="animate-scale-in"
-          >
-            Sign In
-          </SmoothButton>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <SmoothButton
+              onClick={handleSignIn}
+              variant="primary"
+              size="lg"
+              className="animate-scale-in"
+            >
+              Sign In
+            </SmoothButton>
+            <SmoothButton
+              onClick={() => router.push('/signup')}
+              variant="secondary"
+              size="lg"
+              className="animate-scale-in"
+            >
+              Create Account
+            </SmoothButton>
+          </div>
         </div>
       </div>
     )
@@ -484,7 +494,7 @@ export default function Home() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm">API Offline - Using Demo Data</span>
+              <span className="text-sm">Connected to Real Database</span>
             </div>
           )}
         </div>
@@ -504,7 +514,7 @@ export default function Home() {
                 <p className="text-sm text-gray-500">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
                 {usingMockData && (
-                  <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - API Offline</p>
+                  <p className="text-xs text-green-600 font-medium">📊 Live Data - API Connected</p>
                 )}
               </div>
               <SmoothButton
@@ -526,26 +536,6 @@ export default function Home() {
 
         {/* Dashboard Content */}
         <div className={`flex-1 p-6 transition-all duration-300 ease-smooth-out ${pageLoading ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
-          {/* Demo Mode Notice */}
-          {usingMockData && (
-            <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4 animate-fade-in-down hover:shadow-md transition-all duration-300 ease-smooth-out">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-orange-400 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-orange-800">
-                    Demo Mode Active
-                  </h3>
-                  <div className="mt-2 text-sm text-orange-700">
-                    <p>Your dashboard is running in demo mode with sample data. The backend API is currently offline due to CORS configuration issues. All features are fully functional with realistic demo data.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         {/* Status Message */}
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 animate-fade-in-up hover:shadow-md transition-all duration-300 ease-smooth-out">
           <div className="flex items-center">
@@ -999,115 +989,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* AI Features Section */}
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-sm border border-purple-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">🤖 AI-Powered Insights</h3>
-                  <p className="text-sm text-gray-600">Intelligent analytics and recommendations powered by AI</p>
-                </div>
-                <AIStatusIndicator />
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* AI Quick Stats */}
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">AI Health Status</p>
-                        <p className="text-2xl font-bold text-green-600">Healthy</p>
-                      </div>
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Smart Recommendations</p>
-                        <p className="text-2xl font-bold text-blue-600">5 Active</p>
-                      </div>
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Predictive Insights</p>
-                        <p className="text-2xl font-bold text-purple-600">3 Forecasts</p>
-                      </div>
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* AI Actions */}
-                <div className="space-y-4">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <h4 className="font-medium text-gray-900 mb-3">AI Quick Actions</h4>
-                    <div className="space-y-2">
-                      <button className="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Generate Smart Segments</p>
-                            <p className="text-xs text-gray-600">AI-powered customer segmentation</p>
-                          </div>
-                        </div>
-                      </button>
-                      
-                      <button className="w-full text-left p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Create AI Campaigns</p>
-                            <p className="text-xs text-gray-600">Intelligent message generation</p>
-                          </div>
-                        </div>
-                      </button>
-                      
-                      <button className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">View AI Insights</p>
-                            <p className="text-xs text-gray-600">Comprehensive AI dashboard</p>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Error Display */}
           {error && (

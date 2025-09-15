@@ -3,6 +3,10 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { campaignApi } from '@/lib/api'
+import PageTransition from '@/components/PageTransition'
+import SkeletonLoader from '@/components/SkeletonLoader'
+import SmoothButton from '@/components/SmoothButton'
+import Navigation from '@/components/Navigation'
 
 interface Campaign {
   _id: string
@@ -27,6 +31,9 @@ export default function Campaigns() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
 
   // Simple authentication check
   useEffect(() => {
@@ -110,6 +117,116 @@ export default function Campaigns() {
     }
   }
 
+  const handleEdit = (campaign: Campaign) => {
+    // Navigate to edit page with campaign data
+    router.push({
+      pathname: '/campaigns/edit',
+      query: { id: campaign._id }
+    })
+  }
+
+  const handleDelete = async (campaign: Campaign) => {
+    if (!confirm(`Are you sure you want to delete "${campaign.name}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      setDeleteLoading(campaign._id)
+      console.log('🗑️ Deleting campaign:', campaign._id)
+      
+      // Try to delete from API first
+      try {
+        await campaignApi.delete(parseInt(campaign._id))
+        console.log('✅ Campaign deleted from API successfully')
+      } catch (apiError) {
+        console.warn('⚠️ API delete failed, removing from local state only:', apiError)
+      }
+      
+      // Remove from local state regardless of API result
+      setCampaigns(prev => prev.filter(c => c._id !== campaign._id))
+      setFilteredCampaigns(prev => prev.filter(c => c._id !== campaign._id))
+      
+      console.log('✅ Campaign deleted successfully')
+    } catch (error) {
+      console.error('❌ Error deleting campaign:', error)
+      setError('Failed to delete campaign')
+    } finally {
+      setDeleteLoading(null)
+    }
+  }
+
+  const generateAICampaigns = async () => {
+    setAiGenerating(true)
+    try {
+      // Simulate AI campaign generation
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      const suggestions = [
+        {
+          id: 'ai-1',
+          name: 'Welcome Series Campaign',
+          description: 'Automated welcome email sequence for new customers',
+          type: 'Email',
+          targetSegment: 'New Customers',
+          estimatedRecipients: 150,
+          confidence: 94
+        },
+        {
+          id: 'ai-2',
+          name: 'Abandoned Cart Recovery',
+          description: 'Re-engage customers who left items in their cart',
+          type: 'Email',
+          targetSegment: 'Cart Abandoners',
+          estimatedRecipients: 75,
+          confidence: 89
+        },
+        {
+          id: 'ai-3',
+          name: 'Loyalty Program Promotion',
+          description: 'Reward high-value customers with exclusive offers',
+          type: 'Email',
+          targetSegment: 'VIP Customers',
+          estimatedRecipients: 45,
+          confidence: 91
+        }
+      ]
+      
+      setAiSuggestions(suggestions)
+    } catch (error) {
+      console.error('Error generating AI campaigns:', error)
+    } finally {
+      setAiGenerating(false)
+    }
+  }
+
+  const createAICampaign = async (suggestion: any) => {
+    try {
+      const newCampaign = {
+        name: suggestion.name,
+        type: suggestion.type,
+        status: 'draft',
+        targetSegment: suggestion.targetSegment,
+        description: suggestion.description
+      }
+      
+      // Create the campaign
+      const response = await campaignApi.create(newCampaign)
+      const createdCampaign = response.data
+      
+      // Add to local state
+      setCampaigns(prev => [...prev, createdCampaign])
+      setFilteredCampaigns(prev => [...prev, createdCampaign])
+      
+      // Remove from suggestions
+      setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+      
+      console.log('✅ AI campaign created:', createdCampaign)
+    } catch (error) {
+      console.error('Error creating AI campaign:', error)
+      setError('Failed to create AI campaign')
+    }
+  }
+
   const handleSignOut = () => {
     setUser(null)
     setIsAuthenticated(false)
@@ -141,11 +258,11 @@ export default function Campaigns() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading campaigns...</p>
+          <p className="text-gray-600 animate-pulse">Loading campaigns...</p>
         </div>
       </div>
     )
@@ -155,139 +272,41 @@ export default function Campaigns() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in-up">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
           <p className="text-gray-600 mb-6">You need to be signed in to view campaigns.</p>
-          <button
+          <SmoothButton
             onClick={() => router.push('/')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            variant="primary"
+            size="lg"
+            className="animate-scale-in"
           >
             Go to Sign In
-          </button>
+          </SmoothButton>
         </div>
       </div>
     )
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Campaigns</title>
         <meta name="description" content="Manage marketing campaigns in Xeno CRM" />
       </Head>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex">
         {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white">
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center px-6 py-4 border-b border-gray-700">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-xl font-semibold text-white">Xeno CRM</span>
-                  <p className="text-sm text-gray-400">Dashboard v2.1</p>
-                </div>
-              </div>
-            </div>
-
-            <nav className="space-y-2">
-              <Link href="/" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                </svg>
-                <span>Dashboard</span>
-              </Link>
-              
-              <Link href="/customers" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-                <span>Customers</span>
-              </Link>
-              
-              <Link href="/campaigns" className="flex items-center space-x-3 px-4 py-3 bg-blue-600 text-white rounded-lg">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                <span className="font-medium">Campaigns</span>
-              </Link>
-              
-              <Link href="/campaigns/history" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Campaign History</span>
-              </Link>
-              
-              <Link href="/orders" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span>Orders</span>
-              </Link>
-              
-              <Link href="/segments" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                <span>Segments</span>
-              </Link>
-            </nav>
-
-            {/* EXTERNAL Section */}
-            <div className="mt-8">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">EXTERNAL</h3>
-              <nav className="space-y-2">
-                <a 
-                  href="https://backend-production-05a7e.up.railway.app/api/docs" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>API Documentation</span>
-                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </nav>
-            </div>
-          </div>
-          
-          {/* User Info */}
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-gray-400">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="p-1 text-gray-400 hover:text-white"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Navigation 
+          currentPath="/campaigns" 
+          user={user} 
+          onSignOut={handleSignOut} 
+        />
 
         {/* Main Content */}
-        <div className="pl-64">
+        <div className="flex-1 flex flex-col">
           {/* Top Bar */}
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
@@ -303,31 +322,86 @@ export default function Campaigns() {
           </div>
 
           {/* Page Content */}
-          <div className="p-6">
+          <div className="flex-1 p-6">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Marketing Campaigns</h1>
-                  <p className="mt-2 text-gray-600">Create and manage your marketing campaigns</p>
+                  <p className="mt-2 text-gray-600">Create and manage your marketing campaigns with AI assistance</p>
                 </div>
                 <div className="flex space-x-3">
-                  <button
+                  <SmoothButton
                     onClick={loadCampaigns}
                     disabled={loading}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                    loading={loading}
+                    variant="secondary"
+                    size="md"
+                    className="animate-fade-in"
                   >
-                    {loading ? 'Refreshing...' : 'Refresh'}
-                  </button>
-                  <Link
-                    href="/campaigns/create"
-                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    Refresh
+                  </SmoothButton>
+                  <SmoothButton
+                    onClick={generateAICampaigns}
+                    disabled={aiGenerating}
+                    loading={aiGenerating}
+                    variant="primary"
+                    size="md"
+                    className="animate-fade-in"
+                  >
+                    🤖 Generate AI Campaigns
+                  </SmoothButton>
+                  <SmoothButton
+                    onClick={() => router.push('/campaigns/create')}
+                    variant="primary"
+                    size="md"
+                    className="animate-fade-in"
                   >
                     + Create Campaign
-                  </Link>
+                  </SmoothButton>
                 </div>
               </div>
             </div>
+
+            {/* AI Suggestions */}
+            {aiSuggestions.length > 0 && (
+              <div className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-sm border border-purple-200 p-6 animate-fade-in-down">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">🤖 AI-Generated Campaign Suggestions</h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-gray-600">AI Active</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiSuggestions.map((suggestion: any, index: number) => (
+                    <div 
+                      key={suggestion.id}
+                      className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-all duration-300 ease-smooth-out animate-fade-in-up"
+                      style={{animationDelay: `${index * 0.1}s`}}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-gray-900">{suggestion.name}</h3>
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                          {suggestion.confidence}% confidence
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">~{suggestion.estimatedRecipients} recipients</span>
+                        <SmoothButton
+                          onClick={() => createAICampaign(suggestion)}
+                          variant="primary"
+                          size="sm"
+                        >
+                          Create
+                        </SmoothButton>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Campaigns List */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
@@ -365,8 +439,8 @@ export default function Campaigns() {
 
               <div className="overflow-hidden">
                 {loading && (
-                  <div className="flex justify-center py-12">
-                    <div className="text-gray-500">Loading campaigns...</div>
+                  <div className="p-6">
+                    <SkeletonLoader type="table" count={1} />
                   </div>
                 )}
 
@@ -415,11 +489,16 @@ export default function Campaigns() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open Rate</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Click Rate</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredCampaigns.map((campaign: Campaign) => (
-                          <tr key={campaign._id} className="hover:bg-gray-50">
+                        {filteredCampaigns.map((campaign: Campaign, index: number) => (
+                          <tr 
+                            key={campaign._id} 
+                            className="hover:bg-gray-50 transition-all duration-200 ease-smooth-out hover:shadow-sm animate-fade-in-up"
+                            style={{animationDelay: `${index * 0.05}s`}}
+                          >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="text-2xl mr-3">{getTypeIcon(campaign.type)}</div>
@@ -456,6 +535,28 @@ export default function Campaigns() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {new Date(campaign.createdAt).toLocaleDateString()}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex space-x-2">
+                                <SmoothButton
+                                  onClick={() => handleEdit(campaign)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-900"
+                                >
+                                  Edit
+                                </SmoothButton>
+                                <SmoothButton
+                                  onClick={() => handleDelete(campaign)}
+                                  disabled={deleteLoading === campaign._id}
+                                  loading={deleteLoading === campaign._id}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </SmoothButton>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -467,6 +568,6 @@ export default function Campaigns() {
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }

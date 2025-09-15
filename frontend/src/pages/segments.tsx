@@ -3,6 +3,10 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { segmentApi } from '@/lib/api'
+import PageTransition from '@/components/PageTransition'
+import SkeletonLoader from '@/components/SkeletonLoader'
+import SmoothButton from '@/components/SmoothButton'
+import Navigation from '@/components/Navigation'
 
 interface Segment {
   _id: string
@@ -24,6 +28,8 @@ export default function Segments() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
 
   // Simple authentication check
   useEffect(() => {
@@ -111,15 +117,83 @@ export default function Segments() {
     }
   }
 
+  const generateAISegments = async () => {
+    setAiGenerating(true)
+    try {
+      // Simulate AI segment generation
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      const suggestions = [
+        {
+          id: 'ai-1',
+          name: 'High-Value Customers',
+          description: 'Customers with total spend > $1000 in the last 6 months',
+          rules: [{ field: 'totalSpend', operator: '>', value: 1000 }],
+          estimatedCount: 45,
+          confidence: 92
+        },
+        {
+          id: 'ai-2',
+          name: 'At-Risk Customers',
+          description: 'Customers who haven\'t made a purchase in 60+ days',
+          rules: [{ field: 'lastOrderAt', operator: '<', value: '60 days ago' }],
+          estimatedCount: 23,
+          confidence: 87
+        },
+        {
+          id: 'ai-3',
+          name: 'Frequent Buyers',
+          description: 'Customers with 5+ orders in the last 3 months',
+          rules: [{ field: 'orderCount', operator: '>=', value: 5 }],
+          estimatedCount: 67,
+          confidence: 89
+        }
+      ]
+      
+      setAiSuggestions(suggestions)
+    } catch (error) {
+      console.error('Error generating AI segments:', error)
+    } finally {
+      setAiGenerating(false)
+    }
+  }
+
+  const createAISegment = async (suggestion: any) => {
+    try {
+      const newSegment = {
+        name: suggestion.name,
+        description: suggestion.description,
+        rules: suggestion.rules,
+        customerCount: suggestion.estimatedCount
+      }
+      
+      // Create the segment
+      const response = await segmentApi.create(newSegment)
+      const createdSegment = response.data
+      
+      // Add to local state
+      setSegments(prev => [...prev, createdSegment])
+      setFilteredSegments(prev => [...prev, createdSegment])
+      
+      // Remove from suggestions
+      setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
+      
+      console.log('✅ AI segment created:', createdSegment)
+    } catch (error) {
+      console.error('Error creating AI segment:', error)
+      setError('Failed to create AI segment')
+    }
+  }
+
   // Show loading state during authentication check
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading segments...</p>
+          <p className="text-gray-600 animate-pulse">Loading segments...</p>
         </div>
       </div>
     )
@@ -129,139 +203,41 @@ export default function Segments() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in-up">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
           <p className="text-gray-600 mb-6">You need to be signed in to view segments.</p>
-          <button
+          <SmoothButton
             onClick={() => router.push('/')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            variant="primary"
+            size="lg"
+            className="animate-scale-in"
           >
             Go to Sign In
-          </button>
+          </SmoothButton>
         </div>
       </div>
     )
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Segments</title>
         <meta name="description" content="Manage customer segments in Xeno CRM" />
       </Head>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex">
         {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 text-white">
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center px-6 py-4 border-b border-gray-700">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <div className="ml-3">
-                  <span className="text-xl font-semibold text-white">Xeno CRM</span>
-                  <p className="text-sm text-gray-400">Dashboard v2.1</p>
-                </div>
-              </div>
-            </div>
-
-            <nav className="space-y-2">
-              <Link href="/" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                </svg>
-                <span>Dashboard</span>
-              </Link>
-              
-              <Link href="/customers" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-                <span>Customers</span>
-              </Link>
-              
-              <Link href="/campaigns" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                <span>Campaigns</span>
-              </Link>
-              
-              <Link href="/campaigns/history" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Campaign History</span>
-              </Link>
-              
-              <Link href="/orders" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span>Orders</span>
-              </Link>
-              
-              <Link href="/segments" className="flex items-center space-x-3 px-4 py-3 bg-blue-600 text-white rounded-lg">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                <span className="font-medium">Segments</span>
-              </Link>
-            </nav>
-
-            {/* EXTERNAL Section */}
-            <div className="mt-8">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">EXTERNAL</h3>
-              <nav className="space-y-2">
-                <a 
-                  href="https://backend-production-05a7e.up.railway.app/api/docs" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>API Documentation</span>
-                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </nav>
-            </div>
-          </div>
-          
-          {/* User Info */}
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-gray-400">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="p-1 text-gray-400 hover:text-white"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+        <Navigation 
+          currentPath="/segments" 
+          user={user} 
+          onSignOut={handleSignOut} 
+        />
 
         {/* Main Content */}
-        <div className="pl-64">
+        <div className="flex-1 flex flex-col">
           {/* Top Bar */}
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
@@ -277,37 +253,92 @@ export default function Segments() {
           </div>
 
           {/* Page Content */}
-          <div className="p-6">
+          <div className="flex-1 p-6">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Customer Segments</h1>
-                  <p className="mt-2 text-gray-600">Organize customers into targeted groups</p>
+                  <p className="mt-2 text-gray-600">Organize customers into targeted groups with AI assistance</p>
                 </div>
                 <div className="flex space-x-3">
-                  <button
+                  <SmoothButton
                     onClick={loadSegments}
                     disabled={loading}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                    loading={loading}
+                    variant="secondary"
+                    size="md"
+                    className="animate-fade-in"
                   >
-                    {loading ? 'Refreshing...' : 'Refresh'}
-                  </button>
-                  <Link
-                    href="/segments/create"
-                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    Refresh
+                  </SmoothButton>
+                  <SmoothButton
+                    onClick={generateAISegments}
+                    disabled={aiGenerating}
+                    loading={aiGenerating}
+                    variant="primary"
+                    size="md"
+                    className="animate-fade-in"
+                  >
+                    🤖 Generate AI Segments
+                  </SmoothButton>
+                  <SmoothButton
+                    onClick={() => router.push('/segments/create')}
+                    variant="primary"
+                    size="md"
+                    className="animate-fade-in"
                   >
                     + Create Segment
-                  </Link>
+                  </SmoothButton>
                 </div>
               </div>
             </div>
 
+            {/* AI Suggestions */}
+            {aiSuggestions.length > 0 && (
+              <div className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-sm border border-purple-200 p-6 animate-fade-in-down">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">🤖 AI-Generated Segment Suggestions</h2>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-gray-600">AI Active</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiSuggestions.map((suggestion: any, index: number) => (
+                    <div 
+                      key={suggestion.id}
+                      className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-all duration-300 ease-smooth-out animate-fade-in-up"
+                      style={{animationDelay: `${index * 0.1}s`}}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-medium text-gray-900">{suggestion.name}</h3>
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                          {suggestion.confidence}% confidence
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{suggestion.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">~{suggestion.estimatedCount} customers</span>
+                        <SmoothButton
+                          onClick={() => createAISegment(suggestion)}
+                          variant="primary"
+                          size="sm"
+                        >
+                          Create
+                        </SmoothButton>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Segments Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loading && (
-                <div className="col-span-full flex justify-center py-12">
-                  <div className="text-gray-500">Loading segments...</div>
+                <div className="col-span-full">
+                  <SkeletonLoader type="card" count={6} />
                 </div>
               )}
 
@@ -364,32 +395,40 @@ export default function Segments() {
                   </div>
 
                   {/* Segment Cards */}
-                  {filteredSegments.map((segment: Segment) => (
-                    <div key={segment._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  {filteredSegments.map((segment: Segment, index: number) => (
+                    <div 
+                      key={segment._id} 
+                      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out animate-fade-in-up group"
+                      style={{animationDelay: `${index * 0.05}s`}}
+                    >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900 mb-2">{segment.name}</h3>
                           <p className="text-sm text-gray-600 mb-4">{segment.description}</p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Link
-                            href={`/segments/edit?id=${segment._id}`}
-                            className="p-2 text-gray-400 hover:text-blue-600"
+                          <SmoothButton
+                            onClick={() => router.push(`/segments/edit?id=${segment._id}`)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-blue-600"
                             title="Edit segment"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                          </Link>
-                          <button
+                          </SmoothButton>
+                          <SmoothButton
                             onClick={() => handleDelete(segment._id)}
-                            className="p-2 text-gray-400 hover:text-red-600"
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-red-600"
                             title="Delete segment"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                          </button>
+                          </SmoothButton>
                         </div>
                       </div>
                       
@@ -410,6 +449,6 @@ export default function Segments() {
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }
