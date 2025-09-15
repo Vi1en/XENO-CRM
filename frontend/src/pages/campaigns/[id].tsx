@@ -1,43 +1,37 @@
 import { useState, useEffect } from 'react'
+import Head from 'next/head'
+import { campaignApi, segmentApi } from '@/lib/api'
 import { useRouter } from 'next/router'
-import { campaignApi, aiApi } from '@/lib/api'
 import Link from 'next/link'
 
-interface Campaign {
-  _id: string
+interface CampaignFormData {
   name: string
   description: string
   segmentId: string
   message: string
-  status: 'draft' | 'scheduled' | 'sent' | 'failed' | 'running'
-  scheduledAt?: string
-  sentAt?: string
-  startedAt?: string
-  createdAt: string
-  updatedAt: string
-  stats?: {
-    totalRecipients: number
-    sent: number
-    failed: number
-    delivered: number
-    bounced: number
-  }
 }
 
-export default function CampaignDetails() {
+interface Segment {
+  _id: string
+  name: string
+}
+
+export default function EditCampaign() {
   const router = useRouter()
   const { id } = router.query
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [campaign, setCampaign] = useState<Campaign | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
-  // AI Summary states
-  const [aiSummary, setAiSummary] = useState<string | null>(null)
-  const [aiSummaryLoading, setAiSummaryLoading] = useState(false)
-  const [showAiSummary, setShowAiSummary] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [formData, setFormData] = useState<CampaignFormData>({
+    name: '',
+    description: '',
+    segmentId: '',
+    message: ''
+  })
 
   // Simple authentication check
   useEffect(() => {
@@ -72,42 +66,86 @@ export default function CampaignDetails() {
   const loadCampaign = async () => {
     if (!id) return
     
-    setLoading(true)
-    setError(null)
-    
     try {
+      console.log('🔄 Loading campaign with ID:', id)
       const response = await campaignApi.getById(id as string)
-      setCampaign(response.data)
+      console.log('✅ Campaign API response:', response)
+      
+      // Extract campaign data from nested API response
+      let campaign: any
+      if (response.data && response.data.success && response.data.data) {
+        campaign = response.data.data
+      } else if (response.data) {
+        campaign = response.data
+      } else {
+        throw new Error('Invalid response format')
+      }
+
+      console.log('📋 Campaign data loaded:', campaign)
+      
+      const formattedData = {
+        name: campaign.name || '',
+        description: campaign.description || '',
+        segmentId: campaign.segmentId || '',
+        message: campaign.message || ''
+      }
+      
+      console.log('📝 Formatted data for form:', formattedData)
+      setFormData(formattedData)
+      
     } catch (error: any) {
-      console.error('Error loading campaign:', error)
-      setError('Failed to load campaign details')
+      console.error('❌ Error loading campaign:', error)
+      setError(`Failed to load campaign details: ${error.message}`)
     } finally {
       setLoading(false)
     }
   }
 
-  const generateAiSummary = async () => {
-    if (!campaign) return
-    
-    setAiSummaryLoading(true)
+  const loadSegments = async () => {
     try {
-      const response = await aiApi.getInsights()
-      setAiSummary(response.data.summary || 'AI summary not available')
-      setShowAiSummary(true)
-    } catch (error: any) {
-      console.error('Error generating AI summary:', error)
-      setAiSummary('Failed to generate AI summary')
-      setShowAiSummary(true)
-    } finally {
-      setAiSummaryLoading(false)
+      const response = await segmentApi.getAll()
+      setSegments(response.data.data || response.data)
+    } catch (error) {
+      console.error('Error loading segments:', error)
     }
   }
 
   useEffect(() => {
     if (isAuthenticated && id) {
       loadCampaign()
+      loadSegments()
     }
   }, [isAuthenticated, id])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    try {
+      await campaignApi.update(id as string, formData)
+      setSuccess(true)
+      
+      // Redirect to campaigns list after 2 seconds
+      setTimeout(() => {
+        router.push('/campaigns')
+      }, 2000)
+    } catch (error: any) {
+      console.error('Error updating campaign:', error)
+      setError(error.response?.data?.message || 'Failed to update campaign')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (authLoading || loading) {
     return (
@@ -130,7 +168,7 @@ export default function CampaignDetails() {
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
-          <p className="text-gray-600 mb-6">You need to be signed in to view campaign details.</p>
+          <p className="text-gray-600 mb-6">You need to be signed in to edit campaigns.</p>
           <button
             onClick={() => router.push('/')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -142,264 +180,245 @@ export default function CampaignDetails() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">!</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Campaigns
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!campaign) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">?</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Campaign not found</h1>
-          <p className="text-gray-600 mb-6">The campaign you're looking for doesn't exist.</p>
-          <button
-            onClick={() => router.push('/campaigns')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Campaigns
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">X</span>
+    <>
+      <Head>
+        <title>Xeno CRM - Edit Campaign</title>
+        <meta name="description" content="Edit marketing campaign in Xeno CRM" />
+      </Head>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navigation Sidebar */}
+        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+          <div className="flex flex-col h-full">
+            {/* Logo */}
+            <div className="flex items-center px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">X</span>
+                </div>
+                <span className="ml-3 text-xl font-semibold text-gray-900">Xeno CRM</span>
               </div>
-              <span className="ml-3 text-xl font-semibold text-gray-900">Xeno CRM</span>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 px-4 py-6 space-y-2">
+              <div className="space-y-1">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                  Navigation
+                </div>
+                <Link href="/" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+                  </svg>
+                  Dashboard
+                </Link>
+                <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Orders
+                </Link>
+                <Link href="/customers" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                  Customers
+                </Link>
+                <Link href="/segments" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Segments
+                </Link>
+                <Link href="/campaigns" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Campaigns
+                </Link>
+              </div>
+            </nav>
+
+            {/* User Info */}
+            <div className="px-4 py-4 border-t border-gray-200">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-700">
+                    {user?.name?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="ml-auto p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="pl-64">
+          {/* Top Bar */}
+          <div className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Link href="/campaigns" className="text-blue-600 hover:text-blue-800 mr-4">
+                  ← Back to Campaigns
+                </Link>
+                <div className="flex items-center text-sm text-gray-500">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>/campaigns/edit/{id}</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            <div className="space-y-1">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Navigation
+          {/* Page Content */}
+          <div className="p-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Edit Campaign</h1>
+                <p className="mt-2 text-gray-600">Update your marketing campaign details</p>
               </div>
-              <Link href="/" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
-                </svg>
-                Dashboard
-              </Link>
-              <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Orders
-              </Link>
-              <Link href="/customers" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-                Customers
-              </Link>
-              <Link href="/segments" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Segments
-              </Link>
-              <Link href="/campaigns" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
-                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Campaigns
-              </Link>
-            </div>
-          </nav>
 
-          {/* User Info */}
-          <div className="px-4 py-4 border-t border-gray-200">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-700">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="ml-auto p-1 text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              {success && (
+                <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-green-800">
+                        Campaign updated successfully! Redirecting to campaigns list...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-red-800">{error}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Campaign Details</h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Campaign Name *
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter campaign name"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="segmentId" className="block text-sm font-medium text-gray-700 mb-2">
+                        Target Segment *
+                      </label>
+                      <select
+                        id="segmentId"
+                        name="segmentId"
+                        value={formData.segmentId}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select a segment</option>
+                        {segments.map((segment) => (
+                          <option key={segment._id} value={segment._id}>
+                            {segment.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Describe your campaign"
+                    />
+                  </div>
+
+                  <div className="mt-6">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                      Campaign Message *
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      rows={6}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Write your campaign message here..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <Link
+                    href="/campaigns"
+                    className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </Link>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    {loading ? 'Updating...' : 'Update Campaign'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="pl-64">
-        {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Link href="/campaigns" className="text-blue-600 hover:text-blue-800 mr-4">
-                ← Back to Campaigns
-              </Link>
-              <div className="flex items-center text-sm text-gray-500">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>/campaigns/{id}</span>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={generateAiSummary}
-                disabled={aiSummaryLoading}
-                className="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
-              >
-                {aiSummaryLoading ? 'Generating...' : 'Generate AI Summary'}
-              </button>
-              <Link
-                href={`/campaigns/edit/${campaign._id}`}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Edit Campaign
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Campaign Details */}
-        <div className="p-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{campaign.name}</h1>
-                <p className="text-gray-600">{campaign.description}</p>
-              </div>
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                campaign.status === 'running' ? 'bg-green-100 text-green-800' :
-                campaign.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                campaign.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                campaign.status === 'sent' ? 'bg-blue-100 text-blue-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {campaign.status.toUpperCase()}
-              </span>
-            </div>
-
-            {/* Campaign Stats */}
-            {campaign.stats && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.totalRecipients}</div>
-                  <div className="text-sm text-gray-500">Total Recipients</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{campaign.stats.sent}</div>
-                  <div className="text-sm text-gray-500">Sent</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{campaign.stats.delivered}</div>
-                  <div className="text-sm text-gray-500">Delivered</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">{campaign.stats.failed}</div>
-                  <div className="text-sm text-gray-500">Failed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {campaign.stats.sent > 0 ? Math.round((campaign.stats.delivered / campaign.stats.sent) * 100) : 0}%
-                  </div>
-                  <div className="text-sm text-gray-500">Delivery Rate</div>
-                </div>
-              </div>
-            )}
-
-            {/* Campaign Message */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Campaign Message</h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-700 whitespace-pre-wrap">{campaign.message}</p>
-              </div>
-            </div>
-
-            {/* AI Summary */}
-            {showAiSummary && aiSummary && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">AI Summary</h3>
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <p className="text-gray-700">{aiSummary}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Campaign Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Campaign Information</h3>
-                <dl className="space-y-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Campaign ID</dt>
-                    <dd className="text-sm text-gray-900">{campaign._id}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Segment ID</dt>
-                    <dd className="text-sm text-gray-900">{campaign.segmentId}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Created</dt>
-                    <dd className="text-sm text-gray-900">{new Date(campaign.createdAt).toLocaleString()}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-                    <dd className="text-sm text-gray-900">{new Date(campaign.updatedAt).toLocaleString()}</dd>
-                  </div>
-                  {campaign.scheduledAt && (
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Scheduled For</dt>
-                      <dd className="text-sm text-gray-900">{new Date(campaign.scheduledAt).toLocaleString()}</dd>
-                    </div>
-                  )}
-                  {campaign.sentAt && (
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Sent At</dt>
-                      <dd className="text-sm text-gray-900">{new Date(campaign.sentAt).toLocaleString()}</dd>
-                    </div>
-                  )}
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }

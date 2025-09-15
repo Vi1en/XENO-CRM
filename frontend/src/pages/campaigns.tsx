@@ -122,12 +122,14 @@ export default function Campaigns() {
     }
   }
 
+  const handleView = (campaign: Campaign) => {
+    // Navigate to view page with campaign data
+    router.push(`/campaigns/view/${campaign._id}`)
+  }
+
   const handleEdit = (campaign: Campaign) => {
     // Navigate to edit page with campaign data
-    router.push({
-      pathname: '/campaigns/edit',
-      query: { id: campaign._id }
-    })
+    router.push(`/campaigns/${campaign._id}`)
   }
 
   const handleDelete = async (campaign: Campaign) => {
@@ -522,6 +524,14 @@ export default function Campaigns() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
+                                <SmoothButton
+                                  onClick={() => handleView(campaign)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  View Details
+                                </SmoothButton>
                                 <SmoothButton
                                   onClick={() => handleEdit(campaign)}
                                   variant="ghost"
