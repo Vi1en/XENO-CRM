@@ -259,12 +259,47 @@ export default function Home() {
 
   const generateMockAnalytics = () => {
     const totalCustomers = customers.length || 5 // Fallback to 5 if no customers
+    
+    // Use the same segmentation logic as the real chart
+    const customersArray = Array.isArray(customers) ? customers : []
+    const segmentCounts = {
+      vip: customersArray.filter(c => 
+        c.tags?.some((tag: string) => 
+          tag.toLowerCase().includes('vip') || 
+          tag.toLowerCase().includes('premium')
+        ) || c.totalSpend > 1000
+      ).length,
+      loyal: customersArray.filter(c => 
+        c.tags?.some((tag: string) => 
+          tag.toLowerCase().includes('loyal') || 
+          tag.toLowerCase().includes('returning')
+        )
+      ).length,
+      newCustomer: customersArray.filter(c => 
+        c.tags?.some((tag: string) => 
+          tag.toLowerCase().includes('new') || 
+          tag.toLowerCase().includes('new-customer')
+        )
+      ).length,
+      potentialVip: customersArray.filter(c => 
+        c.tags?.some((tag: string) => 
+          tag.toLowerCase().includes('potential') || 
+          tag.toLowerCase().includes('potential-vip')
+        )
+      ).length,
+      test: customersArray.filter(c => 
+        c.tags?.some((tag: string) => 
+          tag.toLowerCase().includes('test')
+        )
+      ).length,
+      regular: 0
+    }
+    
+    const taggedCustomers = segmentCounts.vip + segmentCounts.loyal + segmentCounts.newCustomer + segmentCounts.potentialVip + segmentCounts.test
+    segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
+    
     return {
-      customerSegments: {
-        vip: Math.round(totalCustomers * 0.75),
-        premium: Math.round(totalCustomers * 0.17),
-        regular: Math.round(totalCustomers * 0.08)
-      },
+      customerSegments: segmentCounts,
       campaignPerformance: {
         running: campaigns.length || 3, // Fallback to 3 if no campaigns
         completed: Math.round((campaigns.length || 3) * 0.8),
@@ -626,53 +661,77 @@ export default function Home() {
                       {(() => {
                         const customersArray = Array.isArray(customers) ? customers : []
                         const totalCustomers = customersArray.length || 1
-                        const vipCustomers = customersArray.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
-                        const premiumCustomers = customersArray.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
-                        const regularCustomers = totalCustomers - vipCustomers - premiumCustomers
                         
-                        const vipPercent = Math.round((vipCustomers / totalCustomers) * 100)
-                        const premiumPercent = Math.round((premiumCustomers / totalCustomers) * 100)
-                        const regularPercent = Math.round((regularCustomers / totalCustomers) * 100)
+                        // Count customers by actual tags in the database
+                        const segmentCounts = {
+                          vip: customersArray.filter(c => 
+                            c.tags?.some((tag: string) => 
+                              tag.toLowerCase().includes('vip') || 
+                              tag.toLowerCase().includes('premium')
+                            ) || c.totalSpend > 1000
+                          ).length,
+                          loyal: customersArray.filter(c => 
+                            c.tags?.some((tag: string) => 
+                              tag.toLowerCase().includes('loyal') || 
+                              tag.toLowerCase().includes('returning')
+                            )
+                          ).length,
+                          newCustomer: customersArray.filter(c => 
+                            c.tags?.some((tag: string) => 
+                              tag.toLowerCase().includes('new') || 
+                              tag.toLowerCase().includes('new-customer')
+                            )
+                          ).length,
+                          potentialVip: customersArray.filter(c => 
+                            c.tags?.some((tag: string) => 
+                              tag.toLowerCase().includes('potential') || 
+                              tag.toLowerCase().includes('potential-vip')
+                            )
+                          ).length,
+                          test: customersArray.filter(c => 
+                            c.tags?.some((tag: string) => 
+                              tag.toLowerCase().includes('test')
+                            )
+                          ).length,
+                          regular: 0
+                        }
                         
-                        return (
-                          <>
-                            {/* VIP Customers */}
+                        // Calculate regular customers (those without specific tags)
+                        const taggedCustomers = segmentCounts.vip + segmentCounts.loyal + segmentCounts.newCustomer + segmentCounts.potentialVip + segmentCounts.test
+                        segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
+                        
+                        // Define segments with colors and calculate percentages
+                        const segments = [
+                          { name: 'VIP', count: segmentCounts.vip, color: '#8B5CF6', percent: Math.round((segmentCounts.vip / totalCustomers) * 100) },
+                          { name: 'Loyal', count: segmentCounts.loyal, color: '#3B82F6', percent: Math.round((segmentCounts.loyal / totalCustomers) * 100) },
+                          { name: 'New Customer', count: segmentCounts.newCustomer, color: '#10B981', percent: Math.round((segmentCounts.newCustomer / totalCustomers) * 100) },
+                          { name: 'Potential VIP', count: segmentCounts.potentialVip, color: '#F59E0B', percent: Math.round((segmentCounts.potentialVip / totalCustomers) * 100) },
+                          { name: 'Test', count: segmentCounts.test, color: '#6B7280', percent: Math.round((segmentCounts.test / totalCustomers) * 100) },
+                          { name: 'Regular', count: segmentCounts.regular, color: '#6366F1', percent: Math.round((segmentCounts.regular / totalCustomers) * 100) }
+                        ].filter(segment => segment.count > 0) // Only show segments with customers
+                        
+                        // Render pie chart segments
+                        let currentOffset = 0
+                        return segments.map((segment, index) => {
+                          const segmentLength = segment.percent * 2.51 // Convert percentage to stroke-dasharray length
+                          const offset = currentOffset
+                          currentOffset += segmentLength
+                          
+                          return (
                             <circle
+                              key={segment.name}
                               cx="50"
                               cy="50"
                               r="40"
                               fill="none"
-                              stroke="#8B5CF6"
+                              stroke={segment.color}
                               strokeWidth="20"
-                              strokeDasharray={`${vipPercent * 2.51} ${100 * 2.51}`}
+                              strokeDasharray={`${segmentLength} ${100 * 2.51}`}
+                              strokeDashoffset={`-${offset}`}
                               className="transition-all duration-500"
                             />
-                            {/* Premium Customers */}
-                            <circle
-                              cx="50"
-                              cy="50"
-                              r="40"
-                              fill="none"
-                              stroke="#3B82F6"
-                              strokeWidth="20"
-                              strokeDasharray={`${premiumPercent * 2.51} ${100 * 2.51}`}
-                              strokeDashoffset={`-${vipPercent * 2.51}`}
-                              className="transition-all duration-500"
-                            />
-                            {/* Regular Customers */}
-                            <circle
-                              cx="50"
-                              cy="50"
-                              r="40"
-                              fill="none"
-                              stroke="#10B981"
-                              strokeWidth="20"
-                              strokeDasharray={`${regularPercent * 2.51} ${100 * 2.51}`}
-                              strokeDashoffset={`-${(vipPercent + premiumPercent) * 2.51}`}
-                              className="transition-all duration-500"
-                            />
-                          </>
-                        )
+                          )
+                        })
                       })()}
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -687,37 +746,72 @@ export default function Home() {
                   {(() => {
                     const customersArray = Array.isArray(customers) ? customers : []
                     const totalCustomers = customersArray.length || 1
-                    const vipCustomers = customersArray.filter(c => c.tags?.includes('VIP') || c.totalSpend > 1000).length
-                    const premiumCustomers = customersArray.filter(c => c.tags?.includes('Premium') || (c.totalSpend > 500 && c.totalSpend <= 1000)).length
-                    const regularCustomers = totalCustomers - vipCustomers - premiumCustomers
                     
-                    const vipPercent = Math.round((vipCustomers / totalCustomers) * 100)
-                    const premiumPercent = Math.round((premiumCustomers / totalCustomers) * 100)
-                    const regularPercent = Math.round((regularCustomers / totalCustomers) * 100)
+                    // Count customers by actual tags in the database
+                    const segmentCounts = {
+                      vip: customersArray.filter(c => 
+                        c.tags?.some((tag: string) => 
+                          tag.toLowerCase().includes('vip') || 
+                          tag.toLowerCase().includes('premium')
+                        ) || c.totalSpend > 1000
+                      ).length,
+                      loyal: customersArray.filter(c => 
+                        c.tags?.some((tag: string) => 
+                          tag.toLowerCase().includes('loyal') || 
+                          tag.toLowerCase().includes('returning')
+                        )
+                      ).length,
+                      newCustomer: customersArray.filter(c => 
+                        c.tags?.some((tag: string) => 
+                          tag.toLowerCase().includes('new') || 
+                          tag.toLowerCase().includes('new-customer')
+                        )
+                      ).length,
+                      potentialVip: customersArray.filter(c => 
+                        c.tags?.some((tag: string) => 
+                          tag.toLowerCase().includes('potential') || 
+                          tag.toLowerCase().includes('potential-vip')
+                        )
+                      ).length,
+                      test: customersArray.filter(c => 
+                        c.tags?.some((tag: string) => 
+                          tag.toLowerCase().includes('test')
+                        )
+                      ).length,
+                      regular: 0 // Will be calculated as remaining
+                    }
+                    
+                    // Calculate regular customers (those without specific tags)
+                    const taggedCustomers = segmentCounts.vip + segmentCounts.loyal + segmentCounts.newCustomer + segmentCounts.potentialVip + segmentCounts.test
+                    segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
+                    
+                    // Calculate percentages
+                    const segments = [
+                      { name: 'VIP', count: segmentCounts.vip, color: 'bg-purple-500', percent: Math.round((segmentCounts.vip / totalCustomers) * 100) },
+                      { name: 'Loyal', count: segmentCounts.loyal, color: 'bg-blue-500', percent: Math.round((segmentCounts.loyal / totalCustomers) * 100) },
+                      { name: 'New Customer', count: segmentCounts.newCustomer, color: 'bg-green-500', percent: Math.round((segmentCounts.newCustomer / totalCustomers) * 100) },
+                      { name: 'Potential VIP', count: segmentCounts.potentialVip, color: 'bg-yellow-500', percent: Math.round((segmentCounts.potentialVip / totalCustomers) * 100) },
+                      { name: 'Test', count: segmentCounts.test, color: 'bg-gray-500', percent: Math.round((segmentCounts.test / totalCustomers) * 100) },
+                      { name: 'Regular', count: segmentCounts.regular, color: 'bg-indigo-500', percent: Math.round((segmentCounts.regular / totalCustomers) * 100) }
+                    ].filter(segment => segment.count > 0) // Only show segments with customers
+                    
+                    console.log('📊 Customer segments calculated:', {
+                      totalCustomers,
+                      segmentCounts,
+                      segments: segments.map(s => `${s.name}: ${s.count} (${s.percent}%)`)
+                    })
                     
                     return (
                       <>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                            <span className="text-sm text-gray-600">VIP Customers</span>
+                        {segments.map((segment, index) => (
+                          <div key={segment.name} className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <div className={`w-3 h-3 ${segment.color} rounded-full`}></div>
+                              <span className="text-sm text-gray-600">{segment.name}</span>
+                            </div>
+                            <span className="text-sm font-semibold text-gray-900">{segment.percent}%</span>
                           </div>
-                          <span className="text-sm font-semibold text-gray-900">{vipPercent}%</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span className="text-sm text-gray-600">Premium Customers</span>
-                          </div>
-                          <span className="text-sm font-semibold text-gray-900">{premiumPercent}%</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span className="text-sm text-gray-600">Regular Customers</span>
-                          </div>
-                          <span className="text-sm font-semibold text-gray-900">{regularPercent}%</span>
-                        </div>
+                        ))}
                       </>
                     )
                   })()}
