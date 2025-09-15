@@ -192,28 +192,34 @@ export default function SignUp() {
         <title>Sign Up - Xeno CRM</title>
         <meta name="description" content="Create your Xeno CRM account" />
       </Head>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse-slow" style={{animationDelay: '2s'}}></div>
+        </div>
+        
+        <div className="max-w-md w-full space-y-8 relative z-10">
           {/* Header */}
           <div className="text-center animate-fade-in-up">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-bounce-gentle">
-              <span className="text-white font-bold text-2xl">X</span>
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-bounce-gentle shadow-lg shadow-blue-500/25">
+              <span className="text-white font-bold text-3xl">X</span>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
-            <p className="text-gray-600">Join Xeno CRM and start managing your business</p>
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-3">Welcome to Xeno</h2>
+            <p className="text-gray-600 text-lg">Create your account and start your CRM journey</p>
           </div>
 
           {/* Sign Up Form */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 animate-fade-in-up border border-white/20" style={{animationDelay: '0.1s'}}>
             {/* Google Sign Up Button */}
-            <div className="mb-6">
+            <div className="mb-8">
               <SmoothButton
                 onClick={handleGoogleSignUp}
                 disabled={loading}
                 loading={loading}
                 variant="secondary"
                 size="lg"
-                className="w-full flex items-center justify-center space-x-3 py-3 border border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:shadow-md"
+                className="w-full flex items-center justify-center space-x-3 py-4 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300 hover:shadow-lg group"
               >
                 {success ? (
                   <>
@@ -252,9 +258,9 @@ export default function SignUp() {
             </div>
 
             {/* Email Sign Up Form */}
-            <form onSubmit={handleEmailSignUp} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <form onSubmit={handleEmailSignUp} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700">
                   Full Name
                 </label>
                 <input
@@ -264,13 +270,13 @@ export default function SignUp() {
                   required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 bg-gray-50/50 backdrop-blur-sm"
                   placeholder="Enter your full name"
                 />
               </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
                   Email Address
                 </label>
                 <input
@@ -280,13 +286,13 @@ export default function SignUp() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 bg-gray-50/50 backdrop-blur-sm"
                   placeholder="Enter your email"
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
                   Password
                 </label>
                 <div className="relative">
@@ -297,7 +303,7 @@ export default function SignUp() {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400"
+                    className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-gray-300 bg-gray-50/50 backdrop-blur-sm"
                     placeholder="Create a password"
                   />
                   <button
@@ -320,17 +326,17 @@ export default function SignUp() {
                 
                 {/* Password Strength Indicator */}
                 {formData.password && (
-                  <div className="mt-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                  <div className="mt-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                          className={`h-2 rounded-full transition-all duration-500 ease-out ${getPasswordStrengthColor()}`}
                           style={{ width: `${(passwordStrength / 5) * 100}%` }}
                         ></div>
                       </div>
-                      <span className={`text-xs font-medium ${
-                        passwordStrength <= 2 ? 'text-red-600' : 
-                        passwordStrength <= 3 ? 'text-yellow-600' : 'text-green-600'
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                        passwordStrength <= 2 ? 'text-red-700 bg-red-100' : 
+                        passwordStrength <= 3 ? 'text-yellow-700 bg-yellow-100' : 'text-green-700 bg-green-100'
                       }`}>
                         {getPasswordStrengthText()}
                       </span>
@@ -340,12 +346,12 @@ export default function SignUp() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-fade-in">
+                <div className="bg-red-50/80 backdrop-blur-sm border-2 border-red-200 rounded-xl p-4 animate-fade-in">
                   <div className="flex items-center">
-                    <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm text-red-700">{error}</span>
+                    <span className="text-sm text-red-700 font-medium">{error}</span>
                   </div>
                 </div>
               )}
@@ -356,21 +362,21 @@ export default function SignUp() {
                 loading={loading}
                 variant="primary"
                 size="lg"
-                className="w-full"
+                className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Create Account
               </SmoothButton>
             </form>
 
             {/* Sign In Link */}
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
                 <button
                   onClick={() => router.push('/')}
-                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  className="text-blue-600 hover:text-blue-800 font-semibold transition-all duration-200 hover:underline"
                 >
-                  Sign in
+                  Sign in here
                 </button>
               </p>
             </div>
@@ -378,24 +384,30 @@ export default function SignUp() {
 
           {/* Features */}
           <div className="text-center animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-            <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
-              <div className="flex items-center justify-center space-x-1">
-                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Free to start</span>
+            <div className="grid grid-cols-3 gap-6 text-sm text-gray-600">
+              <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 hover:bg-white/80 transition-all duration-300">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="font-medium">Free to start</span>
               </div>
-              <div className="flex items-center justify-center space-x-1">
-                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>AI-powered</span>
+              <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 hover:bg-white/80 transition-all duration-300">
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <span className="font-medium">AI-powered</span>
               </div>
-              <div className="flex items-center justify-center space-x-1">
-                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Real-time data</span>
+              <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/40 hover:bg-white/80 transition-all duration-300">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <span className="font-medium">Real-time</span>
               </div>
             </div>
           </div>
