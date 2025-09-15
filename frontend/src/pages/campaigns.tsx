@@ -95,15 +95,15 @@ export default function Campaigns() {
       const apiCampaigns = rawCampaigns.map((campaign: any) => {
         const stats = campaign.stats || {}
         return {
-          _id: campaign._id,
-          name: campaign.name,
+          _id: campaign._id || '',
+          name: campaign.name || 'Unnamed Campaign',
           type: 'Email', // Default type since backend doesn't store type
-          status: campaign.status,
+          status: campaign.status || 'draft',
           targetSegment: 'All Customers', // Default since we don't have segment info in this endpoint
           sentCount: stats.sent || 0,
           openRate: 0, // Not tracked in current backend
           clickRate: 0, // Not tracked in current backend
-          createdAt: campaign.createdAt,
+          createdAt: campaign.createdAt || new Date().toISOString(),
           scheduledAt: campaign.scheduledAt
         }
       })
@@ -509,7 +509,7 @@ export default function Campaigns() {
                               {campaign.targetSegment}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {campaign.sentCount.toLocaleString()}
+                              {(campaign.sentCount || 0).toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                               {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
@@ -518,7 +518,7 @@ export default function Campaigns() {
                               {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(campaign.createdAt).toLocaleDateString()}
+                              {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
