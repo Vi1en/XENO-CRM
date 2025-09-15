@@ -159,16 +159,16 @@ export const orderApi = {
   getAll: async () => {
     return retryRequest(() => api.get('/orders'));
   },
-  getById: async (id: number) => {
+  getById: async (id: string) => {
     return retryRequest(() => api.get(`/orders/${id}`));
   },
   create: async (data: any) => {
     return retryRequest(() => api.post('/orders', data));
   },
-  update: async (id: number, data: any) => {
+  update: async (id: string, data: any) => {
     return retryRequest(() => api.put(`/orders/${id}`, data));
   },
-  delete: async (id: number) => {
+  delete: async (id: string) => {
     return retryRequest(() => api.delete(`/orders/${id}`));
   },
   getTrends: async () => {

@@ -109,6 +109,27 @@ export default function Orders() {
     }
   }
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      console.log('🗑️ Deleting order:', orderId)
+      await orderApi.delete(orderId)
+      
+      // Remove from local state
+      const updatedOrders = orders.filter(order => order._id !== orderId)
+      setOrders(updatedOrders)
+      setFilteredOrders(updatedOrders)
+      
+      console.log('✅ Order deleted successfully')
+    } catch (error: any) {
+      console.error('❌ Error deleting order:', error)
+      setError(`Failed to delete order: ${error.response?.data?.message || error.message}`)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800'
@@ -422,7 +443,10 @@ export default function Orders() {
                               >
                                 Edit
                               </Link>
-                              <button className="text-red-600 hover:text-red-900">
+                              <button 
+                                onClick={() => handleDeleteOrder(order._id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
                                 Delete
                               </button>
                             </td>
