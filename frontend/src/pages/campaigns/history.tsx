@@ -98,7 +98,9 @@ export default function CampaignHistory() {
         const delivered = stats.delivered || 0
         const failed = stats.failed || 0
         const totalRecipients = stats.totalRecipients || 0
-        const deliveryRate = sent > 0 ? Math.round((delivered / sent) * 100) : 0
+        // Calculate delivery rate: delivered / (delivered + failed) or delivered / totalRecipients
+        const totalProcessed = delivered + failed
+        const deliveryRate = totalProcessed > 0 ? Math.round((delivered / totalProcessed) * 100) : 0
         
         return {
           _id: campaign._id,
