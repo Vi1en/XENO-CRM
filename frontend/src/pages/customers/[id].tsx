@@ -174,9 +174,23 @@ export default function EditCustomer() {
       console.log('📋 Customer data type:', typeof customer)
       console.log('📋 Customer data keys:', customer ? Object.keys(customer) : 'No customer data')
       
-      // Handle both array and object response formats
-      const customerData = Array.isArray(customer) ? customer[0] : customer
-      console.log('📋 Processed customer data:', customerData)
+      // Extract the actual customer data from the nested structure
+      let customerData
+      if (customer && customer.success && customer.data) {
+        // API returns {success: true, data: {actual_customer_data}}
+        customerData = customer.data
+        console.log('📋 Extracted customer data from nested structure:', customerData)
+      } else if (Array.isArray(customer)) {
+        // Handle array format
+        customerData = customer[0]
+        console.log('📋 Extracted customer data from array:', customerData)
+      } else {
+        // Handle direct object format
+        customerData = customer
+        console.log('📋 Using customer data directly:', customerData)
+      }
+      
+      console.log('📋 Final processed customer data:', customerData)
       
       // Format lastOrderAt for date input
       let formattedLastOrderAt = ''
