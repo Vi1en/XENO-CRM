@@ -36,13 +36,19 @@ export default function EnhancedNavigation({ currentPath, user }: EnhancedNaviga
 
   const handleLogout = async () => {
     try {
-      console.log('👋 Logging out user...')
-      await logout()
-      router.push('/login')
+      console.log('👋 EnhancedNavigation: Logging out user...')
+      console.log('🔑 EnhancedNavigation: Clearing localStorage...')
+      
+      // Clear localStorage
+      localStorage.removeItem('xeno-user')
+      localStorage.removeItem('xeno-jwt')
+      
+      console.log('✅ EnhancedNavigation: Logout successful, redirecting to login')
+      router.replace('/login') // Use replace to avoid back button issues
     } catch (error) {
-      console.error('❌ Logout error:', error)
+      console.error('❌ EnhancedNavigation: Logout error:', error)
       // Still redirect to login even if logout fails
-      router.push('/login')
+      router.replace('/login')
     }
   }
 

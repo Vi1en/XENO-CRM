@@ -1,22 +1,12 @@
 /** @type {import('next').NextConfig} */
-const isProduction = process.env.NODE_ENV === 'production'
-
 const nextConfig = {
-  // Only use static export for production builds
-  ...(isProduction && {
-    output: 'export',
-    distDir: 'out',
-    trailingSlash: true,
-  }),
+  // Disable static export for development
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
+  distDir: process.env.NODE_ENV === 'production' ? 'out' : '.next',
+  trailingSlash: process.env.NODE_ENV === 'production',
   images: {
     unoptimized: true
   },
-  // Only generate build ID for production
-  ...(isProduction && {
-    generateBuildId: async () => {
-      return 'demo-mode-v5-' + Date.now()
-    },
-  }),
 }
 
 module.exports = nextConfig

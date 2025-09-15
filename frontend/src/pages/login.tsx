@@ -17,12 +17,21 @@ export default function Login() {
     const checkAuth = () => {
       try {
         const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
+        const storedJWT = localStorage.getItem('xeno-jwt')
+        
+        console.log('🔍 Checking authentication status...')
+        console.log('📱 Stored user:', storedUser ? 'Found' : 'Not found')
+        console.log('🔑 Stored JWT:', storedJWT ? 'Found' : 'Not found')
+        
+        if (storedUser && storedJWT) {
+          console.log('✅ User already authenticated, redirecting to dashboard')
           setIsAuthenticated(true)
-          router.push('/')
+          router.replace('/') // Use replace to avoid back button issues
+        } else {
+          console.log('❌ No valid authentication found')
         }
       } catch (error) {
-        console.error('Auth check error:', error)
+        console.error('❌ Auth check error:', error)
       }
     }
 

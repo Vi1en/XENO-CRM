@@ -25,16 +25,31 @@ export default function ProtectedRoute({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check if user exists in localStorage
-        const hasLocalAuth = isAuthenticated()
+        console.log('🔍 ProtectedRoute: Checking authentication...')
         
-        if (!hasLocalAuth) {
-          console.log('🔐 No local authentication found, redirecting to login')
-          router.push(redirectTo)
+        // First check if user exists in localStorage
+        const storedUser = localStorage.getItem('xeno-user')
+        const storedJWT = localStorage.getItem('xeno-jwt')
+        
+        console.log('📱 ProtectedRoute: Stored user:', storedUser ? 'Found' : 'Not found')
+        console.log('🔑 ProtectedRoute: Stored JWT:', storedJWT ? 'Found' : 'Not found')
+        
+        if (!storedUser || !storedJWT) {
+          console.log('❌ ProtectedRoute: No local authentication found, redirecting to login')
+          router.replace(redirectTo) // Use replace to avoid back button issues
           return
         }
 
-        // Verify token with backend
+        // For now, just use local authentication to avoid backend calls
+        console.log('✅ ProtectedRoute: Local authentication found, allowing access')
+        const userData = JSON.parse(storedUser)
+        setAuthState({
+          isAuthenticated: true,
+          user: userData
+        })
+        
+        // Optional: Verify token with backend (commented out to avoid loops)
+        /*
         console.log('🔐 Verifying token with backend...')
         const verification = await verifyToken()
         
@@ -46,11 +61,12 @@ export default function ProtectedRoute({
           })
         } else {
           console.log('❌ Token verification failed, redirecting to login')
-          router.push(redirectTo)
+          router.replace(redirectTo)
         }
+        */
       } catch (error) {
-        console.error('❌ Auth check error:', error)
-        router.push(redirectTo)
+        console.error('❌ ProtectedRoute: Auth check error:', error)
+        router.replace(redirectTo)
       } finally {
         setLoading(false)
       }

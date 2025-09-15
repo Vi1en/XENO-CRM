@@ -35,16 +35,22 @@ export default function Home() {
   useEffect(() => {
     const loadUser = () => {
       try {
+        console.log('🏠 Dashboard: Loading user data...')
         const userData = getUser()
-        setUser(userData)
+        
         if (userData) {
-          console.log('✅ User loaded:', userData.name)
+          console.log('✅ Dashboard: User loaded successfully:', {
+            name: userData.name,
+            email: userData.email,
+            provider: userData.provider
+          })
+          setUser(userData)
           loadData()
         } else {
-          console.log('❌ No user found')
+          console.log('❌ Dashboard: No user found in localStorage')
         }
       } catch (error) {
-        console.error('Error loading user:', error)
+        console.error('❌ Dashboard: Error loading user:', error)
       } finally {
         setAuthLoading(false)
       }
