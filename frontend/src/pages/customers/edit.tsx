@@ -66,6 +66,65 @@ export default function EditCustomer() {
       
       // Validate ID format (MongoDB ObjectIds are 24 characters)
       if (typeof id === 'string' && id.length !== 24) {
+        console.error('❌ Invalid customer ID format detected')
+        console.error('❌ Expected 24 characters, got:', id.length)
+        console.error('❌ ID value:', id)
+        
+        // Try to find the customer in the customers list as fallback
+        console.log('🔄 Attempting fallback: loading all customers to find match...')
+        try {
+          const allCustomersResponse = await customerApi.getAll()
+          const allCustomers = allCustomersResponse.data.data || allCustomersResponse.data
+          console.log('📋 All customers loaded:', allCustomers)
+          
+          // Look for a customer that might match (partial ID match)
+          const matchingCustomer = allCustomers.find((customer: any) => 
+            customer._id && customer._id.includes(id)
+          )
+          
+          if (matchingCustomer) {
+            console.log('✅ Found matching customer via fallback:', matchingCustomer)
+            const customerData = matchingCustomer
+            
+            // Format data for the form
+            let formattedLastOrderAt = ''
+            if (customerData.lastOrderAt) {
+              try {
+                const date = new Date(customerData.lastOrderAt)
+                formattedLastOrderAt = date.toISOString().split('T')[0]
+              } catch (e) {
+                console.warn('⚠️ Error formatting lastOrderAt:', e)
+              }
+            }
+            
+            let formattedTags = ''
+            if (customerData.tags) {
+              if (Array.isArray(customerData.tags)) {
+                formattedTags = customerData.tags.join(', ')
+              } else {
+                formattedTags = customerData.tags
+              }
+            }
+            
+            setFormData({
+              email: customerData.email || '',
+              firstName: customerData.firstName || '',
+              lastName: customerData.lastName || '',
+              phone: customerData.phone || '',
+              visits: customerData.visits?.toString() || '0',
+              tags: formattedTags,
+              lastOrderAt: formattedLastOrderAt
+            })
+            console.log('✅ Form data set via fallback method')
+            setLoading(false)
+            return
+          } else {
+            console.error('❌ No matching customer found in fallback search')
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback method also failed:', fallbackError)
+        }
+        
         throw new Error(`Invalid customer ID format. Expected 24 characters, got ${id.length}. ID: "${id}"`)
       }
       
@@ -329,6 +388,25 @@ export default function EditCustomer() {
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Edit Customer</h1>
                 <p className="mt-2 text-gray-600">Update customer information and details</p>
+                
+                {/* Debug Information */}
+                <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Debug Information:</h3>
+                  <p className="text-xs text-gray-600">Customer ID: {id}</p>
+                  <p className="text-xs text-gray-600">ID Type: {typeof id}</p>
+                  <p className="text-xs text-gray-600">ID Length: {id?.length}</p>
+                  <p className="text-xs text-gray-600">Form Data: {JSON.stringify(formData, null, 2)}</p>
+                  <button
+                    onClick={() => {
+                      console.log('🔍 Current form data:', formData)
+                      console.log('🔍 Current ID:', id)
+                      loadCustomer()
+                    }}
+                    className="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  >
+                    Reload Customer Data
+                  </button>
+                </div>
               </div>
 
               {success && (
