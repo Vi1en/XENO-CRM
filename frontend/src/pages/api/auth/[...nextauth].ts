@@ -14,10 +14,6 @@ declare module 'next-auth' {
 }
 
 const authOptions: NextAuthOptions = {
-  // Configure NextAuth URL for local development
-  url: process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:3000' 
-    : process.env.NEXTAUTH_URL,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
