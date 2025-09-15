@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Mini CRM system with AI-powered segmentation and campaign management",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0",
+    "npm": ">=9.0.0"
+  },
   "workspaces": [
     "frontend",
     "backend",

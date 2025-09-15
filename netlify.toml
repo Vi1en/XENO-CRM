@@ -5,6 +5,8 @@
   publish = "frontend/out"
 
 [build.environment]
+  # Node.js version
+  NODE_VERSION = "18.17.0"
   # Disable Next.js serverless functions
   NEXT_TELEMETRY_DISABLED = "1"
   # Disable Next.js plugin
