@@ -104,7 +104,19 @@ export const customerApi = {
     return retryRequest(() => api.get(`/customers/${id}`));
   },
   create: async (data: any) => {
-    return retryRequest(() => api.post('/customers', data));
+    // Use ingestion endpoint as fallback since direct POST to /customers is not working
+    try {
+      return retryRequest(() => api.post('/customers', data));
+    } catch (error) {
+      console.log('Direct customer creation failed, trying ingestion endpoint...');
+      // Generate externalId for ingestion
+      const externalId = `cust_${Date.now()}_${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const ingestionData = {
+        ...data,
+        externalId
+      };
+      return retryRequest(() => api.post('/ingest/customers', ingestionData));
+    }
   },
   update: async (id: number, data: any) => {
     return retryRequest(() => api.put(`/customers/${id}`, data));
