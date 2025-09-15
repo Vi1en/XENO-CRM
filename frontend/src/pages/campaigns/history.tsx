@@ -381,9 +381,9 @@ export default function CampaignHistory() {
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-purple-600">
                               {(() => {
-                                const sent = campaign.stats?.sent || campaign.sentCount || 0
+                                const totalRecipients = campaign.stats?.totalRecipients || campaign.audienceSize || 0
                                 const delivered = campaign.stats?.delivered || campaign.deliveredCount || 0
-                                const rate = sent > 0 ? (delivered / sent) * 100 : 0
+                                const rate = totalRecipients > 0 ? (delivered / totalRecipients) * 100 : 0
                                 return `${rate.toFixed(0)}%`
                               })()}
                             </div>
