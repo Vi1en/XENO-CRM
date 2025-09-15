@@ -168,10 +168,9 @@ export default function Campaigns() {
       
       const newCampaign = {
         name: suggestion.name,
-        type: suggestion.type,
-        status: 'draft',
-        targetSegment: suggestion.targetSegment,
-        description: suggestion.description
+        description: suggestion.description,
+        segmentId: 'all', // Use 'all' as default segment ID for now
+        message: suggestion.message || suggestion.description
       }
       
       console.log('📝 Campaign data to create:', newCampaign)

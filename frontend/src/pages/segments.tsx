@@ -131,8 +131,7 @@ export default function Segments() {
       const newSegment = {
         name: suggestion.name,
         description: suggestion.description,
-        rules: suggestion.rules,
-        customerCount: suggestion.estimatedCount
+        rules: suggestion.rules
       }
       
       console.log('📝 Segment data to create:', newSegment)
