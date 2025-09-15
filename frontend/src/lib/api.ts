@@ -43,18 +43,8 @@ if (typeof window !== 'undefined') {
   console.log('📱 User Agent:', navigator.userAgent);
   console.log('📐 Screen size:', window.innerWidth + 'x' + window.innerHeight);
   
-  // Test the API URL immediately
-  fetch(API_BASE_URL + '/orders')
-    .then(response => {
-      console.log('🧪 API Test Response Status:', response.status);
-      return response.json();
-    })
-    .then(data => {
-      console.log('🧪 API Test Data:', data);
-    })
-    .catch(error => {
-      console.error('🧪 API Test Error:', error);
-    });
+  // API test disabled due to CORS issues - using demo mode
+  console.log('🚫 API Test disabled - using demo mode');
 }
 
 export const api = axios.create({
@@ -90,18 +80,11 @@ api.interceptors.response.use(
   }
 );
 
-// Retry function for failed requests
+// Retry function for failed requests - disabled for demo mode
 const retryRequest = async (fn: () => Promise<any>, retries = 3): Promise<any> => {
-  try {
-    return await fn()
-  } catch (error) {
-    if (retries > 0) {
-      console.log(`🔄 Retrying request, ${retries} attempts left...`)
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
-      return retryRequest(fn, retries - 1)
-    }
-    throw error
-  }
+  // Immediately throw error to trigger demo mode
+  console.log('🚫 API call blocked - using demo mode');
+  throw new Error('API calls disabled - using demo mode');
 }
 
 // Customer API functions

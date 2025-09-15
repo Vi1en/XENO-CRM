@@ -8,6 +8,10 @@ const nextConfig = {
   experimental: {
     outputFileTracingRoot: undefined,
   },
+  // Cache busting for demo mode
+  generateBuildId: async () => {
+    return 'demo-mode-v3-' + Date.now()
+  },
   // Ensure proper routing
   async rewrites() {
     return [
