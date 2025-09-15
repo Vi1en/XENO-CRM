@@ -98,15 +98,29 @@ export default function CreateSegment() {
     setError(null)
 
     try {
-      // Remove id field from rules before sending to API
+      // Remove id field from rules before sending to API and convert values to proper types
       const apiData = {
         name: formData.name,
         description: formData.description,
-        rules: formData.rules.map(rule => ({
-          field: rule.field,
-          operator: rule.operator,
-          value: rule.value
-        }))
+        rules: formData.rules.map(rule => {
+          let value: any = rule.value
+          
+          // Convert numeric fields to numbers
+          if (rule.field === 'totalSpend' || rule.field === 'visits') {
+            value = parseFloat(rule.value) || 0
+          }
+          
+          // Convert date fields to Date objects
+          if (rule.field === 'lastOrderAt') {
+            value = new Date(rule.value).toISOString()
+          }
+          
+          return {
+            field: rule.field,
+            operator: rule.operator,
+            value: value
+          }
+        })
       }
       
       console.log('📝 Sending segment data:', apiData)
@@ -413,18 +427,10 @@ export default function CreateSegment() {
                               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                             >
                               <option value="">Select Field</option>
-                              <option value="visits_count">Visits Count</option>
-                              <option value="last_active">Last Active</option>
-                              <option value="total_spend">Total Spend</option>
-                              <option value="created_at">Created At</option>
-                              <option value="name">Name</option>
-                              <option value="email">Email</option>
-                              <option value="phone">Phone</option>
-                              <option value="company">Company</option>
-                              <option value="location">Location</option>
-                              <option value="last_order_date">Last Order Date</option>
-                              <option value="order_count">Order Count</option>
-                              <option value="avg_order_value">Average Order Value</option>
+                              <option value="totalSpend">Total Spend</option>
+                              <option value="visits">Visits</option>
+                              <option value="lastOrderAt">Last Order Date</option>
+                              <option value="tags">Tags</option>
                             </select>
                           </div>
                           
@@ -437,30 +443,31 @@ export default function CreateSegment() {
                               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                             >
                               <option value="">Operator</option>
-                              <option value=">">&gt;</option>
-                              <option value="<">&lt;</option>
-                              <option value=">=">&gt;=</option>
-                              <option value="<=">&lt;=</option>
-                              <option value="=">=</option>
-                              <option value="!=">!=</option>
-                              <option value="contains">contains</option>
-                              <option value="not_contains">not contains</option>
-                              <option value="starts_with">starts with</option>
-                              <option value="ends_with">ends with</option>
-                              <option value="is_empty">is empty</option>
-                              <option value="is_not_empty">is not empty</option>
+                              <option value="equals">Equals</option>
+                              <option value="not_equals">Not Equals</option>
+                              <option value="greater_than">Greater Than</option>
+                              <option value="less_than">Less Than</option>
+                              <option value="contains">Contains</option>
+                              <option value="not_contains">Not Contains</option>
+                              <option value="in">In</option>
+                              <option value="not_in">Not In</option>
                             </select>
                           </div>
                           
                           <div className="flex-1">
                             <input
-                              type="text"
+                              type={newRule.field === 'lastOrderAt' ? 'date' : (newRule.field === 'totalSpend' || newRule.field === 'visits') ? 'number' : 'text'}
                               id="ruleValue"
                               name="value"
                               value={newRule.value}
                               onChange={handleRuleChange}
                               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                              placeholder="Value"
+                              placeholder={
+                                newRule.field === 'lastOrderAt' ? 'Select date' :
+                                newRule.field === 'totalSpend' ? 'Enter amount' :
+                                newRule.field === 'visits' ? 'Enter number' :
+                                'Enter value'
+                              }
                             />
                           </div>
                           
