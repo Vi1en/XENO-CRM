@@ -112,12 +112,20 @@ router.get('/callback', async (req: Request, res: Response) => {
     
     if (error) {
       console.error('❌ Google Callback: OAuth error:', error);
-      return res.redirect(`${state}/login?error=oauth_error`);
+      const frontendUrl = decodeURIComponent(state as string);
+      const fullFrontendUrl = frontendUrl.startsWith('http') 
+        ? frontendUrl 
+        : `https://${frontendUrl}`;
+      return res.redirect(`${fullFrontendUrl}/login?error=oauth_error`);
     }
     
     if (!code || !state) {
       console.error('❌ Google Callback: Missing code or state parameter');
-      return res.redirect(`${state}/login?error=missing_parameters`);
+      const frontendUrl = decodeURIComponent(state as string);
+      const fullFrontendUrl = frontendUrl.startsWith('http') 
+        ? frontendUrl 
+        : `https://${frontendUrl}`;
+      return res.redirect(`${fullFrontendUrl}/login?error=missing_parameters`);
     }
     
     const frontendUrl = decodeURIComponent(state as string);
@@ -173,7 +181,14 @@ router.get('/callback', async (req: Request, res: Response) => {
     console.log('🔄 Google Callback: Redirecting to frontend with token...');
     
     // Redirect back to frontend with token
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(ourJwt)}`;
+    // Ensure frontend URL has https:// protocol
+    const fullFrontendUrl = frontendUrl.startsWith('http') 
+      ? frontendUrl 
+      : `https://${frontendUrl}`;
+    
+    const redirectUrl = `${fullFrontendUrl}/auth/callback?token=${encodeURIComponent(ourJwt)}`;
+    
+    console.log('🔄 Google Callback: Final redirect URL:', redirectUrl);
     res.redirect(redirectUrl);
     
   } catch (error) {
