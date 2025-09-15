@@ -236,7 +236,7 @@ export default function Home() {
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
         <meta name="version" content="v4.0-no-api-calls" />
-        <meta name="build" content="2024-01-15-demo-mode" />
+        <meta name="build" content="2024-01-15-redirect-fix-v2" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
       </Head>
