@@ -199,7 +199,7 @@ export default function CampaignHistory() {
                 </div>
                 <div className="ml-3">
                   <span className="text-xl font-semibold text-white">Xeno CRM</span>
-                  <p className="text-sm text-gray-400">Dashboard v2.1</p>
+                  <p className="text-sm text-gray-400">Dashboard</p>
                 </div>
               </div>
             </div>

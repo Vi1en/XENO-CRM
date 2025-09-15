@@ -662,7 +662,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white" style={{ fontSize: '1.25rem', margin: '0' }}>Xeno CRM</h1>
-              <p className="text-sm text-gray-400">Dashboard v2.1</p>
+              <p className="text-sm text-gray-400">Dashboard</p>
             </div>
           </div>
           
