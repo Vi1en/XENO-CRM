@@ -25,7 +25,6 @@ export default function AuthNavigation({ currentPath }: AuthNavigationProps) {
     { href: '/campaigns', label: 'Campaigns', icon: '📧' },
     { href: '/segments', label: 'Segments', icon: '🎯' },
     { href: '/orders', label: 'Orders', icon: '🛒' },
-    { href: '/ai-insights', label: 'AI Insights', icon: '🤖' },
   ]
 
   return (
