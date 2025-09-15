@@ -36,9 +36,21 @@ router.get('/login', async (req: Request, res: Response) => {
     
     if (!GOOGLE_CLIENT_ID) {
       console.error('❌ Google Login: CLIENT_ID not configured');
+      console.error('❌ Google Login: Available env vars:', {
+        CLIENT_ID: !!process.env.CLIENT_ID,
+        CLIENT_SECRET: !!process.env.CLIENT_SECRET,
+        BACKEND_URL: process.env.BACKEND_URL,
+        FRONTEND_URL: process.env.FRONTEND_URL
+      });
+      
+      // Return a helpful error message
       return res.status(500).json({ 
         success: false, 
-        message: 'Google OAuth not configured' 
+        message: 'Google OAuth not configured. Please set CLIENT_ID and CLIENT_SECRET environment variables in Railway.',
+        debug: {
+          CLIENT_ID: !!process.env.CLIENT_ID,
+          CLIENT_SECRET: !!process.env.CLIENT_SECRET
+        }
       });
     }
     
