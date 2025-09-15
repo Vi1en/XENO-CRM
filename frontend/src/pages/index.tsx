@@ -1,9 +1,8 @@
-// Removed NextAuth imports - using static export
+// Restored API imports for real data
 import Link from 'next/link'
-// DEMO MODE - NO API CALLS - v4.0
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-// Removed API imports - using demo mode
+import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api'
 import Head from 'next/head'
 
 export default function Home() {
@@ -63,8 +62,31 @@ export default function Home() {
     setError(null)
     console.log('📱 Loading demo data...')
 
-    // Skip all API calls - use demo data directly
-    console.log('🔄 Loading demo data - API calls disabled')
+    // Load real data from API
+    console.log('🔄 Loading real data from API...')
+    
+    try {
+      // Load data from real API
+      const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
+        customerApi.getAll(),
+        campaignApi.getAll(),
+        segmentApi.getAll(),
+        orderApi.getAll()
+      ])
+      
+      setCustomers(customersRes.data)
+      setCampaigns(campaignsRes.data)
+      setSegments(segmentsRes.data)
+      setOrders(ordersRes.data)
+      setUsingMockData(false)
+      
+      console.log('✅ Real data loaded successfully')
+      return // Exit early if API call succeeds
+    } catch (err: any) {
+      console.error('❌ Error loading real data:', err)
+      setError('Failed to load data from API')
+      console.log('🔄 Falling back to demo data...')
+    }
     
     // Simulate a brief loading delay for better UX
     await new Promise(resolve => setTimeout(resolve, 800))
@@ -156,12 +178,30 @@ export default function Home() {
 
   const loadAnalyticsData = async () => {
     setAnalyticsLoading(true)
-    console.log('📊 Loading demo analytics data...')
+    console.log('📊 Loading real analytics data from API...')
     
-    // Skip API calls - analytics data is already loaded in loadData
-    console.log('🔄 Analytics data already loaded with demo data')
-    
-    setAnalyticsLoading(false)
+    try {
+      // Load analytics data from real API
+      const [analyticsRes, trendsRes, deliveryRes] = await Promise.all([
+        customerApi.getAnalytics(),
+        orderApi.getTrends(),
+        campaignApi.getDeliveryStats()
+      ])
+      
+      setAnalyticsData(analyticsRes.data)
+      setTrendsData(trendsRes.data)
+      setDeliveryData(deliveryRes.data)
+      
+      console.log('✅ Real analytics data loaded successfully')
+    } catch (err: any) {
+      console.error('❌ Error loading analytics data:', err)
+      // Fallback to mock data generation
+      setAnalyticsData(generateMockAnalytics())
+      setTrendsData(generateMockTrends())
+      setDeliveryData(generateMockDelivery())
+    } finally {
+      setAnalyticsLoading(false)
+    }
   }
 
   const generateMockAnalytics = () => {
@@ -236,7 +276,7 @@ export default function Home() {
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
         <meta name="version" content="v4.0-no-api-calls" />
-        <meta name="build" content="2024-01-15-redirect-fix-v2" />
+        <meta name="build" content="2024-01-15-real-data-v1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="alternate icon" href="/favicon.ico" />
       </Head>
@@ -347,7 +387,7 @@ export default function Home() {
                 <p className="text-sm text-gray-500">Last updated</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
                 {usingMockData && (
-                  <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - Backend Offline</p>
+                  <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - API Offline</p>
                 )}
               </div>
               <button
