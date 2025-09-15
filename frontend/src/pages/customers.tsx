@@ -1,7 +1,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
-import { customerApi } from '@/lib/api'
+// Removed API import - using demo mode
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 

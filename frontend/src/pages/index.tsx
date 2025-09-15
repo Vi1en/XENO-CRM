@@ -3,16 +3,16 @@ import Link from 'next/link'
 // DEMO MODE - NO API CALLS - v4.0
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { customerApi, campaignApi, segmentApi, orderApi } from '@/lib/api'
+// Removed API imports - using demo mode
 import Head from 'next/head'
 
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [customers, setCustomers] = useState([])
-  const [campaigns, setCampaigns] = useState([])
-  const [segments, setSegments] = useState([])
-  const [orders, setOrders] = useState([])
+  const [customers, setCustomers] = useState<any[]>([])
+  const [campaigns, setCampaigns] = useState<any[]>([])
+  const [segments, setSegments] = useState<any[]>([])
+  const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedTimeRange, setSelectedTimeRange] = useState('7')
