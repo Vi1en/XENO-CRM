@@ -62,6 +62,16 @@ export default function Home() {
       console.log('🚀 User authenticated, starting data load...')
       loadData()
       loadAnalyticsData()
+      
+      // Test segments API directly
+      console.log('🧪 Testing segments API directly...')
+      customerApi.getSegments()
+        .then(response => {
+          console.log('✅ Segments API test successful:', response.data)
+        })
+        .catch(error => {
+          console.error('❌ Segments API test failed:', error)
+        })
     }
   }, [isAuthenticated, customers.length])
 
@@ -140,6 +150,8 @@ export default function Home() {
       console.log('🔍 Customer data structure:', customersRes.data)
       console.log('🔍 First customer tags:', customersRes.data[0]?.tags)
       console.log('🔍 Customer count:', customersRes.data.length)
+      console.log('🔍 Segments API response:', segmentsDataRes.data)
+      console.log('🔍 Customer segments data:', customerSegments)
       setLoading(false)
       return // Exit early if API call succeeds
     } catch (err: any) {
@@ -674,8 +686,11 @@ export default function Home() {
                         
                         if (customerSegments && Object.keys(customerSegments).length > 0) {
                           console.log('📊 Using API segments data:', customerSegments)
+                          console.log('📊 API segments keys:', Object.keys(customerSegments))
+                          console.log('📊 API segments values:', Object.values(customerSegments))
                           segmentCounts = customerSegments
                           totalCustomers = Object.values(customerSegments).reduce((sum: number, count: any) => sum + Number(count), 0)
+                          console.log('📊 Total customers from API:', totalCustomers)
                         } else {
                           console.log('📊 Using frontend calculation for segments')
                           const customersArray = Array.isArray(customers) ? customers : []
