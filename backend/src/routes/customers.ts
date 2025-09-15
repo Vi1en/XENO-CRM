@@ -408,5 +408,94 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/v1/customers/segments:
+ *   get:
+ *     summary: Get customer segments count
+ *     tags: [Customers]
+ *     responses:
+ *       200:
+ *         description: Customer segments count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     segments:
+ *                       type: object
+ *                       additionalProperties:
+ *                         type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/segments', async (req, res) => {
+  try {
+    console.log('📊 Fetching customer segments...');
+    
+    // Aggregate customers by tags
+    const result = await Customer.aggregate([
+      {
+        $project: {
+          tags: {
+            $cond: {
+              if: { $isArray: "$tags" },
+              then: "$tags",
+              else: ["regular"] // fallback if no tags
+            }
+          }
+        }
+      },
+      {
+        $unwind: "$tags"
+      },
+      {
+        $group: {
+          _id: "$tags",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    console.log('📊 Raw aggregation result:', result);
+
+    // Convert aggregation result into a more usable object
+    const segments: { [key: string]: number } = {};
+    result.forEach(r => {
+      segments[r._id] = r.count;
+    });
+
+    // Ensure we have a regular count for customers without specific tags
+    const totalCustomers = await Customer.countDocuments();
+    const taggedCustomers = Object.values(segments).reduce((sum: number, count: number) => sum + count, 0);
+    const regularCount = totalCustomers - taggedCustomers;
+    
+    if (regularCount > 0) {
+      segments['regular'] = regularCount;
+    }
+
+    console.log('📊 Final segments:', segments);
+
+    return res.json({
+      success: true,
+      data: { segments }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching customer segments:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch customer segments'
+    });
+  }
+});
+
 export { router as customersRoutes };
 

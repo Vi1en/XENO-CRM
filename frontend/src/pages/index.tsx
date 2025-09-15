@@ -27,6 +27,7 @@ export default function Home() {
   const [deliveryData, setDeliveryData] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const [usingMockData, setUsingMockData] = useState(false)
+  const [customerSegments, setCustomerSegments] = useState<any>(null)
   const [pageLoading, setPageLoading] = useState(false)
   // Removed client-side loading logic - using proper authentication
 
@@ -117,17 +118,22 @@ export default function Home() {
     
     try {
       // Load data from real API
-      const [customersRes, campaignsRes, segmentsRes, ordersRes] = await Promise.all([
+      const [customersRes, campaignsRes, segmentsRes, ordersRes, segmentsDataRes] = await Promise.all([
         customerApi.getAll(),
         campaignApi.getAll(),
         segmentApi.getAll(),
-        orderApi.getAll()
+        orderApi.getAll(),
+        customerApi.getSegments().catch(err => {
+          console.log('⚠️ Segments API not available, will use frontend calculation')
+          return { data: { data: { segments: {} } } }
+        })
       ])
       
       setCustomers(customersRes.data)
       setCampaigns(campaignsRes.data)
       setSegments(segmentsRes.data)
       setOrders(ordersRes.data)
+      setCustomerSegments(segmentsDataRes.data.data?.segments || segmentsDataRes.data.segments || {})
       setUsingMockData(false)
       
       console.log('✅ Real data loaded successfully')
@@ -662,56 +668,76 @@ export default function Home() {
                     {/* Pie Chart - Calculate real percentages based on customer data */}
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                       {(() => {
-                        const customersArray = Array.isArray(customers) ? customers : []
-                        const totalCustomers = customersArray.length || 1
+                        // Use segments data from API if available, otherwise fall back to frontend calculation
+                        let segmentCounts: { [key: string]: number } = {}
+                        let totalCustomers = customers.length || 1
                         
-                        // Count customers by actual tags in the database
-                        const segmentCounts = {
-                          vip: customersArray.filter(c => 
-                            c.tags?.some((tag: string) => 
-                              tag.toLowerCase().includes('vip') || 
-                              tag.toLowerCase().includes('premium')
-                            ) || c.totalSpend > 1000
-                          ).length,
-                          loyal: customersArray.filter(c => 
-                            c.tags?.some((tag: string) => 
-                              tag.toLowerCase().includes('loyal') || 
-                              tag.toLowerCase().includes('returning')
-                            )
-                          ).length,
-                          newCustomer: customersArray.filter(c => 
-                            c.tags?.some((tag: string) => 
-                              tag.toLowerCase().includes('new') || 
-                              tag.toLowerCase().includes('new-customer')
-                            )
-                          ).length,
-                          potentialVip: customersArray.filter(c => 
-                            c.tags?.some((tag: string) => 
-                              tag.toLowerCase().includes('potential') || 
-                              tag.toLowerCase().includes('potential-vip')
-                            )
-                          ).length,
-                          test: customersArray.filter(c => 
-                            c.tags?.some((tag: string) => 
-                              tag.toLowerCase().includes('test')
-                            )
-                          ).length,
-                          regular: 0
+                        if (customerSegments && Object.keys(customerSegments).length > 0) {
+                          console.log('📊 Using API segments data:', customerSegments)
+                          segmentCounts = customerSegments
+                          totalCustomers = Object.values(customerSegments).reduce((sum: number, count: any) => sum + Number(count), 0)
+                        } else {
+                          console.log('📊 Using frontend calculation for segments')
+                          const customersArray = Array.isArray(customers) ? customers : []
+                          
+                          // Fallback to frontend calculation
+                          segmentCounts = {
+                            vip: customersArray.filter(c => 
+                              c.tags?.some((tag: string) => 
+                                tag.toLowerCase().includes('vip') || 
+                                tag.toLowerCase().includes('premium')
+                              ) || c.totalSpend > 1000
+                            ).length,
+                            loyal: customersArray.filter(c => 
+                              c.tags?.some((tag: string) => 
+                                tag.toLowerCase().includes('loyal') || 
+                                tag.toLowerCase().includes('returning')
+                              )
+                            ).length,
+                            'new-customer': customersArray.filter(c => 
+                              c.tags?.some((tag: string) => 
+                                tag.toLowerCase().includes('new') || 
+                                tag.toLowerCase().includes('new-customer')
+                              )
+                            ).length,
+                            'potential-vip': customersArray.filter(c => 
+                              c.tags?.some((tag: string) => 
+                                tag.toLowerCase().includes('potential') || 
+                                tag.toLowerCase().includes('potential-vip')
+                              )
+                            ).length,
+                            test: customersArray.filter(c => 
+                              c.tags?.some((tag: string) => 
+                                tag.toLowerCase().includes('test')
+                              )
+                            ).length,
+                            regular: 0
+                          }
+                          
+                          // Calculate regular customers (those without specific tags)
+                          const taggedCustomers = Object.values(segmentCounts).reduce((sum: number, count: any) => sum + Number(count), 0) - (segmentCounts.regular || 0)
+                          segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
                         }
                         
-                        // Calculate regular customers (those without specific tags)
-                        const taggedCustomers = segmentCounts.vip + segmentCounts.loyal + segmentCounts.newCustomer + segmentCounts.potentialVip + segmentCounts.test
-                        segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
-                        
                         // Define segments with colors and calculate percentages
-                        const segments = [
-                          { name: 'VIP', count: segmentCounts.vip, color: '#8B5CF6', percent: Math.round((segmentCounts.vip / totalCustomers) * 100) },
-                          { name: 'Loyal', count: segmentCounts.loyal, color: '#3B82F6', percent: Math.round((segmentCounts.loyal / totalCustomers) * 100) },
-                          { name: 'New Customer', count: segmentCounts.newCustomer, color: '#10B981', percent: Math.round((segmentCounts.newCustomer / totalCustomers) * 100) },
-                          { name: 'Potential VIP', count: segmentCounts.potentialVip, color: '#F59E0B', percent: Math.round((segmentCounts.potentialVip / totalCustomers) * 100) },
-                          { name: 'Test', count: segmentCounts.test, color: '#6B7280', percent: Math.round((segmentCounts.test / totalCustomers) * 100) },
-                          { name: 'Regular', count: segmentCounts.regular, color: '#6366F1', percent: Math.round((segmentCounts.regular / totalCustomers) * 100) }
-                        ].filter(segment => segment.count > 0) // Only show segments with customers
+                        const segmentDefinitions = [
+                          { key: 'vip', name: 'VIP', color: '#8B5CF6' },
+                          { key: 'loyal', name: 'Loyal', color: '#3B82F6' },
+                          { key: 'new-customer', name: 'New Customer', color: '#10B981' },
+                          { key: 'potential-vip', name: 'Potential VIP', color: '#F59E0B' },
+                          { key: 'test', name: 'Test', color: '#6B7280' },
+                          { key: 'regular', name: 'Regular', color: '#6366F1' }
+                        ]
+                        
+                        const segments = segmentDefinitions
+                          .map(segment => ({
+                            ...segment,
+                            count: segmentCounts[segment.key] || 0,
+                            percent: Math.round(((segmentCounts[segment.key] || 0) / totalCustomers) * 100)
+                          }))
+                          .filter(segment => segment.count > 0) // Only show segments with customers
+                        
+                        console.log('📊 Final segments for chart:', segments)
                         
                         // Render pie chart segments
                         let currentOffset = 0
@@ -747,83 +773,77 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 mt-4">
                   {(() => {
-                    const customersArray = Array.isArray(customers) ? customers : []
-                    const totalCustomers = customersArray.length || 1
+                    // Use the same logic as the pie chart
+                    let segmentCounts: { [key: string]: number } = {}
+                    let totalCustomers = customers.length || 1
                     
-                    // Count customers by actual tags in the database
-                    const segmentCounts = {
-                      vip: customersArray.filter(c => 
-                        c.tags?.some((tag: string) => 
-                          tag.toLowerCase().includes('vip') || 
-                          tag.toLowerCase().includes('premium')
-                        ) || c.totalSpend > 1000
-                      ).length,
-                      loyal: customersArray.filter(c => 
-                        c.tags?.some((tag: string) => 
-                          tag.toLowerCase().includes('loyal') || 
-                          tag.toLowerCase().includes('returning')
-                        )
-                      ).length,
-                      newCustomer: customersArray.filter(c => 
-                        c.tags?.some((tag: string) => 
-                          tag.toLowerCase().includes('new') || 
-                          tag.toLowerCase().includes('new-customer')
-                        )
-                      ).length,
-                      potentialVip: customersArray.filter(c => 
-                        c.tags?.some((tag: string) => 
-                          tag.toLowerCase().includes('potential') || 
-                          tag.toLowerCase().includes('potential-vip')
-                        )
-                      ).length,
-                      test: customersArray.filter(c => 
-                        c.tags?.some((tag: string) => 
-                          tag.toLowerCase().includes('test')
-                        )
-                      ).length,
-                      regular: 0 // Will be calculated as remaining
+                    if (customerSegments && Object.keys(customerSegments).length > 0) {
+                      segmentCounts = customerSegments
+                      totalCustomers = Object.values(customerSegments).reduce((sum: number, count: any) => sum + Number(count), 0)
+                    } else {
+                      const customersArray = Array.isArray(customers) ? customers : []
+                      
+                      // Fallback to frontend calculation
+                      segmentCounts = {
+                        vip: customersArray.filter(c => 
+                          c.tags?.some((tag: string) => 
+                            tag.toLowerCase().includes('vip') || 
+                            tag.toLowerCase().includes('premium')
+                          ) || c.totalSpend > 1000
+                        ).length,
+                        loyal: customersArray.filter(c => 
+                          c.tags?.some((tag: string) => 
+                            tag.toLowerCase().includes('loyal') || 
+                            tag.toLowerCase().includes('returning')
+                          )
+                        ).length,
+                        'new-customer': customersArray.filter(c => 
+                          c.tags?.some((tag: string) => 
+                            tag.toLowerCase().includes('new') || 
+                            tag.toLowerCase().includes('new-customer')
+                          )
+                        ).length,
+                        'potential-vip': customersArray.filter(c => 
+                          c.tags?.some((tag: string) => 
+                            tag.toLowerCase().includes('potential') || 
+                            tag.toLowerCase().includes('potential-vip')
+                          )
+                        ).length,
+                        test: customersArray.filter(c => 
+                          c.tags?.some((tag: string) => 
+                            tag.toLowerCase().includes('test')
+                          )
+                        ).length,
+                        regular: 0
+                      }
+                      
+                      // Calculate regular customers (those without specific tags)
+                      const taggedCustomers = Object.values(segmentCounts).reduce((sum: number, count: any) => sum + Number(count), 0) - (segmentCounts.regular || 0)
+                      segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
                     }
                     
-                    // Calculate regular customers (those without specific tags)
-                    const taggedCustomers = segmentCounts.vip + segmentCounts.loyal + segmentCounts.newCustomer + segmentCounts.potentialVip + segmentCounts.test
-                    segmentCounts.regular = Math.max(0, totalCustomers - taggedCustomers)
+                    // Define segments with colors and calculate percentages
+                    const segmentDefinitions = [
+                      { key: 'vip', name: 'VIP', color: 'bg-purple-500' },
+                      { key: 'loyal', name: 'Loyal', color: 'bg-blue-500' },
+                      { key: 'new-customer', name: 'New Customer', color: 'bg-green-500' },
+                      { key: 'potential-vip', name: 'Potential VIP', color: 'bg-yellow-500' },
+                      { key: 'test', name: 'Test', color: 'bg-gray-500' },
+                      { key: 'regular', name: 'Regular', color: 'bg-indigo-500' }
+                    ]
                     
-                    // Calculate percentages
-                    const segments = [
-                      { name: 'VIP', count: segmentCounts.vip, color: 'bg-purple-500', percent: Math.round((segmentCounts.vip / totalCustomers) * 100) },
-                      { name: 'Loyal', count: segmentCounts.loyal, color: 'bg-blue-500', percent: Math.round((segmentCounts.loyal / totalCustomers) * 100) },
-                      { name: 'New Customer', count: segmentCounts.newCustomer, color: 'bg-green-500', percent: Math.round((segmentCounts.newCustomer / totalCustomers) * 100) },
-                      { name: 'Potential VIP', count: segmentCounts.potentialVip, color: 'bg-yellow-500', percent: Math.round((segmentCounts.potentialVip / totalCustomers) * 100) },
-                      { name: 'Test', count: segmentCounts.test, color: 'bg-gray-500', percent: Math.round((segmentCounts.test / totalCustomers) * 100) },
-                      { name: 'Regular', count: segmentCounts.regular, color: 'bg-indigo-500', percent: Math.round((segmentCounts.regular / totalCustomers) * 100) }
-                    ].filter(segment => segment.count > 0) // Only show segments with customers
+                    const segments = segmentDefinitions
+                      .map(segment => ({
+                        ...segment,
+                        count: segmentCounts[segment.key] || 0,
+                        percent: Math.round(((segmentCounts[segment.key] || 0) / totalCustomers) * 100)
+                      }))
+                      .filter(segment => segment.count > 0) // Only show segments with customers
                     
                     console.log('📊 Customer segments calculated:', {
                       totalCustomers,
                       segmentCounts,
                       segments: segments.map(s => `${s.name}: ${s.count} (${s.percent}%)`)
-                    })
-                    
-                    // Debug: Log first few customers to see their tag structure
-                    console.log('🔍 Sample customer data for debugging:', customersArray.slice(0, 3).map(c => ({
-                      id: c._id,
-                      name: `${c.firstName} ${c.lastName}`,
-                      tags: c.tags,
-                      totalSpend: c.totalSpend
-                    })))
-                    
-                    // Debug: Test tag detection manually
-                    console.log('🧪 Manual tag detection test:')
-                    customersArray.slice(0, 3).forEach((c, i) => {
-                      console.log(`Customer ${i + 1}:`, {
-                        name: `${c.firstName} ${c.lastName}`,
-                        tags: c.tags,
-                        hasVipTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('vip')),
-                        hasLoyalTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('loyal')),
-                        hasNewTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('new')),
-                        totalSpend: c.totalSpend,
-                        isVipBySpend: c.totalSpend > 1000
-                      })
                     })
                     
                     return (

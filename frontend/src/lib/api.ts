@@ -126,6 +126,9 @@ export const customerApi = {
   },
   getAnalytics: async () => {
     return retryRequest(() => api.get('/customers/analytics'), 3, true);
+  },
+  getSegments: async () => {
+    return retryRequest(() => api.get('/customers/segments'));
   }
 };
 
