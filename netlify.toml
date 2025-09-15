@@ -1,6 +1,6 @@
 [build]
   # Build command for static export with network resilience
-  command = "npm install --workspace frontend && cd frontend && npm run build"
+  command = "npm install --workspace frontend --include=dev && cd frontend && npm run build"
   # Publish directory for static files
   publish = "frontend/out"
 
