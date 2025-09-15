@@ -1,14 +1,13 @@
-// Restored API imports for real data
+// Original CRM with authentication
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useSession, signIn, signOut } from 'next-auth/react'
 import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api'
 import Head from 'next/head'
 
 export default function Home() {
-  // Demo mode - no authentication required
-  const session = null
-  const status = 'unauthenticated'
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [customers, setCustomers] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
@@ -22,57 +21,19 @@ export default function Home() {
   const [deliveryData, setDeliveryData] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const [usingMockData, setUsingMockData] = useState(false)
-  const [isClient, setIsClient] = useState(false)
-
-  // Set client flag to prevent hydration issues
-  useEffect(() => {
-    console.log('🔄 Setting client flag to true')
-    setIsClient(true)
-  }, [])
+  // Removed client-side loading logic - using proper authentication
 
   useEffect(() => {
-    if (!isClient) {
-      console.log('⏳ Waiting for client flag...')
-      return // Only run on client side
+    // Only load data when authenticated
+    if (status === 'loading') return
+    if (status === 'unauthenticated') return
+    
+    if (session && customers.length === 0) {
+      console.log('🚀 User authenticated, starting data load...')
+      loadData()
+      loadAnalyticsData()
     }
-    
-    console.log('🚀 Client ready, starting data load...')
-    let isMounted = true
-    
-    // Clear any cached NextAuth data
-    try {
-      localStorage.removeItem('nextauth.message')
-      localStorage.removeItem('nextauth.csrf-token')
-      sessionStorage.removeItem('nextauth.message')
-      sessionStorage.removeItem('nextauth.csrf-token')
-      localStorage.removeItem('api-cache')
-      sessionStorage.clear()
-    } catch (err) {
-      console.warn('Could not clear storage:', err)
-    }
-    
-    // Load data immediately
-    const loadDataAsync = async () => {
-      if (isMounted) {
-        try {
-          console.log('📊 Starting data load...')
-          await loadData()
-          console.log('📈 Starting analytics load...')
-          await loadAnalyticsData()
-          console.log('✅ All data loaded successfully')
-        } catch (err) {
-          console.error('❌ Error loading data:', err)
-        }
-      }
-    }
-    
-    // Load data immediately without delay
-    loadDataAsync()
-    
-    return () => {
-      isMounted = false
-    }
-  }, [isClient])
+  }, [session, status, customers.length])
 
   const loadData = async () => {
     console.log('🔄 loadData called, loading state:', loading)
@@ -281,8 +242,8 @@ export default function Home() {
   }
 
 
-  // Show loading state during initial render to prevent hydration issues
-  if (!isClient || loading) {
+  // Show loading state during authentication
+  if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -290,6 +251,27 @@ export default function Home() {
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect to sign in if not authenticated
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">X</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Xeno CRM</h1>
+          <p className="text-gray-600 mb-6">Please sign in to access your dashboard</p>
+          <button
+            onClick={() => signIn('google')}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Sign in with Google
+          </button>
         </div>
       </div>
     )
@@ -386,19 +368,31 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-sm font-medium">D</span>
+              <span className="text-gray-600 text-sm font-medium">
+                {session?.user?.name?.charAt(0) || 'U'}
+              </span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">Demo User</p>
-              <p className="text-xs text-gray-500">demo@xenocrm.com</p>
+              <p className="text-sm font-medium text-gray-900">{session?.user?.name}</p>
+              <p className="text-xs text-gray-500">{session?.user?.email}</p>
             </div>
+            <button
+              onClick={() => signOut()}
+              className="p-1 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
-          <div className="w-full flex items-center space-x-2 px-4 py-3 text-gray-700 bg-gray-50 rounded-lg mt-2">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm">Demo Mode</span>
-          </div>
+          {usingMockData && (
+            <div className="w-full flex items-center space-x-2 px-4 py-3 text-orange-700 bg-orange-50 rounded-lg mt-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm">API Offline - Using Demo Data</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -409,11 +403,11 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
-              <p className="text-gray-600">Welcome to Xeno CRM Demo!</p>
+              <p className="text-gray-600">Welcome to Xeno CRM!</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-500">Last updated</p>
+                <p className="text-sm text-gray-500">Welcome back, {session?.user?.name?.split(' ')[0] || 'User'}!</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
                 {usingMockData && (
                   <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - API Offline</p>
