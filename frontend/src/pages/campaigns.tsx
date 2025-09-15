@@ -193,6 +193,8 @@ export default function Campaigns() {
     } catch (error: any) {
       console.error('❌ Error creating AI campaign:', error)
       console.error('❌ Error details:', error.response?.data || error.message)
+      console.error('❌ Full error response:', error.response)
+      console.error('❌ Validation errors:', error.response?.data?.errors)
       setError('Failed to create AI campaign: ' + (error.response?.data?.message || error.message))
     }
   }

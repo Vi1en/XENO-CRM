@@ -33,8 +33,8 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
             name: `${prompt.split(' ')[0]} Customers`,
             description: `AI-generated segment based on: ${prompt}`,
             rules: [
-              { field: 'behavior', operator: 'contains', value: prompt.toLowerCase() },
-              { field: 'engagement', operator: '>', value: 'high' }
+              { field: 'totalSpend', operator: 'greater_than', value: 100 },
+              { field: 'visits', operator: 'greater_than', value: 3 }
             ],
             estimatedCount: Math.floor(Math.random() * 100) + 10,
             confidence: Math.floor(Math.random() * 20) + 80,
@@ -45,8 +45,8 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
             name: `High-Value ${prompt.split(' ')[0]} Users`,
             description: `Premium customers matching: ${prompt}`,
             rules: [
-              { field: 'value', operator: '>', value: 500 },
-              { field: 'behavior', operator: 'contains', value: prompt.toLowerCase() }
+              { field: 'totalSpend', operator: 'greater_than', value: 500 },
+              { field: 'lastOrderAt', operator: 'greater_than', value: '2024-01-01' }
             ],
             estimatedCount: Math.floor(Math.random() * 50) + 5,
             confidence: Math.floor(Math.random() * 15) + 85,

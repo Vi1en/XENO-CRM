@@ -154,6 +154,8 @@ export default function Segments() {
     } catch (error: any) {
       console.error('❌ Error creating AI segment:', error)
       console.error('❌ Error details:', error.response?.data || error.message)
+      console.error('❌ Full error response:', error.response)
+      console.error('❌ Validation errors:', error.response?.data?.errors)
       setError('Failed to create AI segment: ' + (error.response?.data?.message || error.message))
     }
   }
