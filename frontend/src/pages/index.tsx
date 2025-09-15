@@ -3,15 +3,17 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { customerApi, campaignApi, segmentApi, orderApi } from '@/lib/api'
+import { User, getUser } from '@/lib/auth'
 import Head from 'next/head'
 import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import EnhancedNavigation from '@/components/EnhancedNavigation'
 
 export default function Home() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [customers, setCustomers] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
@@ -29,48 +31,47 @@ export default function Home() {
   const [pageLoading, setPageLoading] = useState(false)
   // Removed client-side loading logic - using proper authentication
 
-  // Simple authentication check
+  // Load user data
   useEffect(() => {
-    const checkAuth = () => {
+    const loadUser = () => {
       try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-          console.log('✅ User authenticated:', userData.name)
+        const userData = getUser()
+        setUser(userData)
+        if (userData) {
+          console.log('✅ User loaded:', userData.name)
+          loadData()
         } else {
-          setIsAuthenticated(false)
-          console.log('❌ No user found, showing sign-in')
+          console.log('❌ No user found')
         }
       } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
+        console.error('Error loading user:', error)
       } finally {
         setAuthLoading(false)
       }
     }
 
-    checkAuth()
+    loadUser()
   }, [])
 
-  // Load data when authenticated
+  // Load data when user is available
   useEffect(() => {
-    if (isAuthenticated && customers.length === 0) {
-      console.log('🚀 User authenticated, starting data load...')
+    if (user && customers.length === 0) {
+      console.log('🚀 User available, starting data load...')
       loadData()
     }
-  }, [isAuthenticated, customers.length])
+  }, [user, customers.length])
 
   // Simple sign in function
   const handleSignIn = () => {
-    const userData = {
+    const userData: User = {
       name: 'John Doe',
       email: 'john@example.com',
-      id: 'user-123'
+      id: 'user-123',
+      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=3b82f6&color=ffffff',
+      provider: 'email',
+      createdAt: new Date().toISOString()
     }
     setUser(userData)
-    setIsAuthenticated(true)
     localStorage.setItem('xeno-user', JSON.stringify(userData))
     console.log('✅ User signed in:', userData.name)
   }
@@ -78,7 +79,6 @@ export default function Home() {
   // Simple sign out function
   const handleSignOut = () => {
     setUser(null)
-    setIsAuthenticated(false)
     localStorage.removeItem('xeno-user')
     setCustomers([])
     setCampaigns([])
@@ -604,57 +604,26 @@ export default function Home() {
     )
   }
 
-  // Show sign in if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center animate-fade-in-up">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
-            <span className="text-white font-bold text-xl">X</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Xeno CRM</h1>
-          <p className="text-gray-600 mb-6">Please sign in to access your dashboard</p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <SmoothButton
-              onClick={handleSignIn}
-              variant="primary"
-              size="lg"
-              className="animate-scale-in"
-            >
-              Sign In
-            </SmoothButton>
-            <SmoothButton
-              onClick={() => router.push('/signup')}
-              variant="secondary"
-              size="lg"
-              className="animate-scale-in"
-            >
-              Create Account
-            </SmoothButton>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
-    <PageTransition>
-      <div className="min-h-screen bg-gray-50 flex">
-      <Head>
-        <title>Xeno CRM Dashboard</title>
-        <meta name="description" content="Customer Relationship Management Dashboard" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-        <meta name="version" content="v4.0-no-api-calls" />
-        <meta name="build" content="2024-01-15-real-data-v1" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="alternate icon" href="/favicon.ico" />
-      </Head>
+    <ProtectedRoute>
+      <PageTransition>
+        <div className="min-h-screen bg-gray-50 flex">
+        <Head>
+          <title>Xeno CRM Dashboard</title>
+          <meta name="description" content="Customer Relationship Management Dashboard" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+          <meta httpEquiv="Pragma" content="no-cache" />
+          <meta httpEquiv="Expires" content="0" />
+          <meta name="version" content="v4.0-no-api-calls" />
+          <meta name="build" content="2024-01-15-real-data-v1" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link rel="alternate icon" href="/favicon.ico" />
+        </Head>
       
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-900 text-white">
+        {/* Enhanced Navigation with User Info */}
+        <EnhancedNavigation currentPath={router.pathname} user={user} />
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -782,8 +751,8 @@ export default function Home() {
               <span className="text-sm">Connected to Real Database</span>
             </div>
           )}
-        </div>
-      </div>
+        {/* Enhanced Navigation with User Info */}
+        <EnhancedNavigation currentPath={router.pathname} user={user} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -1596,6 +1565,7 @@ export default function Home() {
         </div>
       </div>
     </div>
-    </PageTransition>
+      </PageTransition>
+    </ProtectedRoute>
   )
 }
