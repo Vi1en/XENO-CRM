@@ -80,21 +80,9 @@ export default function Segments() {
       
     } catch (error: any) {
       console.error('❌ Error loading segments from API:', error)
-      console.log('📱 Falling back to demo data...')
-      
-      // Fallback to demo data if API fails
-      const demoSegments = [
-        { _id: '1', name: 'VIP Customers', description: 'High-value customers with significant spending', rules: [], customerCount: 25, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '2', name: 'New Customers', description: 'Recently registered customers', rules: [], customerCount: 150, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '3', name: 'At-Risk Customers', description: 'Customers who haven\'t purchased recently', rules: [], customerCount: 45, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '4', name: 'Frequent Buyers', description: 'Customers with multiple purchases', rules: [], customerCount: 80, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '5', name: 'Premium Members', description: 'Customers with premium subscriptions', rules: [], customerCount: 30, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-      ]
-      
-      setSegments(demoSegments)
-      setFilteredSegments(demoSegments)
-      setError('API unavailable - showing demo data')
-      console.log('📊 Demo segments loaded:', demoSegments.length)
+      setError('Failed to load segment data from database')
+      setSegments([])
+      setFilteredSegments([])
     } finally {
       setLoading(false)
     }

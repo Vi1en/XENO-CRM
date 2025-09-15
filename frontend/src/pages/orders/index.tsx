@@ -101,19 +101,9 @@ export default function Orders() {
       
     } catch (error: any) {
       console.error('❌ Error loading orders from API:', error)
-      console.log('📱 Falling back to demo data...')
-      
-      // Fallback to demo data if API fails
-      const demoOrders = [
-        { _id: '1', orderNumber: 'ORD-001', customerId: '1', customerName: 'John Doe', total: 250.00, status: 'completed', createdAt: new Date().toISOString(), items: [] },
-        { _id: '2', orderNumber: 'ORD-002', customerId: '2', customerName: 'Jane Smith', total: 150.00, status: 'pending', createdAt: new Date().toISOString(), items: [] },
-        { _id: '3', orderNumber: 'ORD-003', customerId: '3', customerName: 'Bob Johnson', total: 75.00, status: 'completed', createdAt: new Date().toISOString(), items: [] }
-      ]
-      
-      setOrders(demoOrders)
-      setFilteredOrders(demoOrders)
-      setError('API unavailable - showing demo data')
-      console.log('📊 Demo orders loaded:', demoOrders.length)
+      setError('Failed to load order data from database')
+      setOrders([])
+      setFilteredOrders([])
     } finally {
       setLoading(false)
     }

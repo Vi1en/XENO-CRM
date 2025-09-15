@@ -91,27 +91,29 @@ export default function CampaignHistory() {
       const response = await campaignApi.getAll()
       const rawCampaigns = response.data.data || response.data
       
-      // Map API data to our expected format and filter for completed campaigns
+      // Map API data to our expected format using real MongoDB data
       const apiCampaigns = rawCampaigns.map((campaign: any) => {
-        const sent = campaign.stats?.sent || 0
-        const delivered = campaign.stats?.delivered || sent
-        const failed = campaign.stats?.failed || 0
-        const deliveryRate = sent > 0 ? (delivered / sent) * 100 : 0
+        const stats = campaign.stats || {}
+        const sent = stats.sent || 0
+        const delivered = stats.delivered || 0
+        const failed = stats.failed || 0
+        const totalRecipients = stats.totalRecipients || 0
+        const deliveryRate = sent > 0 ? Math.round((delivered / sent) * 100) : 0
         
         return {
           _id: campaign._id,
           name: campaign.name,
-          description: campaign.description || `${campaign.type} campaign for ${campaign.targetSegment || 'customers'}`,
-          type: campaign.type || 'Email',
+          description: campaign.description || 'Marketing campaign',
+          type: 'Email', // Default type since backend doesn't store type
           status: campaign.status,
-          targetSegment: campaign.targetSegment || 'All Customers',
-          audienceSize: campaign.audienceSize || campaign.stats?.audienceSize || 0,
+          targetSegment: 'All Customers', // Default since we don't have segment info in this endpoint
+          audienceSize: totalRecipients,
           sentCount: sent,
           deliveredCount: delivered,
           failedCount: failed,
-          deliveryRate: Math.round(deliveryRate),
-          openRate: campaign.stats?.openRate || 0,
-          clickRate: campaign.stats?.clickRate || 0,
+          deliveryRate: deliveryRate,
+          openRate: 0, // Not tracked in current backend
+          clickRate: 0, // Not tracked in current backend
           createdAt: campaign.createdAt,
           completedAt: campaign.completedAt
         }
@@ -119,25 +121,13 @@ export default function CampaignHistory() {
       
       setCampaigns(apiCampaigns)
       setFilteredCampaigns(apiCampaigns)
-      console.log('✅ Real campaign history loaded from API:', apiCampaigns.length)
+      console.log('✅ Real campaign history loaded from MongoDB:', apiCampaigns.length)
       
     } catch (error: any) {
       console.error('❌ Error loading campaign history from API:', error)
-      console.log('📱 Falling back to demo data...')
-      
-      // Fallback to demo data if API fails
-      const demoCampaigns = [
-        { _id: '1', name: 'Flash Sale Campaign', description: 'A professional campaign designed to navratra sale', type: 'Email', status: 'running', targetSegment: 'All Customers', audienceSize: 9, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
-        { _id: '2', name: 'Welcome New Customers', description: 'Welcome campaign for new customers', type: 'Email', status: 'draft', targetSegment: 'New Customers', audienceSize: 0, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
-        { _id: '3', name: 'VIP Exclusive Offer', description: 'Special offer for VIP customers', type: 'Email', status: 'draft', targetSegment: 'VIP Customers', audienceSize: 0, sentCount: 0, deliveredCount: 0, failedCount: 0, deliveryRate: 0, openRate: 0, clickRate: 0, createdAt: new Date().toISOString() },
-        { _id: '4', name: 'Holiday Sale', description: 'Holiday promotion campaign', type: 'Email', status: 'completed', targetSegment: 'All Customers', audienceSize: 500, sentCount: 500, deliveredCount: 485, failedCount: 15, deliveryRate: 97, openRate: 52.3, clickRate: 18.7, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() },
-        { _id: '5', name: 'Product Launch', description: 'New product announcement', type: 'SMS', status: 'completed', targetSegment: 'Frequent Buyers', audienceSize: 80, sentCount: 80, deliveredCount: 78, failedCount: 2, deliveryRate: 98, openRate: 85.5, clickRate: 35.2, createdAt: new Date().toISOString(), completedAt: new Date().toISOString() }
-      ]
-      
-      setCampaigns(demoCampaigns)
-      setFilteredCampaigns(demoCampaigns)
-      setError('API unavailable - showing demo data')
-      console.log('📊 Demo campaign history loaded:', demoCampaigns.length)
+      setError('Failed to load campaign data from database')
+      setCampaigns([])
+      setFilteredCampaigns([])
     } finally {
       setLoading(false)
     }

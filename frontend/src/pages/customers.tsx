@@ -90,21 +90,9 @@ export default function Customers() {
       
     } catch (error: any) {
       console.error('❌ Error loading customers from API:', error)
-      console.log('📱 Falling back to demo data...')
-      
-      // Fallback to demo data if API fails
-      const demoCustomers = [
-        { _id: '1', externalId: 'ext1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '2', externalId: 'ext2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '3', externalId: 'ext3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '4', externalId: 'ext4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '5', externalId: 'ext5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-      ]
-      
-      setCustomers(demoCustomers)
-      setFilteredCustomers(demoCustomers)
-      setError('API unavailable - showing demo data')
-      console.log('📊 Demo customers loaded:', demoCustomers.length)
+      setError('Failed to load customer data from database')
+      setCustomers([])
+      setFilteredCustomers([])
     } finally {
       setLoading(false)
     }
