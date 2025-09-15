@@ -78,14 +78,18 @@ api.interceptors.response.use(
 );
 
 // Retry function for failed requests
-const retryRequest = async (fn: () => Promise<any>, retries = 3): Promise<any> => {
+const retryRequest = async (fn: () => Promise<any>, retries = 3, isAnalytics = false): Promise<any> => {
   try {
     return await fn();
   } catch (error: any) {
-    if (retries > 0 && error.code !== 'ECONNABORTED') {
-      console.log(`🔄 Retrying request... ${retries} attempts left`);
+    // For analytics endpoints, reduce retries since they're consistently failing
+    const maxRetries = isAnalytics ? 1 : retries;
+    const remainingRetries = isAnalytics ? 0 : retries - 1;
+    
+    if (remainingRetries > 0 && error.code !== 'ECONNABORTED') {
+      console.log(`🔄 Retrying request... ${remainingRetries} attempts left`);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      return retryRequest(fn, retries - 1);
+      return retryRequest(fn, remainingRetries, isAnalytics);
     }
     throw error;
   }
@@ -109,7 +113,7 @@ export const customerApi = {
     return retryRequest(() => api.delete(`/customers/${id}`));
   },
   getAnalytics: async () => {
-    return retryRequest(() => api.get('/customers/analytics'));
+    return retryRequest(() => api.get('/customers/analytics'), 3, true);
   }
 };
 
@@ -131,7 +135,7 @@ export const campaignApi = {
     return retryRequest(() => api.delete(`/campaigns/${id}`));
   },
   getDeliveryStats: async () => {
-    return retryRequest(() => api.get('/campaigns/delivery-stats'));
+    return retryRequest(() => api.get('/campaigns/delivery-stats'), 3, true);
   }
 };
 
@@ -153,7 +157,7 @@ export const orderApi = {
     return retryRequest(() => api.delete(`/orders/${id}`));
   },
   getTrends: async () => {
-    return retryRequest(() => api.get('/orders/trends'));
+    return retryRequest(() => api.get('/orders/trends'), 3, true);
   }
 };
 
