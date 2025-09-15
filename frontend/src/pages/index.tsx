@@ -381,6 +381,7 @@ export default function Home() {
               </svg>
               <span>Campaign History</span>
             </Link>
+            {/* Campaign History navigation link */}
             
             <Link href="/orders" className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
