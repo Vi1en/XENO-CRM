@@ -438,6 +438,19 @@ router.get('/segments', async (req, res) => {
   try {
     console.log('📊 Fetching customer segments...');
     
+    // Simple test first
+    return res.json({
+      success: true,
+      data: { 
+        segments: { 
+          vip: 3, 
+          loyal: 4, 
+          test: 2, 
+          regular: 5 
+        } 
+      }
+    });
+    
     // Get all customers and process them in JavaScript instead of MongoDB aggregation
     const customers = await Customer.find({});
     console.log('📊 Total customers found:', customers.length);
