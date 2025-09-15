@@ -295,7 +295,6 @@ export default function CampaignHistory() {
               </button>
             </div>
           </div>
-          </div>
         </div>
 
         {/* Main Content */}

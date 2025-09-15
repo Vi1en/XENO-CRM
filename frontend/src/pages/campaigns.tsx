@@ -286,7 +286,6 @@ export default function Campaigns() {
               </button>
             </div>
           </div>
-          </div>
         </div>
 
         {/* Main Content */}
