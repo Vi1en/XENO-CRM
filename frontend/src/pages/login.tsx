@@ -101,32 +101,6 @@ export default function Login() {
                       </span>
                       Sign in with Google
                     </SmoothButton>
-                    
-                    {/* Demo Login Button - Remove after Google OAuth is set up */}
-                    <SmoothButton
-                      onClick={async () => {
-                        console.log('🎭 Demo Login: Starting demo login...');
-                        try {
-                          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1'}/demo/login`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: 'demo@example.com' }),
-                          });
-                          const result = await response.json();
-                          if (result.success && result.token) {
-                            localStorage.setItem('auth-token', result.token);
-                            localStorage.setItem('auth-user', JSON.stringify(result.user));
-                            router.push('/');
-                          }
-                        } catch (error) {
-                          console.error('Demo login failed:', error);
-                        }
-                      }}
-                      className="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
-                      title="Demo Login (temporary)"
-                    >
-                      🎭 Demo Login (temporary)
-                    </SmoothButton>
                   </div>
 
                   <div className="text-center">
