@@ -207,28 +207,28 @@ export default function Customers() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                    <table className="w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Customer
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Email
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Phone
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total Spend
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Spend
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Visits
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Tags
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -236,61 +236,61 @@ export default function Customers() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {customers.map((customer, index) => (
                           <tr key={customer._id || index} className="hover:bg-gray-50 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">
+                            <td className="px-3 py-4">
+                              <div className="flex items-center min-w-0">
+                                <div className="flex-shrink-0 h-8 w-8">
+                                  <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                                    <span className="text-xs font-medium text-white">
                                       {customer.firstName?.charAt(0)?.toUpperCase() || 'U'}
                                     </span>
                                   </div>
                                 </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
+                                <div className="ml-3 min-w-0 flex-1">
+                                  <div className="text-sm font-medium text-gray-900 truncate">
                                     {customer.firstName} {customer.lastName}
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-xs text-gray-500 truncate">
                                     ID: {customer.externalId}
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{customer.email}</div>
+                            <td className="px-3 py-4">
+                              <div className="text-sm text-gray-900 max-w-[150px] truncate">{customer.email}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 py-4">
                               <div className="text-sm text-gray-900">{customer.phone || 'N/A'}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 py-4">
                               <div className="text-sm text-gray-900">
                                 ${(customer.totalSpend || 0).toLocaleString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-3 py-4">
                               <div className="text-sm text-gray-900">{customer.visits || 0}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex flex-wrap gap-1">
-                                {customer.tags?.slice(0, 3).map((tag: string, tagIndex: number) => (
+                            <td className="px-3 py-4">
+                              <div className="flex flex-wrap gap-1 max-w-[120px]">
+                                {customer.tags?.slice(0, 2).map((tag: string, tagIndex: number) => (
                                   <span
                                     key={tagIndex}
-                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                                   >
                                     {tag}
                                   </span>
                                 ))}
-                                {customer.tags?.length > 3 && (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    +{customer.tags.length - 3}
+                                {customer.tags?.length > 2 && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    +{customer.tags.length - 2}
                                   </span>
                                 )}
                                 {(!customer.tags || customer.tags.length === 0) && (
-                                  <span className="text-sm text-gray-500">No tags</span>
+                                  <span className="text-xs text-gray-500">No tags</span>
                                 )}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
+                            <td className="px-3 py-4 text-sm font-medium">
+                              <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
                                 <SmoothButton
                                   onClick={() => router.push(`/customers/${customer._id}`)}
                                   variant="secondary"
