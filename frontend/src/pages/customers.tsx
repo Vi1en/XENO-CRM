@@ -76,17 +76,24 @@ export default function Customers() {
   }, [customers, searchTerm])
 
   const loadCustomers = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await customerApi.getAll()
-      setCustomers(response.data.data || [])
-    } catch (error) {
-      console.error('Error loading customers:', error)
-      setError('Failed to load customers')
-    } finally {
-      setLoading(false)
-    }
+    setLoading(true)
+    setError(null)
+    console.log('Loading demo customers...')
+    
+    // Use demo data instead of API calls
+    const demoCustomers = [
+      { _id: '1', externalId: 'ext1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { _id: '2', externalId: 'ext2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { _id: '3', externalId: 'ext3', firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', totalSpend: 300, visits: 2, tags: ['Regular'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { _id: '4', externalId: 'ext4', firstName: 'Alice', lastName: 'Brown', email: 'alice@example.com', totalSpend: 1200, visits: 4, tags: ['VIP'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { _id: '5', externalId: 'ext5', firstName: 'Charlie', lastName: 'Wilson', email: 'charlie@example.com', totalSpend: 600, visits: 3, tags: ['Premium'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    ]
+    
+    setCustomers(demoCustomers)
+    setFilteredCustomers(demoCustomers)
+    console.log('Demo customers loaded:', demoCustomers.length)
+    
+    setLoading(false)
   }
 
   const handleEdit = (customer: Customer) => {
@@ -104,14 +111,14 @@ export default function Customers() {
 
     try {
       setDeleteLoading(customer._id)
-      await customerApi.delete(customer._id)
+      console.log('Deleting customer (demo mode):', customer._id)
       
-      // Remove customer from local state
+      // In demo mode, just remove from local state
       setCustomers(prev => prev.filter(c => c._id !== customer._id))
       setFilteredCustomers(prev => prev.filter(c => c._id !== customer._id))
       
       // Show success message (you could add a toast notification here)
-      console.log('Customer deleted successfully')
+      console.log('Customer deleted successfully (demo mode)')
     } catch (error) {
       console.error('Error deleting customer:', error)
       setError('Failed to delete customer')
@@ -160,6 +167,7 @@ export default function Customers() {
                 <div>
                   <h1 className="text-lg font-bold text-gray-900">Customers</h1>
                   <p className="text-xs text-gray-500">{filteredCustomers.length} customers</p>
+                  <p className="text-xs text-orange-600 font-medium">📊 Demo Mode</p>
                 </div>
               </div>
               <Link
