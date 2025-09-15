@@ -146,7 +146,30 @@ export default function Segments() {
       }
       console.log('🧪 Testing with minimal data:', testSegment)
       
-      // Create the segment
+      // Log the exact API call
+      console.log('🔗 API Base URL:', process.env.NEXT_PUBLIC_API_URL)
+      console.log('🌍 Current URL:', window.location.href)
+      
+      // Test with direct fetch first
+      console.log('🧪 Testing with direct fetch...')
+      const directResponse = await fetch('https://backend-production-05a7e.up.railway.app/api/v1/segments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testSegment)
+      })
+      
+      console.log('📡 Direct fetch response status:', directResponse.status)
+      const directData = await directResponse.json()
+      console.log('📡 Direct fetch response data:', directData)
+      
+      if (!directResponse.ok) {
+        throw new Error(`Direct fetch failed: ${directResponse.status} - ${JSON.stringify(directData)}`)
+      }
+      
+      // If direct fetch works, use the API client
+      console.log('✅ Direct fetch successful, now trying API client...')
       const response = await segmentApi.create(testSegment)
       const createdSegment = response.data
       
