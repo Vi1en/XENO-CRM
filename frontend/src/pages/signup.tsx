@@ -20,22 +20,12 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  // Check if user is already authenticated
+  // Redirect if already authenticated (handled by useAuth hook)
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          setIsAuthenticated(true)
-          router.push('/')
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-      }
+    if (isAuthenticated) {
+      router.push('/')
     }
-
-    checkAuth()
-  }, [router])
+  }, [isAuthenticated, router])
 
   // Password strength checker
   useEffect(() => {
