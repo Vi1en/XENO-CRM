@@ -111,11 +111,8 @@ export default function Customers() {
     console.log('🔍 Customer ID type:', typeof customer._id)
     console.log('📏 Customer ID length:', customer._id?.length)
     
-    // Navigate to edit page with customer data
-    router.push({
-      pathname: '/customers/edit',
-      query: { id: customer._id }
-    })
+    // Navigate to edit page with customer data using dynamic route
+    router.push(`/customers/${customer._id}`)
   }
 
   const handleDelete = async (customer: Customer) => {
