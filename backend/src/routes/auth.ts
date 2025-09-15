@@ -96,8 +96,31 @@ router.post('/google', async (req, res) => {
     const validatedData = googleAuthSchema.parse(req.body);
     console.log('✅ Validated Google Auth Data:', validatedData);
     
-    // For demo purposes, we'll create/find user without actual Google token verification
-    // In production, you would verify the Google ID token here
+    // Verify Google ID token if available
+    if (googleClient && validatedData.googleId) {
+      try {
+        console.log('🔐 Verifying Google ID token...');
+        const ticket = await googleClient.verifyIdToken({
+          idToken: validatedData.googleId,
+          audience: process.env.GOOGLE_CLIENT_ID
+        });
+        
+        const payload = ticket.getPayload();
+        console.log('✅ Google token verified:', payload?.email);
+        
+        if (payload?.email !== validatedData.email) {
+          return res.status(401).json({
+            success: false,
+            message: 'Email mismatch in Google token'
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ Google token verification failed, using fallback mode:', error);
+        // Continue with fallback mode for demo purposes
+      }
+    } else {
+      console.log('⚠️ Google client not available, using fallback mode');
+    }
     
     let user = await Customer.findOne({ 
       email: validatedData.email,

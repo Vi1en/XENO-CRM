@@ -126,7 +126,7 @@ export default function Login() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          googleId: (session.user as any).id || `google_${Date.now()}`,
+          googleId: session.accessToken || (session.user as any).id || `google_${Date.now()}`,
           email: session.user.email,
           name: session.user.name,
           picture: session.user.image,
