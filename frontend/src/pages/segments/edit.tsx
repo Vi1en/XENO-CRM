@@ -68,7 +68,7 @@ export default function EditSegment() {
     
     try {
       console.log('🔄 Loading segment from API...', id)
-      const response = await segmentApi.getById(parseInt(id as string))
+      const response = await segmentApi.getById(id as string)
       const segmentData = response.data.data || response.data
       
       setSegment(segmentData)
@@ -110,7 +110,7 @@ export default function EditSegment() {
     setError(null)
 
     try {
-      await segmentApi.update(parseInt(id as string), formData)
+      await segmentApi.update(id as string, formData)
       setSuccess(true)
       
       // Redirect to segments list after 2 seconds

@@ -8,7 +8,7 @@ interface Segment {
   _id: string
   name: string
   description: string
-  criteria: any
+  rules: any[]
   customerCount: number
   createdAt: string
   updatedAt: string
@@ -84,11 +84,11 @@ export default function Segments() {
       
       // Fallback to demo data if API fails
       const demoSegments = [
-        { _id: '1', name: 'VIP Customers', description: 'High-value customers with significant spending', criteria: {}, customerCount: 25, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '2', name: 'New Customers', description: 'Recently registered customers', criteria: {}, customerCount: 150, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '3', name: 'At-Risk Customers', description: 'Customers who haven\'t purchased recently', criteria: {}, customerCount: 45, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '4', name: 'Frequent Buyers', description: 'Customers with multiple purchases', criteria: {}, customerCount: 80, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        { _id: '5', name: 'Premium Members', description: 'Customers with premium subscriptions', criteria: {}, customerCount: 30, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+        { _id: '1', name: 'VIP Customers', description: 'High-value customers with significant spending', rules: [], customerCount: 25, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '2', name: 'New Customers', description: 'Recently registered customers', rules: [], customerCount: 150, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '3', name: 'At-Risk Customers', description: 'Customers who haven\'t purchased recently', rules: [], customerCount: 45, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '4', name: 'Frequent Buyers', description: 'Customers with multiple purchases', rules: [], customerCount: 80, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+        { _id: '5', name: 'Premium Members', description: 'Customers with premium subscriptions', rules: [], customerCount: 30, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
       ]
       
       setSegments(demoSegments)
@@ -113,7 +113,7 @@ export default function Segments() {
     }
 
     try {
-      await segmentApi.delete(parseInt(segmentId))
+      await segmentApi.delete(segmentId)
       // Remove from local state
       setSegments(prev => prev.filter(segment => segment._id !== segmentId))
       setFilteredSegments(prev => prev.filter(segment => segment._id !== segmentId))

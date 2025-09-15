@@ -178,16 +178,16 @@ export const segmentApi = {
   getAll: async () => {
     return retryRequest(() => api.get('/segments'));
   },
-  getById: async (id: number) => {
+  getById: async (id: string) => {
     return retryRequest(() => api.get(`/segments/${id}`));
   },
   create: async (data: any) => {
     return retryRequest(() => api.post('/segments', data));
   },
-  update: async (id: number, data: any) => {
+  update: async (id: string, data: any) => {
     return retryRequest(() => api.put(`/segments/${id}`, data));
   },
-  delete: async (id: number) => {
+  delete: async (id: string) => {
     return retryRequest(() => api.delete(`/segments/${id}`));
   }
 };
