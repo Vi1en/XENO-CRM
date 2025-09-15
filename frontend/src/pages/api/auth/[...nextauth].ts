@@ -14,6 +14,10 @@ declare module 'next-auth' {
 }
 
 const authOptions: NextAuthOptions = {
+  // Configure NextAuth URL for local development
+  ...(process.env.NODE_ENV === 'development' && {
+    url: 'http://localhost:3000',
+  }),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
@@ -65,7 +69,7 @@ const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-local-development-only',
 }
 
 export default NextAuth(authOptions)
