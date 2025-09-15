@@ -3,6 +3,9 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { customerApi } from '@/lib/api'
+import PageTransition from '@/components/PageTransition'
+import SkeletonLoader from '@/components/SkeletonLoader'
+import SmoothButton from '@/components/SmoothButton'
 
 interface Customer {
   _id: string
@@ -25,6 +28,7 @@ export default function Customers() {
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pageLoading, setPageLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -143,15 +147,24 @@ export default function Customers() {
     router.push('/')
   }
 
+  // Smooth navigation with loading state
+  const handleNavigation = (href: string) => {
+    setPageLoading(true)
+    // Use router.push for smoother navigation
+    setTimeout(() => {
+      router.push(href)
+    }, 100)
+  }
+
   // Show loading state during authentication check
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading customers...</p>
+          <p className="text-gray-600 animate-pulse">Loading customers...</p>
         </div>
       </div>
     )
@@ -161,25 +174,27 @@ export default function Customers() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in-up">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
           <p className="text-gray-600 mb-6">You need to be signed in to view customers.</p>
-          <button
+          <SmoothButton
             onClick={() => router.push('/')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            variant="primary"
+            size="lg"
+            className="animate-scale-in"
           >
             Go to Sign In
-          </button>
+          </SmoothButton>
         </div>
       </div>
     )
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Customers</title>
         <meta name="description" content="Manage your customers in Xeno CRM" />
@@ -318,19 +333,24 @@ export default function Customers() {
                   <p className="mt-2 text-gray-600">Manage your customer database and relationships</p>
                 </div>
                 <div className="flex space-x-3">
-                  <button
+                  <SmoothButton
                     onClick={loadCustomers}
                     disabled={loading}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                    loading={loading}
+                    variant="secondary"
+                    size="md"
+                    className="animate-fade-in"
                   >
-                    {loading ? 'Refreshing...' : 'Refresh'}
-                  </button>
-                  <Link
-                    href="/customers/create"
-                    className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    Refresh
+                  </SmoothButton>
+                  <SmoothButton
+                    onClick={() => router.push('/customers/create')}
+                    variant="primary"
+                    size="md"
+                    className="animate-fade-in"
                   >
                     + Add Customer
-                  </Link>
+                  </SmoothButton>
                 </div>
               </div>
             </div>
@@ -371,8 +391,8 @@ export default function Customers() {
 
               <div className="overflow-hidden">
                 {loading && (
-                  <div className="flex justify-center py-12">
-                    <div className="text-gray-500">Loading customers...</div>
+                  <div className="p-6">
+                    <SkeletonLoader type="table" count={1} />
                   </div>
                 )}
 
@@ -438,8 +458,12 @@ export default function Customers() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredCustomers.map((customer: Customer) => (
-                          <tr key={customer._id} className="hover:bg-gray-50">
+                        {filteredCustomers.map((customer: Customer, index: number) => (
+                          <tr 
+                            key={customer._id} 
+                            className="hover:bg-gray-50 transition-all duration-200 ease-smooth-out hover:shadow-sm animate-fade-in-up"
+                            style={{animationDelay: `${index * 0.05}s`}}
+                          >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
@@ -487,19 +511,26 @@ export default function Customers() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button 
-                                onClick={() => handleEdit(customer)}
-                                className="text-blue-600 hover:text-blue-900 mr-4 transition-colors"
-                              >
-                                Edit
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(customer)}
-                                disabled={deleteLoading === customer._id}
-                                className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                {deleteLoading === customer._id ? 'Deleting...' : 'Delete'}
-                              </button>
+                              <div className="flex space-x-2">
+                                <SmoothButton
+                                  onClick={() => handleEdit(customer)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-900"
+                                >
+                                  Edit
+                                </SmoothButton>
+                                <SmoothButton
+                                  onClick={() => handleDelete(customer)}
+                                  disabled={deleteLoading === customer._id}
+                                  loading={deleteLoading === customer._id}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </SmoothButton>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -512,6 +543,6 @@ export default function Customers() {
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }

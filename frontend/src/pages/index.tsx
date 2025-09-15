@@ -6,6 +6,9 @@ import { customerApi, campaignApi, segmentApi, orderApi, aiApi } from '@/lib/api
 import Head from 'next/head'
 import AIInsightsDashboard from '@/components/AIInsightsDashboard'
 import AIStatusIndicator from '@/components/AIStatusIndicator'
+import PageTransition from '@/components/PageTransition'
+import SkeletonLoader from '@/components/SkeletonLoader'
+import SmoothButton from '@/components/SmoothButton'
 
 export default function Home() {
   const router = useRouter()
@@ -24,6 +27,7 @@ export default function Home() {
   const [deliveryData, setDeliveryData] = useState<any>(null)
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
   const [usingMockData, setUsingMockData] = useState(false)
+  const [pageLoading, setPageLoading] = useState(false)
   // Removed client-side loading logic - using proper authentication
 
   // Simple authentication check
@@ -83,6 +87,15 @@ export default function Home() {
     setSegments([])
     setOrders([])
     console.log('✅ User signed out')
+  }
+
+  // Smooth navigation with loading state
+  const handleNavigation = (href: string) => {
+    setPageLoading(true)
+    // Use router.push for smoother navigation
+    setTimeout(() => {
+      router.push(href)
+    }, 100)
   }
 
   const loadData = async () => {
@@ -296,11 +309,11 @@ export default function Home() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600 animate-pulse">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -310,25 +323,28 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="text-center animate-fade-in-up">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Xeno CRM</h1>
           <p className="text-gray-600 mb-6">Please sign in to access your dashboard</p>
-          <button
+          <SmoothButton
             onClick={handleSignIn}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            variant="primary"
+            size="lg"
+            className="animate-scale-in"
           >
             Sign In
-          </button>
+          </SmoothButton>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <PageTransition>
+      <div className="min-h-screen bg-gray-50 flex">
       <Head>
         <title>Xeno CRM Dashboard</title>
         <meta name="description" content="Customer Relationship Management Dashboard" />
@@ -363,40 +379,60 @@ export default function Home() {
               <span className="font-medium">Dashboard</span>
             </Link>
             
-            <Link href="/customers" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => handleNavigation('/customers')}
+              className="group flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-300 ease-smooth-out hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
-              <span>Customers</span>
-            </Link>
+              <span className="transition-all duration-200 group-hover:font-medium">Customers</span>
+              {pageLoading && <div className="ml-auto w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>}
+            </button>
             
-            <Link href="/campaigns" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => handleNavigation('/campaigns')}
+              className="group flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-300 ease-smooth-out hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
               </svg>
-              <span>Campaigns</span>
-            </Link>
+              <span className="transition-all duration-200 group-hover:font-medium">Campaigns</span>
+              {pageLoading && <div className="ml-auto w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>}
+            </button>
             
-            <Link href="/campaigns/history" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => handleNavigation('/campaigns/history')}
+              className="group flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-300 ease-smooth-out hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Campaign History</span>
-            </Link>
+              <span className="transition-all duration-200 group-hover:font-medium">Campaign History</span>
+              {pageLoading && <div className="ml-auto w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>}
+            </button>
             
-            <Link href="/orders" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => handleNavigation('/orders')}
+              className="group flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-300 ease-smooth-out hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <span>Orders</span>
-            </Link>
+              <span className="transition-all duration-200 group-hover:font-medium">Orders</span>
+              {pageLoading && <div className="ml-auto w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>}
+            </button>
             
-            <Link href="/segments" className="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button 
+              onClick={() => handleNavigation('/segments')}
+              className="group flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-all duration-300 ease-smooth-out hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <span>Segments</span>
-            </Link>
+              <span className="transition-all duration-200 group-hover:font-medium">Segments</span>
+              {pageLoading && <div className="ml-auto w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>}
+            </button>
             
           </nav>
           
@@ -471,28 +507,31 @@ export default function Home() {
                   <p className="text-xs text-orange-600 font-medium">📊 Demo Mode - API Offline</p>
                 )}
               </div>
-              <button
+              <SmoothButton
                 onClick={() => {
                   loadData()
                   loadAnalyticsData()
                 }}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={loading}
+                variant="primary"
+                size="md"
+                className="animate-fade-in"
               >
-                {loading ? 'Loading...' : 'Refresh'}
-              </button>
+                Refresh
+              </SmoothButton>
             </div>
           </div>
         </div>
 
         {/* Dashboard Content */}
-        <div className="flex-1 p-6">
+        <div className={`flex-1 p-6 transition-all duration-300 ease-smooth-out ${pageLoading ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
           {/* Demo Mode Notice */}
           {usingMockData && (
-            <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4 animate-fade-in-down hover:shadow-md transition-all duration-300 ease-smooth-out">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-orange-400 animate-pulse" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -508,9 +547,9 @@ export default function Home() {
             </div>
           )}
         {/* Status Message */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 animate-fade-in-up hover:shadow-md transition-all duration-300 ease-smooth-out">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 animate-bounce-gentle">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -524,65 +563,71 @@ export default function Home() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                  <p className="text-3xl font-bold text-gray-900">{customers.length}</p>
-                  <p className="text-sm text-green-600 mt-1">+12% from last month</p>
+            {loading ? (
+              <SkeletonLoader type="card" count={4} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6" />
+            ) : (
+              <>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                      <p className="text-3xl font-bold text-gray-900">{customers.length}</p>
+                      <p className="text-sm text-green-600 mt-1">+12% from last month</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
-                  <p className="text-3xl font-bold text-gray-900">{campaigns.length}</p>
-                  <p className="text-sm text-green-600 mt-1">+8% from last month</p>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
+                      <p className="text-3xl font-bold text-gray-900">{campaigns.length}</p>
+                      <p className="text-sm text-green-600 mt-1">+8% from last month</p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Customer Segments</p>
-                  <p className="text-3xl font-bold text-gray-900">{segments.length}</p>
-                  <p className="text-sm text-blue-600 mt-1">+3 new this week</p>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Customer Segments</p>
+                      <p className="text-3xl font-bold text-gray-900">{segments.length}</p>
+                      <p className="text-sm text-blue-600 mt-1">+3 new this week</p>
+                    </div>
+                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-3xl font-bold text-gray-900">{orders.length}</p>
-                  <p className="text-sm text-red-600 mt-1">+15% from last month</p>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                      <p className="text-3xl font-bold text-gray-900">{orders.length}</p>
+                      <p className="text-sm text-red-600 mt-1">+15% from last month</p>
+                    </div>
+                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Analytics Overview */}
@@ -590,7 +635,7 @@ export default function Home() {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Analytics Overview</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Customer Segments - Pie Chart */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Customer Segments</h3>
                   <div className="flex items-center space-x-2">
@@ -1100,5 +1145,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </PageTransition>
   )
 }
