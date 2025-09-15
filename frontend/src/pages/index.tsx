@@ -131,6 +131,9 @@ export default function Home() {
       setUsingMockData(false)
       
       console.log('✅ Real data loaded successfully')
+      console.log('🔍 Customer data structure:', customersRes.data)
+      console.log('🔍 First customer tags:', customersRes.data[0]?.tags)
+      console.log('🔍 Customer count:', customersRes.data.length)
       setLoading(false)
       return // Exit early if API call succeeds
     } catch (err: any) {
@@ -799,6 +802,28 @@ export default function Home() {
                       totalCustomers,
                       segmentCounts,
                       segments: segments.map(s => `${s.name}: ${s.count} (${s.percent}%)`)
+                    })
+                    
+                    // Debug: Log first few customers to see their tag structure
+                    console.log('🔍 Sample customer data for debugging:', customersArray.slice(0, 3).map(c => ({
+                      id: c._id,
+                      name: `${c.firstName} ${c.lastName}`,
+                      tags: c.tags,
+                      totalSpend: c.totalSpend
+                    })))
+                    
+                    // Debug: Test tag detection manually
+                    console.log('🧪 Manual tag detection test:')
+                    customersArray.slice(0, 3).forEach((c, i) => {
+                      console.log(`Customer ${i + 1}:`, {
+                        name: `${c.firstName} ${c.lastName}`,
+                        tags: c.tags,
+                        hasVipTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('vip')),
+                        hasLoyalTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('loyal')),
+                        hasNewTag: c.tags?.some((tag: string) => tag.toLowerCase().includes('new')),
+                        totalSpend: c.totalSpend,
+                        isVipBySpend: c.totalSpend > 1000
+                      })
                     })
                     
                     return (
