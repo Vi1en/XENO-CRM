@@ -31,6 +31,10 @@ const authOptions: NextAuthOptions = {
     signIn: '/login',
     error: '/login'
   },
+  // Ensure NextAuth uses the correct base URL
+  ...(process.env.NEXTAUTH_URL && {
+    // This will be automatically handled by NextAuth when NEXTAUTH_URL is set
+  }),
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account) {
