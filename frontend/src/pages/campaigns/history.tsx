@@ -13,20 +13,27 @@ interface Campaign {
   _id: string
   name: string
   description?: string
-  type: string
+  type?: string
   status: string
-  targetSegment: string
-  audienceSize: number
-  sentCount: number
-  deliveredCount: number
-  failedCount: number
-  deliveryRate: number
-  openRate: number
-  clickRate: number
+  targetSegment?: string
+  audienceSize?: number
+  sentCount?: number
+  deliveredCount?: number
+  failedCount?: number
+  deliveryRate?: number
+  openRate?: number
+  clickRate?: number
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
   scheduledAt?: string
   completedAt?: string
+  stats?: {
+    totalRecipients: number
+    sent: number
+    failed: number
+    delivered: number
+    bounced: number
+  }
 }
 
 export default function CampaignHistory() {
@@ -62,15 +69,38 @@ export default function CampaignHistory() {
       console.log('📧 Loading campaigns...')
       const response = await campaignApi.getAll()
       
-      console.log('📧 Campaigns response:', response.data)
+      console.log('📧 Campaigns response:', response)
+      console.log('📧 Response data:', response.data)
+      console.log('📧 Response data type:', typeof response.data)
+      console.log('📧 Response data keys:', Object.keys(response.data || {}))
       
       // Handle nested data structure
-      const campaignsData = response.data?.data || response.data || []
+      let campaignsData
+      if (response.data && response.data.success && response.data.data) {
+        console.log('🔍 Found nested structure: response.data.data')
+        campaignsData = response.data.data
+      } else if (response.data && Array.isArray(response.data)) {
+        console.log('🔍 Found direct array: response.data')
+        campaignsData = response.data
+      } else {
+        console.log('🔍 Using fallback structure')
+        campaignsData = response.data?.data || response.data || []
+      }
+      
+      console.log('📧 Final campaigns data:', campaignsData)
+      console.log('📧 Campaigns data length:', campaignsData?.length || 0)
+      
+      if (campaignsData && campaignsData.length > 0) {
+        console.log('📧 First campaign sample:', campaignsData[0])
+        console.log('📧 First campaign keys:', Object.keys(campaignsData[0] || {}))
+      }
+      
       setCampaigns(Array.isArray(campaignsData) ? campaignsData : [])
       
-      console.log('✅ Campaigns loaded:', campaignsData.length)
+      console.log('✅ Campaigns loaded:', campaignsData?.length || 0)
     } catch (error: any) {
       console.error('❌ Error loading campaigns:', error)
+      console.error('❌ Error details:', error.response?.data)
       setError('Failed to load campaigns. Please try again.')
     } finally {
       setLoading(false)
@@ -322,35 +352,40 @@ export default function CampaignHistory() {
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                           <div className="bg-gray-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-gray-900">
-                              {formatNumber(campaign.audienceSize || 0)}
+                              {formatNumber(campaign.stats?.totalRecipients || campaign.audienceSize || 0)}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Audience Size</div>
                           </div>
                           
                           <div className="bg-green-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-green-600">
-                              {formatNumber(campaign.sentCount || 0)}
+                              {formatNumber(campaign.stats?.sent || campaign.sentCount || 0)}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Sent</div>
                           </div>
                           
                           <div className="bg-blue-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-blue-600">
-                              {formatNumber(campaign.deliveredCount || 0)}
+                              {formatNumber(campaign.stats?.delivered || campaign.deliveredCount || 0)}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Delivered</div>
                           </div>
                           
                           <div className="bg-red-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-red-600">
-                              {formatNumber(campaign.failedCount || 0)}
+                              {formatNumber(campaign.stats?.failed || campaign.failedCount || 0)}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Failed</div>
                           </div>
                           
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-purple-600">
-                              {campaign.deliveryRate ? `${campaign.deliveryRate.toFixed(0)}%` : '0%'}
+                              {(() => {
+                                const sent = campaign.stats?.sent || campaign.sentCount || 0
+                                const delivered = campaign.stats?.delivered || campaign.deliveredCount || 0
+                                const rate = sent > 0 ? (delivered / sent) * 100 : 0
+                                return `${rate.toFixed(0)}%`
+                              })()}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Delivery Rate</div>
                           </div>
@@ -375,7 +410,7 @@ export default function CampaignHistory() {
                             </SmoothButton>
                           </div>
                           <div className="text-sm text-gray-500">
-                            {campaign.type || 'Email'} Campaign
+                            Email Campaign
                           </div>
                         </div>
                       </div>
