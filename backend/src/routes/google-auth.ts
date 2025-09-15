@@ -60,7 +60,7 @@ router.get('/login', async (req: Request, res: Response) => {
       redirect_uri: GOOGLE_REDIRECT_URI,
       scope: 'openid email profile',
       response_type: 'code',
-      state: frontendUrl,
+      state: encodeURIComponent(frontendUrl),
       access_type: 'offline',
       prompt: 'consent'
     });
@@ -120,7 +120,7 @@ router.get('/callback', async (req: Request, res: Response) => {
       return res.redirect(`${state}/login?error=missing_parameters`);
     }
     
-    const frontendUrl = state as string;
+    const frontendUrl = decodeURIComponent(state as string);
     console.log('🔄 Google Callback: Frontend URL from state:', frontendUrl);
     
     // Exchange code for tokens
