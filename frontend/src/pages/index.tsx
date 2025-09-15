@@ -133,46 +133,37 @@ export default function Home() {
         
         // Calculate segments from customer data directly
         const customersArray = Array.isArray(customersRes.data) ? customersRes.data : []
-        console.log('🔍 Raw customers data:', customersArray)
+        console.log('🔍 Raw customers data length:', customersArray.length)
         console.log('🔍 First customer object:', customersArray[0])
-        console.log('🔍 First customer tags:', customersArray[0]?.tags)
-        console.log('🔍 First customer tags type:', typeof customersArray[0]?.tags)
-        console.log('🔍 First customer tags is array:', Array.isArray(customersArray[0]?.tags))
         
         const segments: { [key: string]: number } = {}
         let regularCount = 0
         
+        // Process each customer
         customersArray.forEach((customer: any, index: number) => {
-          console.log(`🔍 Customer ${index}:`, {
-            id: customer._id,
-            name: `${customer.firstName} ${customer.lastName}`,
-            tags: customer.tags,
-            tagsType: typeof customer.tags,
-            tagsIsArray: Array.isArray(customer.tags)
-          })
-          
+          // Check if customer has tags
           if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
-            // Customer has tags, count the first tag only for now
+            // Customer has tags, count the first tag
             const firstTag = customer.tags[0]
             if (firstTag && typeof firstTag === 'string') {
               segments[firstTag] = (segments[firstTag] || 0) + 1
-              console.log(`✅ Added tag "${firstTag}" for customer ${index}`)
+              console.log(`✅ Customer ${index} (${customer.firstName}): tag "${firstTag}"`)
             }
           } else {
-            // Customer has no tags, count as regular
+            // Customer has no tags or empty tags, count as regular
             regularCount++
-            console.log(`📝 Customer ${index} has no tags, counting as regular`)
+            console.log(`📝 Customer ${index} (${customer.firstName}): no tags -> regular`)
           }
         })
         
-        // Add regular count if there are any
+        // Add regular count
         if (regularCount > 0) {
           segments['regular'] = regularCount
         }
         
-        console.log('📊 Final calculated segments:', segments)
-        console.log('📊 Regular count:', regularCount)
-        console.log('📊 Total customers processed:', customersArray.length)
+        console.log('📊 Final segments calculated:', segments)
+        console.log('📊 Total customers:', customersArray.length)
+        console.log('📊 Regular customers:', regularCount)
         setCustomerSegments(segments)
         setUsingMockData(false)
       
@@ -713,18 +704,19 @@ export default function Home() {
                         let segmentCounts: { [key: string]: number } = {}
                         let totalCustomers = customers.length || 1
                         
+                        // Always use the calculated segments from customer data
                         if (customerSegments && Object.keys(customerSegments).length > 0) {
-                          console.log('📊 Using calculated segments data:', customerSegments)
-                          console.log('📊 Segments keys:', Object.keys(customerSegments))
-                          console.log('📊 Segments values:', Object.values(customerSegments))
+                          console.log('📊 Using calculated segments:', customerSegments)
                           segmentCounts = customerSegments
                           totalCustomers = Object.values(customerSegments).reduce((sum: number, count: any) => sum + Number(count), 0)
-                          console.log('📊 Total customers from segments:', totalCustomers)
                         } else {
-                          console.log('📊 No segments data available, using fallback')
+                          console.log('📊 No segments data, using customers length')
                           segmentCounts = { regular: customers.length || 1 }
                           totalCustomers = customers.length || 1
                         }
+                        
+                        console.log('📊 Segment counts for chart:', segmentCounts)
+                        console.log('📊 Total customers for chart:', totalCustomers)
                         
                         // Define segments with colors and calculate percentages
                         const segmentDefinitions = [
