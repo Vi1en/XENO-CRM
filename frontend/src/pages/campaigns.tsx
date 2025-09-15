@@ -164,6 +164,8 @@ export default function Campaigns() {
 
   const createAICampaign = async (suggestion: any) => {
     try {
+      console.log('🤖 Creating AI campaign with suggestion:', suggestion)
+      
       const newCampaign = {
         name: suggestion.name,
         type: suggestion.type,
@@ -172,9 +174,14 @@ export default function Campaigns() {
         description: suggestion.description
       }
       
+      console.log('📝 Campaign data to create:', newCampaign)
+      
       // Create the campaign
       const response = await campaignApi.create(newCampaign)
       const createdCampaign = response.data
+      
+      console.log('✅ API response:', response)
+      console.log('✅ Created campaign:', createdCampaign)
       
       // Add to local state
       setCampaigns(prev => [...prev, createdCampaign])
@@ -183,10 +190,11 @@ export default function Campaigns() {
       // Remove from suggestions
       setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
       
-      console.log('✅ AI campaign created:', createdCampaign)
+      console.log('✅ AI campaign created and added to state:', createdCampaign)
     } catch (error) {
-      console.error('Error creating AI campaign:', error)
-      setError('Failed to create AI campaign')
+      console.error('❌ Error creating AI campaign:', error)
+      console.error('❌ Error details:', error.response?.data || error.message)
+      setError('Failed to create AI campaign: ' + (error.response?.data?.message || error.message))
     }
   }
 

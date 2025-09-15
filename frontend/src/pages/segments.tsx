@@ -126,6 +126,8 @@ export default function Segments() {
 
   const createAISegment = async (suggestion: any) => {
     try {
+      console.log('🤖 Creating AI segment with suggestion:', suggestion)
+      
       const newSegment = {
         name: suggestion.name,
         description: suggestion.description,
@@ -133,9 +135,14 @@ export default function Segments() {
         customerCount: suggestion.estimatedCount
       }
       
+      console.log('📝 Segment data to create:', newSegment)
+      
       // Create the segment
       const response = await segmentApi.create(newSegment)
       const createdSegment = response.data
+      
+      console.log('✅ API response:', response)
+      console.log('✅ Created segment:', createdSegment)
       
       // Add to local state
       setSegments(prev => [...prev, createdSegment])
@@ -144,10 +151,11 @@ export default function Segments() {
       // Remove from suggestions
       setAiSuggestions(prev => prev.filter(s => s.id !== suggestion.id))
       
-      console.log('✅ AI segment created:', createdSegment)
+      console.log('✅ AI segment created and added to state:', createdSegment)
     } catch (error) {
-      console.error('Error creating AI segment:', error)
-      setError('Failed to create AI segment')
+      console.error('❌ Error creating AI segment:', error)
+      console.error('❌ Error details:', error.response?.data || error.message)
+      setError('Failed to create AI segment: ' + (error.response?.data?.message || error.message))
     }
   }
 
