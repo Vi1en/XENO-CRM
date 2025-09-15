@@ -14,10 +14,6 @@ declare module 'next-auth' {
 }
 
 const authOptions: NextAuthOptions = {
-  pages: {
-    signIn: '/login',
-    error: '/login'
-  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
@@ -31,6 +27,10 @@ const authOptions: NextAuthOptions = {
       }
     })
   ],
+  pages: {
+    signIn: '/login',
+    error: '/login'
+  },
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account) {
@@ -60,10 +60,6 @@ const authOptions: NextAuthOptions = {
       }
       return true
     }
-  },
-  pages: {
-    signIn: '/signup',
-    error: '/signup',
   },
   session: {
     strategy: 'jwt',
