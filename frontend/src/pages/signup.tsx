@@ -3,13 +3,13 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import PageTransition from '@/components/PageTransition'
 import SmoothButton from '@/components/SmoothButton'
-import { signIn, getSession } from 'next-auth/react'
+import { useAuth } from '@/lib/useAuth'
 
 export default function SignUp() {
   const router = useRouter()
+  const { isAuthenticated, login } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [authStep, setAuthStep] = useState<string>('')
   const [formData, setFormData] = useState({
     name: '',
@@ -73,46 +73,8 @@ export default function SignUp() {
   }
 
   const handleGoogleSignUp = async () => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      // Try NextAuth Google OAuth first
-      const result = await signIn('google', { 
-        redirect: false,
-        callbackUrl: '/' 
-      })
-      
-      if (result?.ok) {
-        // Get the session to extract user data
-        const session = await getSession()
-        if (session?.user) {
-          const userData = {
-            id: (session.user as any).id || `user_${Date.now()}`,
-            name: session.user.name || 'User',
-            email: session.user.email || '',
-            avatar: session.user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name || 'User')}&background=3b82f6&color=ffffff`,
-            provider: 'google',
-            createdAt: new Date().toISOString()
-          }
-          
-          // Store user in localStorage
-          localStorage.setItem('xeno-user', JSON.stringify(userData))
-          router.push('/')
-          return
-        }
-      }
-      
-      // Fallback to enhanced mock Google OAuth simulation
-      console.log('NextAuth not configured, using enhanced mock Google OAuth')
-      await simulateGoogleOAuth()
-      
-    } catch (error) {
-      console.error('Google sign-up error:', error)
-      setError('Failed to sign up with Google. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    console.log('🔐 SignUp: Starting Auth0 login...')
+    login()
   }
 
   const simulateGoogleOAuth = async () => {
