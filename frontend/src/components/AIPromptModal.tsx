@@ -46,7 +46,7 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
             description: `Premium customers matching: ${prompt}`,
             rules: [
               { field: 'totalSpend', operator: 'greater_than', value: 500 },
-              { field: 'lastOrderAt', operator: 'greater_than', value: '2024-01-01' }
+              { field: 'visits', operator: 'greater_than', value: 5 }
             ],
             estimatedCount: Math.floor(Math.random() * 50) + 5,
             confidence: Math.floor(Math.random() * 15) + 85,

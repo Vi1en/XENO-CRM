@@ -136,8 +136,18 @@ export default function Segments() {
       
       console.log('📝 Segment data to create:', newSegment)
       
+      // Test with minimal data first
+      const testSegment = {
+        name: suggestion.name,
+        description: suggestion.description || 'AI Generated Segment',
+        rules: [
+          { field: 'totalSpend', operator: 'greater_than', value: 0 }
+        ]
+      }
+      console.log('🧪 Testing with minimal data:', testSegment)
+      
       // Create the segment
-      const response = await segmentApi.create(newSegment)
+      const response = await segmentApi.create(testSegment)
       const createdSegment = response.data
       
       console.log('✅ API response:', response)
