@@ -438,11 +438,11 @@ router.get('/segments', async (req, res) => {
   try {
     console.log('📊 Fetching customer segments...');
     
-    // First, let's check if we have any customers at all
-    const customerCount = await Customer.countDocuments();
-    console.log('📊 Total customers in database:', customerCount);
+    // Get all customers and process them in JavaScript instead of MongoDB aggregation
+    const customers = await Customer.find({});
+    console.log('📊 Total customers found:', customers.length);
     
-    if (customerCount === 0) {
+    if (customers.length === 0) {
       return res.json({
         success: true,
         data: { segments: { regular: 0 } }
@@ -450,56 +450,27 @@ router.get('/segments', async (req, res) => {
     }
     
     // Get a sample customer to see the structure
-    const sampleCustomer = await Customer.findOne();
-    console.log('📊 Sample customer structure:', sampleCustomer);
+    console.log('📊 Sample customer structure:', customers[0]);
     
-        // Aggregate customers by tags
-        const result = await Customer.aggregate([
-          {
-            $project: {
-              tags: {
-                $cond: {
-                  if: { 
-                    $and: [
-                      { $ne: ["$tags", null] },
-                      { $ne: ["$tags", undefined] },
-                      { $isArray: "$tags" },
-                      { $gt: [{ $size: "$tags" }, 0] }
-                    ]
-                  },
-                  then: "$tags",
-                  else: ["regular"] // fallback if no tags or empty array
-                }
-              }
-            }
-          },
-          {
-            $unwind: "$tags"
-          },
-          {
-            $group: {
-              _id: "$tags",
-              count: { $sum: 1 }
-            }
-          },
-          {
-            $sort: { count: -1 }
-          }
-        ]);
-
-    console.log('📊 Raw aggregation result:', result);
-
-    // Convert aggregation result into a more usable object
+    // Process customers to count segments
     const segments: { [key: string]: number } = {};
-    result.forEach(r => {
-      segments[r._id] = r.count;
-    });
-
-    // Ensure we have a regular count for customers without specific tags
-    const totalCustomers = await Customer.countDocuments();
-    const taggedCustomers = Object.values(segments).reduce((sum: number, count: number) => sum + count, 0);
-    const regularCount = totalCustomers - taggedCustomers;
+    let regularCount = 0;
     
+    customers.forEach(customer => {
+      if (customer.tags && Array.isArray(customer.tags) && customer.tags.length > 0) {
+        // Customer has tags, count each tag
+        customer.tags.forEach(tag => {
+          if (tag && typeof tag === 'string') {
+            segments[tag] = (segments[tag] || 0) + 1;
+          }
+        });
+      } else {
+        // Customer has no tags, count as regular
+        regularCount++;
+      }
+    });
+    
+    // Add regular count if there are any
     if (regularCount > 0) {
       segments['regular'] = regularCount;
     }
