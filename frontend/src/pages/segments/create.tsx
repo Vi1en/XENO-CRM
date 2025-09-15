@@ -98,7 +98,19 @@ export default function CreateSegment() {
     setError(null)
 
     try {
-      await segmentApi.create(formData)
+      // Remove id field from rules before sending to API
+      const apiData = {
+        name: formData.name,
+        description: formData.description,
+        rules: formData.rules.map(rule => ({
+          field: rule.field,
+          operator: rule.operator,
+          value: rule.value
+        }))
+      }
+      
+      console.log('📝 Sending segment data:', apiData)
+      await segmentApi.create(apiData)
       setSuccess(true)
       
       // Redirect to segments list after 2 seconds
@@ -108,6 +120,7 @@ export default function CreateSegment() {
 
     } catch (error: any) {
       console.error('Error creating segment:', error)
+      console.error('Error details:', error.response?.data)
       setError(error.response?.data?.message || 'Failed to create segment')
     } finally {
       setLoading(false)
