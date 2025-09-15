@@ -139,11 +139,32 @@ export default function EditCustomer() {
         throw new Error(`Invalid customer ID format. Expected 24 characters, got ${id.length}. ID: "${id}"`)
       }
       
+      console.log('🌐 Making API call to:', `https://backend-production-05a7e.up.railway.app/api/v1/customers/${id}`)
+      
+      // Test with direct fetch first
+      console.log('🧪 Testing with direct fetch...')
+      try {
+        const directResponse = await fetch(`https://backend-production-05a7e.up.railway.app/api/v1/customers/${id}`)
+        console.log('📡 Direct fetch response status:', directResponse.status)
+        const directData = await directResponse.json()
+        console.log('📡 Direct fetch response data:', directData)
+        
+        if (!directResponse.ok) {
+          throw new Error(`Direct fetch failed: ${directResponse.status} - ${JSON.stringify(directData)}`)
+        }
+      } catch (directError) {
+        console.error('❌ Direct fetch failed:', directError)
+      }
+      
       const response = await customerApi.getById(id as string)
       console.log('✅ Customer API response:', response)
+      console.log('✅ Response status:', response.status)
+      console.log('✅ Response headers:', response.headers)
       
       const customer = response.data
       console.log('📋 Customer data:', customer)
+      console.log('📋 Customer data type:', typeof customer)
+      console.log('📋 Customer data keys:', customer ? Object.keys(customer) : 'No customer data')
       
       // Handle both array and object response formats
       const customerData = Array.isArray(customer) ? customer[0] : customer
