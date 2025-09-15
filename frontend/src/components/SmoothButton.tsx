@@ -9,6 +9,7 @@ interface SmoothButtonProps {
   loading?: boolean
   className?: string
   type?: 'button' | 'submit' | 'reset'
+  title?: string
 }
 
 export default function SmoothButton({
@@ -19,7 +20,9 @@ export default function SmoothButton({
   disabled = false,
   loading = false,
   className = '',
-  type = 'button'
+  type = 'button',
+  title,
+  ...props
 }: SmoothButtonProps) {
   const [isPressed, setIsPressed] = useState(false)
 
@@ -50,6 +53,7 @@ export default function SmoothButton({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
+      title={title}
       className={`
         ${baseClasses}
         ${variantClasses[variant]}
@@ -58,6 +62,7 @@ export default function SmoothButton({
         ${loading ? 'cursor-wait' : ''}
         ${className}
       `}
+      {...props}
     >
       {/* Ripple Effect */}
       <div className="absolute inset-0 overflow-hidden rounded-lg">
