@@ -2,9 +2,10 @@ import OpenAI from 'openai';
 import { Campaign } from '../models/campaign';
 import { CommunicationLog } from '../models/communication-log';
 
-const openai = new OpenAI({
+// Only initialize OpenAI if API key is available
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 // Mock responses when OpenAI API key is not available
 const MOCK_RESPONSES = {
@@ -281,47 +282,6 @@ export async function generateSegmentRules(prompt: string): Promise<{ rules: any
   const result = { rules, name, description };
   console.log('🤖 AI SEGMENT GENERATION - Result:', JSON.stringify(result, null, 2));
   return result;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at converting natural language descriptions into customer segmentation rules. 
-          Return a JSON array of rules that can be used to filter customers. Each rule should have:
-          - field: one of 'totalSpend', 'visits', 'lastOrderAt', 'tags'
-          - operator: one of 'equals', 'not_equals', 'greater_than', 'less_than', 'contains', 'not_contains', 'in', 'not_in'
-          - value: the value to compare against
-          
-          Examples:
-          - "Customers who spent more than $100" -> [{"field": "totalSpend", "operator": "greater_than", "value": 100}]
-          - "Customers with 3 or more visits" -> [{"field": "visits", "operator": "greater_than", "value": 2}]
-          - "Customers who ordered in the last 30 days" -> [{"field": "lastOrderAt", "operator": "greater_than", "value": "2024-01-01T00:00:00Z"}]
-          - "VIP customers" -> [{"field": "tags", "operator": "contains", "value": "VIP"}]`,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.3,
-    });
-
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    return JSON.parse(response as string);
-  } catch (error) {
-    console.error('OpenAI API error:', error);
-    return {
-      rules: MOCK_RESPONSES.segmentRules,
-      name: 'General Segment',
-      description: 'A general customer segment'
-    };
-  }
 }
 
 export async function generateMessageVariants(
@@ -335,46 +295,6 @@ export async function generateMessageVariants(
   const result = generateSmartMockCampaign(objective, tone, offer);
   console.log('🤖 Generated result:', JSON.stringify(result, null, 2));
   return result;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert marketing copywriter. Generate 3 different email/message variants for a campaign.
-          Each variant should be:
-          - 1-2 sentences long
-          - Match the specified tone
-          - Include the offer if provided
-          - Be engaging and action-oriented
-          - Suitable for email marketing
-          
-          Return as a JSON array of strings.`,
-        },
-        {
-          role: 'user',
-          content: `Objective: ${objective}\nTone: ${tone}\nOffer: ${offer || 'No specific offer'}`,
-        },
-      ],
-      temperature: 0.7,
-    });
-
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    return JSON.parse(response as string);
-  } catch (error) {
-    console.error('OpenAI API error:', error);
-    return {
-      name: 'Marketing Campaign',
-      description: 'A marketing campaign',
-      message: 'Check out our latest offer!',
-      variants: MOCK_RESPONSES.messageVariants
-    };
-  }
 }
 
 export async function generateCampaignSummary(campaignId: string): Promise<string> {
@@ -411,6 +331,11 @@ export async function generateCampaignSummary(campaignId: string): Promise<strin
     const deliveryRate = campaign.stats.totalRecipients > 0 
       ? ((totalSent / campaign.stats.totalRecipients) * 100).toFixed(1)
       : '0';
+
+    if (!openai) {
+      console.log('🤖 OpenAI client not available, using mock response');
+      return MOCK_RESPONSES.campaignSummary;
+    }
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
