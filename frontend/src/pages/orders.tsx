@@ -74,7 +74,19 @@ export default function Orders() {
     try {
       console.log('🔄 Loading orders from API...')
       const response = await orderApi.getAll()
-      const apiOrders = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      const rawOrders = response.data.data || response.data // Handle both {data: [...]} and [...] formats
+      
+      // Map API data to our expected format
+      const apiOrders = rawOrders.map((order: any) => ({
+        _id: order._id,
+        orderNumber: order.orderId || order.orderNumber,
+        customerId: order.customerId || order._id, // Use _id as fallback
+        customerName: order.customerName,
+        total: order.totalSpent || order.total || 0, // Map totalSpent to total
+        status: order.status || 'completed', // Default to completed if not specified
+        createdAt: order.date || order.createdAt,
+        items: order.items || []
+      }))
       
       setOrders(apiOrders)
       setFilteredOrders(apiOrders)
@@ -359,13 +371,13 @@ export default function Orders() {
                         {filteredOrders.map((order: Order) => (
                           <tr key={order._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {order.orderNumber}
+                              {order.orderNumber || 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {order.customerName}
+                              {order.customerName || 'Unknown Customer'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              ${order.total.toFixed(2)}
+                              ${(order.total || 0).toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -373,7 +385,7 @@ export default function Orders() {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(order.createdAt).toLocaleDateString()}
+                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                             </td>
                           </tr>
                         ))}
