@@ -61,20 +61,53 @@ export default function EditCustomer() {
     setError(null)
     try {
       console.log('🔄 Loading customer with ID:', id)
+      console.log('🔍 ID type:', typeof id)
+      console.log('📏 ID length:', id?.length)
+      
+      // Validate ID format (MongoDB ObjectIds are 24 characters)
+      if (typeof id === 'string' && id.length !== 24) {
+        throw new Error(`Invalid customer ID format. Expected 24 characters, got ${id.length}. ID: "${id}"`)
+      }
+      
       const response = await customerApi.getById(id as string)
       console.log('✅ Customer API response:', response)
       
       const customer = response.data
       console.log('📋 Customer data:', customer)
       
+      // Handle both array and object response formats
+      const customerData = Array.isArray(customer) ? customer[0] : customer
+      console.log('📋 Processed customer data:', customerData)
+      
+      // Format lastOrderAt for date input
+      let formattedLastOrderAt = ''
+      if (customerData.lastOrderAt) {
+        try {
+          const date = new Date(customerData.lastOrderAt)
+          formattedLastOrderAt = date.toISOString().split('T')[0]
+        } catch (e) {
+          console.warn('⚠️ Error formatting lastOrderAt:', e)
+        }
+      }
+      
+      // Format tags for textarea (convert array to comma-separated string)
+      let formattedTags = ''
+      if (customerData.tags) {
+        if (Array.isArray(customerData.tags)) {
+          formattedTags = customerData.tags.join(', ')
+        } else {
+          formattedTags = customerData.tags
+        }
+      }
+      
       setFormData({
-        email: customer.email || '',
-        firstName: customer.firstName || '',
-        lastName: customer.lastName || '',
-        phone: customer.phone || '',
-        visits: customer.visits?.toString() || '',
-        tags: customer.tags || '',
-        lastOrderAt: customer.lastOrderAt || ''
+        email: customerData.email || '',
+        firstName: customerData.firstName || '',
+        lastName: customerData.lastName || '',
+        phone: customerData.phone || '',
+        visits: customerData.visits?.toString() || '0',
+        tags: formattedTags,
+        lastOrderAt: formattedLastOrderAt
       })
       console.log('✅ Form data set successfully')
     } catch (error: any) {
@@ -83,7 +116,9 @@ export default function EditCustomer() {
       console.error('❌ Error status:', error.response?.status)
       console.error('❌ Error message:', error.message)
       
-      if (error.response?.status === 404) {
+      if (error.message?.includes('Invalid customer ID format')) {
+        setError(`Invalid customer ID: "${id}". Please go back to the customers list and try editing again.`)
+      } else if (error.response?.status === 404) {
         setError(`Customer with ID "${id}" not found. Please check the customer ID and try again.`)
       } else if (error.response?.status === 500) {
         setError('Server error occurred while loading customer. Please try again later.')
@@ -154,10 +189,11 @@ export default function EditCustomer() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
             <span className="text-white font-bold text-xl">X</span>
           </div>
           <p className="text-gray-600">Loading customer details...</p>
+          <p className="text-sm text-gray-500 mt-2">Please wait while we fetch the customer information</p>
         </div>
       </div>
     )
@@ -320,8 +356,16 @@ export default function EditCustomer() {
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <div className="ml-3">
+                    <div className="ml-3 flex-1">
                       <p className="text-sm font-medium text-red-800">{error}</p>
+                      <div className="mt-3">
+                        <Link
+                          href="/customers"
+                          className="inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          ← Back to Customers List
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
