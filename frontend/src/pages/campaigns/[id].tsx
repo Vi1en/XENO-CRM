@@ -88,7 +88,10 @@ export default function EditCampaign() {
       
       // Extract campaign data from nested API response
       let campaign: any
-      if (response.data && response.data.success && response.data.data) {
+      if (response.data && response.data.success && response.data.data && response.data.data.campaign) {
+        console.log('🔍 Found campaign in nested structure: response.data.data.campaign')
+        campaign = response.data.data.campaign
+      } else if (response.data && response.data.success && response.data.data) {
         console.log('🔍 Found nested data structure: response.data.data')
         campaign = response.data.data
       } else if (response.data) {
