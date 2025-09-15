@@ -196,8 +196,15 @@ router.post('/', async (req, res) => {
     const { name, description, rules } = segmentCreateSchema.parse(req.body);
     
     // Count customers matching the rules
-    const query = buildCustomerQuery(rules);
-    const customerCount = await Customer.countDocuments(query);
+    let customerCount = 0;
+    try {
+      const query = buildCustomerQuery(rules);
+      customerCount = await Customer.countDocuments(query);
+    } catch (countError) {
+      console.error('Error counting customers:', countError);
+      // Set to 0 if counting fails
+      customerCount = 0;
+    }
     
     // Create segment
     const segment = new Segment({
