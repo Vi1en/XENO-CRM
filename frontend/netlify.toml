@@ -1,0 +1,20 @@
+[build]
+  # Build command for static export
+  command = "npm run build"
+  # Publish directory for static files
+  publish = "out"
+
+[build.environment]
+  # Disable Next.js serverless functions
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Redirect rules for SPA routing
+[[redirects]]
+  from = "/api/*"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
