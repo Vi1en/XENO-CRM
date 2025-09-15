@@ -35,6 +35,8 @@ export default function CampaignHistory() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -106,6 +108,19 @@ export default function CampaignHistory() {
   const formatNumber = (num: number) => {
     if (num === undefined || num === null) return '0'
     return num.toLocaleString()
+  }
+
+  // Filter campaigns based on search and status
+  const filteredCampaigns = campaigns.filter(campaign => {
+    const matchesSearch = campaign.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         campaign.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || campaign.status?.toLowerCase() === statusFilter.toLowerCase()
+    return matchesSearch && matchesStatus
+  })
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
   }
 
   if (authLoading) {
@@ -193,6 +208,45 @@ export default function CampaignHistory() {
 
           {/* Content */}
           <div className="flex-1 p-6">
+            {/* Search and Filter Controls */}
+            <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search campaigns..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="sm:w-48">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="running">Running</option>
+                    <option value="completed">Completed</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="draft">Draft</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+                <div>
+                  <SmoothButton
+                    onClick={clearFilters}
+                    variant="secondary"
+                    size="md"
+                    disabled={searchTerm === '' && statusFilter === 'all'}
+                  >
+                    Clear Filters
+                  </SmoothButton>
+                </div>
+              </div>
+            </div>
+
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
                 <div className="flex">
@@ -219,11 +273,11 @@ export default function CampaignHistory() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Campaign History ({campaigns.length})
+                    Campaign History ({filteredCampaigns.length} of {campaigns.length})
                   </h3>
                 </div>
                 
-                {campaigns.length === 0 ? (
+                {filteredCampaigns.length === 0 ? (
                   <div className="px-6 py-12 text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
@@ -241,118 +295,91 @@ export default function CampaignHistory() {
                     </div>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Campaign
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Audience
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Sent
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Delivered
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Open Rate
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Click Rate
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {campaigns.map((campaign, index) => (
-                          <tr key={campaign._id || index} className="hover:bg-gray-50 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">
-                                      {campaign.name?.charAt(0)?.toUpperCase() || 'C'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {campaign.name || 'Untitled Campaign'}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {campaign.type || 'Email'}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
+                  <div className="grid gap-6 p-6">
+                    {filteredCampaigns.map((campaign, index) => (
+                      <div key={campaign._id || index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+                        {/* Campaign Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              {campaign.name || 'Untitled Campaign'}
+                            </h3>
+                            <p className="text-gray-600 text-sm mb-3">
+                              {campaign.description || 'No description available'}
+                            </p>
+                            <div className="flex items-center space-x-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
                                 {campaign.status ? campaign.status.toUpperCase() : 'UNKNOWN'}
                               </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {formatNumber(campaign.audienceSize)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {formatNumber(campaign.sentCount)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {formatNumber(campaign.deliveredCount)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {campaign.openRate ? `${campaign.openRate.toFixed(1)}%` : '0%'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {campaign.clickRate ? `${campaign.clickRate.toFixed(1)}%` : '0%'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {formatDate(campaign.createdAt)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
-                                <SmoothButton
-                                  onClick={() => router.push(`/campaigns/view/${campaign._id}`)}
-                                  variant="secondary"
-                                  size="sm"
-                                >
-                                  View
-                                </SmoothButton>
-                                <SmoothButton
-                                  onClick={() => router.push(`/campaigns/${campaign._id}`)}
-                                  variant="secondary"
-                                  size="sm"
-                                >
-                                  Edit
-                                </SmoothButton>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              <span className="text-sm text-gray-500">
+                                Created: {formatDate(campaign.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Campaign Metrics */}
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                          <div className="bg-gray-50 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-gray-900">
+                              {formatNumber(campaign.audienceSize || 0)}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wide">Audience Size</div>
+                          </div>
+                          
+                          <div className="bg-green-50 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              {formatNumber(campaign.sentCount || 0)}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wide">Sent</div>
+                          </div>
+                          
+                          <div className="bg-blue-50 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {formatNumber(campaign.deliveredCount || 0)}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wide">Delivered</div>
+                          </div>
+                          
+                          <div className="bg-red-50 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-red-600">
+                              {formatNumber(campaign.failedCount || 0)}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wide">Failed</div>
+                          </div>
+                          
+                          <div className="bg-purple-50 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-purple-600">
+                              {campaign.deliveryRate ? `${campaign.deliveryRate.toFixed(0)}%` : '0%'}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase tracking-wide">Delivery Rate</div>
+                          </div>
+                        </div>
+
+                        {/* Campaign Actions */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <div className="flex space-x-2">
+                            <SmoothButton
+                              onClick={() => router.push(`/campaigns/view/${campaign._id}`)}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              View Details
+                            </SmoothButton>
+                            <SmoothButton
+                              onClick={() => router.push(`/campaigns/${campaign._id}`)}
+                              variant="secondary"
+                              size="sm"
+                            >
+                              Edit
+                            </SmoothButton>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {campaign.type || 'Email'} Campaign
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
