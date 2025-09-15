@@ -27,6 +27,19 @@ export default function Home() {
   useEffect(() => {
     let isMounted = true
     
+    // Clear any cached NextAuth data
+    if (typeof window !== 'undefined') {
+      // Clear NextAuth session storage
+      localStorage.removeItem('nextauth.message')
+      localStorage.removeItem('nextauth.csrf-token')
+      sessionStorage.removeItem('nextauth.message')
+      sessionStorage.removeItem('nextauth.csrf-token')
+      
+      // Clear any cached API calls
+      localStorage.removeItem('api-cache')
+      sessionStorage.clear()
+    }
+    
     // Load demo data immediately for demo mode
     const loadDataAsync = async () => {
       if (isMounted) {
