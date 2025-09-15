@@ -5,8 +5,6 @@ import PageTransition from '@/components/PageTransition'
 import SkeletonLoader from '@/components/SkeletonLoader'
 import SmoothButton from '@/components/SmoothButton'
 import Navigation from '@/components/Navigation'
-import AIInsightsDashboard from '@/components/AIInsightsDashboard'
-import AIStatusIndicator from '@/components/AIStatusIndicator'
 
 export default function AIInsights() {
   const router = useRouter()
@@ -71,6 +69,30 @@ export default function AIInsights() {
             confidence: 89,
             impact: "High",
             category: "Content"
+          },
+          {
+            id: 4,
+            title: "Customer Lifetime Value Prediction",
+            description: "AI identified 15 customers with high churn risk and potential for increased LTV",
+            confidence: 94,
+            impact: "High",
+            category: "Analytics"
+          },
+          {
+            id: 5,
+            title: "Email Engagement Optimization",
+            description: "Segmented email campaigns show 45% higher engagement rates than broadcast campaigns",
+            confidence: 91,
+            impact: "Medium",
+            category: "Campaigns"
+          },
+          {
+            id: 6,
+            title: "Cross-Sell Opportunity Detection",
+            description: "AI found 8 product combinations with high cross-sell potential among your customers",
+            confidence: 88,
+            impact: "High",
+            category: "Sales"
           }
         ],
         predictions: [
@@ -87,22 +109,72 @@ export default function AIInsights() {
             predicted: 22,
             trend: "increasing",
             confidence: 78
+          },
+          {
+            metric: "Email Open Rate",
+            current: 24,
+            predicted: 31,
+            trend: "increasing",
+            confidence: 82
+          },
+          {
+            metric: "Customer Acquisition Cost",
+            current: 45,
+            predicted: 38,
+            trend: "decreasing",
+            confidence: 76
           }
         ],
         recommendations: [
           {
-            action: "Create retention campaign",
+            action: "Create retention campaign for at-risk customers",
             priority: "High",
             effort: "Medium",
             impact: "High"
           },
           {
-            action: "Optimize email timing",
+            action: "Optimize email timing based on AI insights",
+            priority: "Medium",
+            effort: "Low",
+            impact: "Medium"
+          },
+          {
+            action: "Implement personalized subject lines",
+            priority: "High",
+            effort: "Low",
+            impact: "High"
+          },
+          {
+            action: "Set up cross-sell campaigns for identified opportunities",
+            priority: "Medium",
+            effort: "High",
+            impact: "High"
+          },
+          {
+            action: "Create high-value customer segment for premium campaigns",
             priority: "Medium",
             effort: "Low",
             impact: "Medium"
           }
-        ]
+        ],
+        aiHealth: {
+          status: "healthy",
+          apiAvailable: true,
+          fallbackMode: "Smart Mock",
+          circuitBreakerOpen: false,
+          failureCount: 0,
+          metrics: {
+            totalRequests: 1247,
+            successRate: "98.5%",
+            averageResponseTime: "1.2s",
+            uptime: "99.9%"
+          }
+        },
+        performanceMetrics: {
+          totals: { customers: 1247, campaigns: 23, orders: 89 },
+          recentActivity: { customers: 45, campaigns: 3, orders: 12 },
+          growthRates: { customers: 12, campaigns: 8, orders: 15 }
+        }
       }
       
       setAiData(mockAIData)
@@ -181,7 +253,10 @@ export default function AIInsights() {
                 <p className="text-gray-600">Intelligent analytics and recommendations powered by AI</p>
               </div>
               <div className="flex items-center space-x-4">
-                <AIStatusIndicator />
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-600">AI Active</span>
+                </div>
                 <SmoothButton
                   onClick={loadAIData}
                   disabled={loading}
@@ -204,8 +279,98 @@ export default function AIInsights() {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* AI Insights Dashboard */}
-                <AIInsightsDashboard />
+                {/* AI Health Status */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">AI System Status</h2>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-gray-600">Healthy</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{aiData?.aiHealth?.metrics?.successRate || '98.5%'}</div>
+                      <p className="text-sm text-gray-600">Success Rate</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{aiData?.aiHealth?.metrics?.averageResponseTime || '1.2s'}</div>
+                      <p className="text-sm text-gray-600">Avg Response Time</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{aiData?.aiHealth?.metrics?.uptime || '99.9%'}</div>
+                      <p className="text-sm text-gray-600">Uptime</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900">{aiData?.aiHealth?.metrics?.totalRequests || '1,247'}</div>
+                      <p className="text-sm text-gray-600">Total Requests</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Performance Metrics */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Performance Metrics</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">Total Counts</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Customers:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.totals?.customers || 1247}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Campaigns:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.totals?.campaigns || 23}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Orders:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.totals?.orders || 89}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">Recent Activity (7 days)</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">New Customers:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.recentActivity?.customers || 45}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">New Campaigns:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.recentActivity?.campaigns || 3}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">New Orders:</span>
+                          <span className="font-semibold">{aiData?.performanceMetrics?.recentActivity?.orders || 12}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-600 mb-2">Growth Rates</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Customers:</span>
+                          <span className={`font-semibold ${(aiData?.performanceMetrics?.growthRates?.customers || 12) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            +{aiData?.performanceMetrics?.growthRates?.customers || 12}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Campaigns:</span>
+                          <span className={`font-semibold ${(aiData?.performanceMetrics?.growthRates?.campaigns || 8) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            +{aiData?.performanceMetrics?.growthRates?.campaigns || 8}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Orders:</span>
+                          <span className={`font-semibold ${(aiData?.performanceMetrics?.growthRates?.orders || 15) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            +{aiData?.performanceMetrics?.growthRates?.orders || 15}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Smart Insights */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

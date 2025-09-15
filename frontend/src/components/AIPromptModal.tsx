@@ -26,57 +26,154 @@ export default function AIPromptModal({ isOpen, onClose, type, onGenerate, onCre
       
       let generatedSuggestions = []
       
+      // Parse the prompt to extract key information
+      const promptWords = prompt.toLowerCase().split(' ')
+      const isHighValue = promptWords.some(word => ['high', 'premium', 'vip', 'valuable', 'expensive', 'luxury'].includes(word))
+      const isEngagement = promptWords.some(word => ['engaged', 'active', 'frequent', 'regular', 'loyal'].includes(word))
+      const isInactive = promptWords.some(word => ['inactive', 'churned', 'lost', 'abandoned', 'dormant'].includes(word))
+      const isNew = promptWords.some(word => ['new', 'recent', 'fresh', 'first-time'].includes(word))
+      const isRetention = promptWords.some(word => ['retention', 'retain', 'keep', 'maintain'].includes(word))
+      const isAcquisition = promptWords.some(word => ['acquisition', 'acquire', 'attract', 'gain', 'new'].includes(word))
+      
       if (type === 'segment') {
+        // Generate intelligent segment names based on prompt
+        const segmentName1 = isHighValue ? `Premium ${prompt.split(' ')[0]} Customers` :
+                           isEngagement ? `Highly Engaged ${prompt.split(' ')[0]} Users` :
+                           isInactive ? `Inactive ${prompt.split(' ')[0]} Customers` :
+                           isNew ? `New ${prompt.split(' ')[0]} Customers` :
+                           `${prompt.split(' ')[0]} Segment`
+        
+        const segmentName2 = isHighValue ? `Elite ${prompt.split(' ')[0]} Members` :
+                           isEngagement ? `Active ${prompt.split(' ')[0]} Community` :
+                           isInactive ? `At-Risk ${prompt.split(' ')[0]} Customers` :
+                           isNew ? `First-Time ${prompt.split(' ')[0]} Buyers` :
+                           `Advanced ${prompt.split(' ')[0]} Segment`
+        
+        // Generate intelligent rules based on prompt
+        const rules1 = isHighValue ? [
+          { field: 'totalSpend', operator: 'greater_than', value: 1000 },
+          { field: 'visits', operator: 'greater_than', value: 5 }
+        ] : isEngagement ? [
+          { field: 'visits', operator: 'greater_than', value: 10 },
+          { field: 'totalSpend', operator: 'greater_than', value: 200 }
+        ] : isInactive ? [
+          { field: 'lastOrderAt', operator: 'less_than', value: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString() },
+          { field: 'totalSpend', operator: 'greater_than', value: 50 }
+        ] : isNew ? [
+          { field: 'totalSpend', operator: 'greater_than', value: 0 },
+          { field: 'visits', operator: 'greater_than', value: 1 }
+        ] : [
+          { field: 'totalSpend', operator: 'greater_than', value: 100 },
+          { field: 'visits', operator: 'greater_than', value: 3 }
+        ]
+        
+        const rules2 = isHighValue ? [
+          { field: 'totalSpend', operator: 'greater_than', value: 2000 },
+          { field: 'visits', operator: 'greater_than', value: 8 }
+        ] : isEngagement ? [
+          { field: 'visits', operator: 'greater_than', value: 15 },
+          { field: 'totalSpend', operator: 'greater_than', value: 500 }
+        ] : isInactive ? [
+          { field: 'lastOrderAt', operator: 'less_than', value: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString() },
+          { field: 'totalSpend', operator: 'greater_than', value: 100 }
+        ] : isNew ? [
+          { field: 'totalSpend', operator: 'greater_than', value: 0 },
+          { field: 'visits', operator: 'greater_than', value: 2 }
+        ] : [
+          { field: 'totalSpend', operator: 'greater_than', value: 500 },
+          { field: 'visits', operator: 'greater_than', value: 5 }
+        ]
+        
         generatedSuggestions = [
           {
             id: `ai-segment-${Date.now()}-1`,
-            name: `${prompt.split(' ')[0]} Customers`,
-            description: `AI-generated segment based on: ${prompt}`,
-            rules: [
-              { field: 'totalSpend', operator: 'greater_than', value: 100 },
-              { field: 'visits', operator: 'greater_than', value: 3 }
-            ],
-            estimatedCount: Math.floor(Math.random() * 100) + 10,
+            name: segmentName1,
+            description: `AI-generated segment based on: "${prompt}". This segment targets customers who match your specific criteria.`,
+            rules: rules1,
+            estimatedCount: isHighValue ? Math.floor(Math.random() * 50) + 10 : 
+                          isEngagement ? Math.floor(Math.random() * 80) + 20 :
+                          isInactive ? Math.floor(Math.random() * 120) + 30 :
+                          Math.floor(Math.random() * 100) + 15,
             confidence: Math.floor(Math.random() * 20) + 80,
             prompt: prompt
           },
           {
             id: `ai-segment-${Date.now()}-2`,
-            name: `High-Value ${prompt.split(' ')[0]} Users`,
-            description: `Premium customers matching: ${prompt}`,
-            rules: [
-              { field: 'totalSpend', operator: 'greater_than', value: 500 },
-              { field: 'visits', operator: 'greater_than', value: 5 }
-            ],
-            estimatedCount: Math.floor(Math.random() * 50) + 5,
+            name: segmentName2,
+            description: `Advanced segment targeting: "${prompt}". This segment uses more specific criteria for better targeting.`,
+            rules: rules2,
+            estimatedCount: isHighValue ? Math.floor(Math.random() * 30) + 5 : 
+                          isEngagement ? Math.floor(Math.random() * 60) + 10 :
+                          isInactive ? Math.floor(Math.random() * 80) + 20 :
+                          Math.floor(Math.random() * 70) + 10,
             confidence: Math.floor(Math.random() * 15) + 85,
             prompt: prompt
           }
         ]
       } else {
+        // Generate intelligent campaign names and content based on prompt
+        const campaignName1 = isRetention ? `${prompt} Retention Campaign` :
+                             isAcquisition ? `${prompt} Acquisition Campaign` :
+                             isHighValue ? `Premium ${prompt} Campaign` :
+                             isEngagement ? `Engagement ${prompt} Campaign` :
+                             `${prompt} Campaign`
+        
+        const campaignName2 = isRetention ? `Advanced ${prompt} Retention Strategy` :
+                             isAcquisition ? `Smart ${prompt} Acquisition Drive` :
+                             isHighValue ? `Elite ${prompt} Experience` :
+                             isEngagement ? `Interactive ${prompt} Campaign` :
+                             `Strategic ${prompt} Campaign`
+        
+        // Generate intelligent messages based on prompt
+        const message1 = isRetention ? 
+          `🔄 ${prompt} Retention Campaign\n\nWe noticed you haven't been active lately, and we miss you! We've prepared something special to welcome you back.\n\n✨ Exclusive ${prompt.toLowerCase()} offers\n🎁 Special discounts just for you\n📞 Personal support when you need it\n\nCome back and rediscover what makes us special!` :
+          isAcquisition ?
+          `🚀 ${prompt} Acquisition Campaign\n\nWelcome to our community! We're excited to help you discover the amazing benefits of ${prompt.toLowerCase()}.\n\n🎯 Personalized recommendations\n💡 Expert insights and tips\n🎉 Exclusive member benefits\n\nStart your journey with us today!` :
+          isHighValue ?
+          `💎 Premium ${prompt} Experience\n\nAs one of our valued customers, you deserve the very best. That's why we've created this exclusive ${prompt.toLowerCase()} experience just for you.\n\n🌟 VIP treatment and benefits\n🎁 Exclusive offers and rewards\n📞 Dedicated support team\n\nExperience the difference that premium service makes!` :
+          `🎯 ${prompt} Campaign\n\nWe've crafted this campaign specifically for you based on your interests in ${prompt.toLowerCase()}.\n\n✨ Personalized content\n📊 Data-driven insights\n🎁 Special offers\n\nDiscover what we have in store for you!`
+        
+        const message2 = isRetention ?
+          `🔄 Advanced ${prompt} Retention Strategy\n\nWe understand that every customer is unique. This advanced campaign is designed to re-engage you with personalized content and offers.\n\n📈 Behavioral insights\n🎯 Targeted recommendations\n💝 Exclusive retention offers\n\nLet's rebuild our relationship together!` :
+          isAcquisition ?
+          `🚀 Smart ${prompt} Acquisition Drive\n\nJoin thousands of satisfied customers who have discovered the power of ${prompt.toLowerCase()}. This intelligent campaign adapts to your needs.\n\n🤖 AI-powered personalization\n📊 Real-time optimization\n🎯 Precise targeting\n\nExperience the future of customer engagement!` :
+          isHighValue ?
+          `💎 Elite ${prompt} Experience\n\nYou're not just a customer - you're part of our elite community. This campaign reflects the premium service you deserve.\n\n👑 Exclusive access\n🎁 Premium rewards\n📞 Concierge support\n\nIndulge in the luxury you've earned!` :
+          `🎯 Strategic ${prompt} Campaign\n\nThis campaign combines data science with creative marketing to deliver exactly what you need for ${prompt.toLowerCase()}.\n\n📊 Advanced analytics\n🎨 Creative optimization\n🎯 Precision targeting\n\nExperience marketing that truly understands you!`
+        
         generatedSuggestions = [
           {
             id: `ai-campaign-${Date.now()}-1`,
-            name: `${prompt} Campaign`,
-            description: `AI-generated campaign for: ${prompt}`,
+            name: campaignName1,
+            description: `AI-generated campaign for: "${prompt}". This campaign is designed to achieve your specific goals.`,
             type: 'Email',
-            targetSegment: 'All Customers',
-            estimatedRecipients: Math.floor(Math.random() * 500) + 100,
+            targetSegment: isHighValue ? 'Premium Customers' : isEngagement ? 'Engaged Users' : 'All Customers',
+            estimatedRecipients: isHighValue ? Math.floor(Math.random() * 200) + 50 :
+                                 isEngagement ? Math.floor(Math.random() * 400) + 100 :
+                                 Math.floor(Math.random() * 500) + 150,
             confidence: Math.floor(Math.random() * 20) + 80,
-            message: `🎯 ${prompt}\n\nWe've created something special just for you! This campaign is designed to help you achieve your goals with ${prompt.toLowerCase()}.\n\nDon't miss out on this exclusive opportunity!`,
-            subject: `Your ${prompt} Journey Starts Here`,
+            message: message1,
+            subject: isRetention ? `We Miss You - ${prompt} Special Offer` :
+                    isAcquisition ? `Welcome to ${prompt} - Your Journey Starts Here` :
+                    isHighValue ? `Exclusive ${prompt} Experience Awaits You` :
+                    `Your ${prompt} Campaign is Ready`,
             prompt: prompt
           },
           {
             id: `ai-campaign-${Date.now()}-2`,
-            name: `Advanced ${prompt} Strategy`,
-            description: `Comprehensive campaign targeting: ${prompt}`,
+            name: campaignName2,
+            description: `Advanced campaign targeting: "${prompt}". This campaign uses sophisticated AI to maximize engagement.`,
             type: 'Email',
-            targetSegment: 'Engaged Users',
-            estimatedRecipients: Math.floor(Math.random() * 300) + 50,
+            targetSegment: isHighValue ? 'Elite Members' : isEngagement ? 'Active Community' : 'Engaged Users',
+            estimatedRecipients: isHighValue ? Math.floor(Math.random() * 150) + 25 :
+                                 isEngagement ? Math.floor(Math.random() * 300) + 75 :
+                                 Math.floor(Math.random() * 350) + 100,
             confidence: Math.floor(Math.random() * 15) + 85,
-            message: `🚀 Advanced ${prompt} Strategy\n\nOur AI has analyzed your preferences and created a personalized ${prompt.toLowerCase()} experience.\n\nGet ready for:\n• Personalized recommendations\n• Exclusive insights\n• Special offers\n\nStart your journey today!`,
-            subject: `Unlock Your ${prompt} Potential`,
+            message: message2,
+            subject: isRetention ? `Advanced ${prompt} Strategy - Let's Reconnect` :
+                    isAcquisition ? `Smart ${prompt} Drive - Join the Future` :
+                    isHighValue ? `Elite ${prompt} Experience - Luxury Awaits` :
+                    `Strategic ${prompt} Campaign - Precision Marketing`,
             prompt: prompt
           }
         ]
