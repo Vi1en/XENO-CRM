@@ -51,14 +51,26 @@ export default function Orders() {
       const response = await orderApi.getAll()
       
       console.log('📦 Orders response:', response.data)
+      console.log('📦 Response status:', response.status)
       
       // Handle nested data structure
       const ordersData = response.data?.data || response.data || []
+      console.log('📦 Processed orders data:', ordersData)
+      console.log('📦 Orders count:', ordersData.length)
+      
+      if (ordersData.length > 0) {
+        console.log('📦 First order:', ordersData[0])
+        console.log('📦 First order ID:', ordersData[0]._id)
+        console.log('📦 First order ID type:', typeof ordersData[0]._id)
+        console.log('📦 First order orderId:', ordersData[0].orderId)
+      }
+      
       setOrders(Array.isArray(ordersData) ? ordersData : [])
       
       console.log('✅ Orders loaded:', ordersData.length)
     } catch (error: any) {
       console.error('❌ Error loading orders:', error)
+      console.error('❌ Error details:', error.response?.data)
       setError('Failed to load orders. Please try again.')
     } finally {
       setLoading(false)
@@ -70,12 +82,28 @@ export default function Orders() {
       return
     }
 
+    // Validate order ID
+    if (!orderId || typeof orderId !== 'string' || orderId.trim() === '') {
+      console.error('❌ Invalid order ID:', orderId)
+      alert('Invalid order ID. Please refresh the page and try again.')
+      return
+    }
+
+    // Check if order exists in local state
+    const orderExists = orders.find(o => o._id === orderId)
+    if (!orderExists) {
+      console.error('❌ Order not found in local state:', orderId)
+      alert('Order not found. Please refresh the page and try again.')
+      return
+    }
+
     try {
       console.log('🗑️ Deleting order:', orderId)
       console.log('🗑️ Order ID type:', typeof orderId)
       console.log('🗑️ Order ID length:', orderId?.length)
       console.log('🗑️ Available orders:', orders.length)
-      console.log('🗑️ Order exists in state:', orders.find(o => o._id === orderId) ? 'Yes' : 'No')
+      console.log('🗑️ Order exists in state:', orderExists ? 'Yes' : 'No')
+      console.log('🗑️ Order details:', orderExists)
       
       const response = await orderApi.delete(orderId)
       console.log('✅ Delete API response:', response)
