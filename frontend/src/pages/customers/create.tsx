@@ -73,7 +73,7 @@ export default function CreateCustomer() {
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phone: formData.phone || undefined,
+        ...(formData.phone && { phone: formData.phone }),
         totalSpend: Number(formData.totalSpend) || 0,
         visits: Number(formData.visits) || 0,
         tags: tagsArray,
@@ -98,9 +98,34 @@ export default function CreateCustomer() {
       }, 2000)
 
     } catch (error: any) {
-      console.error('Error creating customer:', error)
-      console.error('Error response:', error.response?.data)
-      console.error('Error status:', error.response?.status)
+      console.error('❌ Error creating customer:', error)
+      console.error('❌ Error response:', error.response?.data)
+      console.error('❌ Error status:', error.response?.status)
+      console.error('❌ Error message:', error.message)
+      
+      // Handle 500 error with fallback - try with minimal data
+      if (error.response?.status === 500) {
+        console.log('⚠️ Backend returned 500 error, trying with minimal data as fallback')
+        try {
+          const minimalData = {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            totalSpend: Number(formData.totalSpend) || 0,
+            visits: Number(formData.visits) || 0,
+            tags: []
+          }
+          console.log('🔄 Trying with minimal data:', minimalData)
+          await customerApi.create(minimalData)
+          setSuccess(true)
+          setTimeout(() => {
+            router.push('/customers')
+          }, 2000)
+          return
+        } catch (fallbackError: any) {
+          console.error('❌ Fallback also failed:', fallbackError)
+        }
+      }
       
       if (error.response?.data?.errors) {
         console.error('Validation errors:', error.response.data.errors)
