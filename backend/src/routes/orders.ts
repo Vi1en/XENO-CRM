@@ -141,6 +141,35 @@ router.get('/debug', async (req, res) => {
   }
 });
 
+// Simple delete test endpoint
+router.delete('/test-delete/:id', async (req, res) => {
+  try {
+    console.log('🧪 Test delete endpoint called with ID:', req.params.id);
+    
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found for test',
+      });
+    }
+    
+    await Order.findByIdAndDelete(req.params.id);
+    
+    return res.json({
+      success: true,
+      message: 'Test order deleted successfully',
+    });
+  } catch (error) {
+    console.error('Test delete error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Test delete failed',
+      error: error.message
+    });
+  }
+});
+
 // Simple test endpoint
 router.post('/test-create', async (req, res) => {
   try {
@@ -483,41 +512,68 @@ router.delete('/:id', async (req, res) => {
     console.log('🗑️ Order ID type:', typeof req.params.id);
     console.log('🗑️ Order ID length:', req.params.id?.length);
     
+    // Validate order ID
+    if (!req.params.id || typeof req.params.id !== 'string') {
+      console.error('❌ Invalid order ID provided');
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order ID',
+      });
+    }
+
     const order = await Order.findById(req.params.id);
     console.log('🗑️ Order found:', order ? 'Yes' : 'No');
     console.log('🗑️ Order details:', order ? { _id: order._id, customerName: order.customerName, totalSpent: order.totalSpent } : 'Not found');
     
     if (!order) {
+      console.log('❌ Order not found in database');
       return res.status(404).json({
         success: false,
         message: 'Order not found',
       });
     }
 
-    // Find customer and subtract the order amount
-    console.log('🗑️ Looking for customer:', order.customerName);
-    const customer = await Customer.findOne({
-      $expr: {
-        $eq: [
-          { $concat: ['$firstName', ' ', '$lastName'] },
-          order.customerName
-        ]
-      }
-    });
-    console.log('🗑️ Customer found:', customer ? 'Yes' : 'No');
-    console.log('🗑️ Customer details:', customer ? { firstName: customer.firstName, lastName: customer.lastName, totalSpend: customer.totalSpend } : 'Not found');
+    // Try to find customer and update totalSpend (with error handling)
+    try {
+      console.log('🗑️ Looking for customer:', order.customerName);
+      const customer = await Customer.findOne({
+        $expr: {
+          $eq: [
+            { $concat: ['$firstName', ' ', '$lastName'] },
+            order.customerName
+          ]
+        }
+      });
+      console.log('🗑️ Customer found:', customer ? 'Yes' : 'No');
+      console.log('🗑️ Customer details:', customer ? { firstName: customer.firstName, lastName: customer.lastName, totalSpend: customer.totalSpend } : 'Not found');
 
-    if (customer) {
-      console.log('🗑️ Updating customer totalSpend from', customer.totalSpend, 'to', customer.totalSpend - order.totalSpent);
-      customer.totalSpend -= order.totalSpent;
-      await customer.save();
-      console.log('🗑️ Customer updated successfully');
+      if (customer) {
+        console.log('🗑️ Updating customer totalSpend from', customer.totalSpend, 'to', customer.totalSpend - order.totalSpent);
+        customer.totalSpend -= order.totalSpent;
+        await customer.save();
+        console.log('🗑️ Customer updated successfully');
+      } else {
+        console.log('⚠️ Customer not found, proceeding with order deletion only');
+      }
+    } catch (customerError) {
+      console.error('⚠️ Error updating customer (non-fatal):', customerError);
+      // Continue with order deletion even if customer update fails
     }
 
+    // Delete the order
     console.log('🗑️ Deleting order from database...');
-    await Order.findByIdAndDelete(req.params.id);
-    console.log('🗑️ Order deleted successfully');
+    const deleteResult = await Order.findByIdAndDelete(req.params.id);
+    console.log('🗑️ Order delete result:', deleteResult ? 'Success' : 'Failed');
+    
+    if (!deleteResult) {
+      console.error('❌ Order deletion failed - no document was deleted');
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete order',
+      });
+    }
 
+    console.log('✅ Order deleted successfully');
     return res.json({
       success: true,
       message: 'Order deleted successfully',
@@ -526,9 +582,12 @@ router.delete('/:id', async (req, res) => {
     console.error('❌ Delete order error:', error);
     console.error('❌ Error message:', error.message);
     console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error name:', error.name);
+    
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
