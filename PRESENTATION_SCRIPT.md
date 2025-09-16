@@ -115,9 +115,9 @@ On mobile, the orders are displayed as clean, easy-to-read cards with all the im
 
 The order details page is fully responsive - all the information is organized in a mobile-friendly layout, and the edit buttons are perfectly sized for touch interaction. The system maintains a complete audit trail and integrates with our vendor simulation system for testing order processing workflows."
 
-### **API Documentation (4:00 - 4:30)**
+### **API Documentation & Swagger UI (4:00 - 4:30)**
 
-**[Open new tab and navigate to /api/docs]**
+**[Open new tab and navigate to /api-docs]**
 
 "Now let me show you something really impressive - the complete API documentation. I've built a comprehensive Swagger UI that documents every single API endpoint.
 
@@ -135,7 +135,15 @@ You can actually test any API endpoint right here - just click 'Try it out', fil
 
 **[Show different endpoint categories]**
 
-The documentation covers everything from basic CRUD operations to complex AI-powered features, making it a complete reference for anyone who wants to build on top of this system."
+The documentation covers everything from basic CRUD operations to complex AI-powered features, making it a complete reference for anyone who wants to build on top of this system.
+
+**[Show schema documentation]**
+
+Notice how each endpoint has detailed schemas showing exactly what data to send and what to expect back. The system uses OpenAPI 3.1.0 specification, which is the industry standard for API documentation.
+
+**[Show authentication section]**
+
+And here's the authentication section - it shows how to get a JWT token from Google OAuth and use it to access protected endpoints. The entire API is secured and production-ready."
 
 ---
 
@@ -197,13 +205,45 @@ All of this happens through a clean API that I built with Express.js and MongoDB
 
 ---
 
-## **CLOSING (6:45 - 7:00)**
+## **TECHNICAL IMPLEMENTATION (6:45 - 7:00)**
 
 **[Return to dashboard for final view]**
 
-"Xeno CRM demonstrates how modern web technologies can be combined with AI to create powerful business tools. The system is fully functional, responsive, and ready for real-world use.
+"Let me quickly explain how I built this system:
 
 **[Show the clean interface]**
+
+**Frontend Technologies:**
+- **Next.js 13** with TypeScript for the React framework
+- **Tailwind CSS** for responsive, mobile-first styling
+- **Framer Motion** for smooth animations and transitions
+- **React Hook Form** for robust form validation
+- **Axios** for API communication with automatic token injection
+- **Swagger UI React** for interactive API documentation
+
+**Backend Technologies:**
+- **Node.js** with **Express.js** for the REST API server
+- **TypeScript** for type-safe backend development
+- **MongoDB** with **Mongoose** for database operations
+- **JWT** tokens for secure authentication
+- **Google OAuth 2.0** for user authentication
+- **OpenAI GPT-4** for AI-powered features
+- **RabbitMQ** for message queuing and background jobs
+
+**Deployment & Infrastructure:**
+- **Frontend**: Deployed on **Netlify** with automatic builds
+- **Backend**: Deployed on **Railway** with MongoDB Atlas
+- **API Documentation**: **OpenAPI 3.1.0** specification with Swagger UI
+- **Mobile Responsive**: Built with mobile-first design principles
+
+**Key Features:**
+- **Real-time data** with live updates
+- **AI integration** for natural language processing
+- **Secure authentication** with Google OAuth
+- **Interactive API testing** with Swagger UI
+- **Mobile-optimized** interface for all devices
+
+Xeno CRM demonstrates how modern web technologies can be combined with AI to create powerful business tools. The system is fully functional, responsive, and ready for real-world use.
 
 Future improvements could include more AI models, additional integrations, advanced reporting, and team collaboration features.
 
@@ -228,9 +268,11 @@ Thanks for watching, and I'd love to hear your thoughts on how AI can enhance bu
 5. **Customers → Segments** → Create AI Segment
 6. **Segments → Campaigns** → Create AI Campaign
 7. **Campaigns → Orders** → Order details
-8. **New Tab → /api/docs** → Show Swagger UI API documentation
-9. **Back to Dashboard** → **Mobile view demonstration**
-10. **Final dashboard overview**
+8. **New Tab → /api-docs** → Show Swagger UI API documentation
+9. **API Docs → Try different endpoints** → Show interactive testing
+10. **API Docs → Show schemas** → Demonstrate OpenAPI specification
+11. **Back to Dashboard** → **Mobile view demonstration**
+12. **Final dashboard overview**
 
 ### **Mobile Demonstration Points:**
 - **Login page on mobile** → Show responsive design
@@ -290,3 +332,7 @@ Thanks for watching, and I'd love to hear your thoughts on how AI can enhance bu
 - **Real-time Testing**: Test API calls directly from the documentation
 - **Developer-Friendly**: Easy integration for third-party developers
 - **Professional Documentation**: Enterprise-grade API documentation
+- **OpenAPI 3.1.0**: Industry-standard specification format
+- **JWT Token Integration**: Automatic authentication for testing
+- **Mobile Responsive**: Swagger UI works perfectly on mobile devices
+- **Schema Validation**: Complete request/response validation rules
