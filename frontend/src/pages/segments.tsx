@@ -27,36 +27,26 @@ export default function Segments() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
   const [showAIModal, setShowAIModal] = useState(false)
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-          loadSegments()
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Segments: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    checkAuth()
-  }, [])
+  // Load segments when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('✅ Segments: User authenticated, loading segments')
+      loadSegments()
+    }
+  }, [isAuthenticated, user])
 
   // Filter segments based on search term
   useEffect(() => {
@@ -97,12 +87,6 @@ export default function Segments() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   const handleDelete = async (segmentId: string) => {
     if (!confirm('Are you sure you want to delete this segment?')) {

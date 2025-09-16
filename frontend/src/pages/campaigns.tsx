@@ -31,9 +31,7 @@ export default function Campaigns() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([])
@@ -41,29 +39,21 @@ export default function Campaigns() {
   const [showSegmentModal, setShowSegmentModal] = useState(false)
   const [selectedAICampaign, setSelectedAICampaign] = useState<any>(null)
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-          loadCampaigns()
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Campaigns: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    checkAuth()
-  }, [])
+  // Load campaigns when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('✅ Campaigns: User authenticated, loading campaigns')
+      loadCampaigns()
+    }
+  }, [isAuthenticated, user])
 
   // Filter campaigns based on search term
   useEffect(() => {
@@ -228,12 +218,6 @@ export default function Campaigns() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {

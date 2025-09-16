@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { campaignApi, segmentApi, aiApi } from '@/lib/api'
+import { useAuth } from '@/lib/useAuth'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -14,9 +15,7 @@ interface Segment {
 
 export default function CreateCampaign() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [segments, setSegments] = useState<Segment[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,35 +29,22 @@ export default function CreateCampaign() {
     scheduledAt: ''
   })
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Create Campaign: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    checkAuth()
-  }, [])
+  // Load segments when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('✅ Create Campaign: User authenticated, loading segments')
+      loadSegments()
+    }
+  }, [isAuthenticated, user])
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   const loadSegments = async () => {
     try {
@@ -216,14 +202,6 @@ export default function CreateCampaign() {
                   <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className="ml-auto p-1 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
               </div>
             </div>
           </div>

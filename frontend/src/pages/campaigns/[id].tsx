@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useForm } from 'react-hook-form'
 import { campaignApi, segmentApi } from '@/lib/api'
+import { useAuth } from '@/lib/useAuth'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
@@ -20,9 +21,7 @@ interface Segment {
 export default function EditCampaign() {
   const router = useRouter()
   const { id } = router.query
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -42,35 +41,23 @@ export default function EditCampaign() {
     }
   })
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Edit Campaign: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
+  }, [authLoading, isAuthenticated, router])
 
-    checkAuth()
-  }, [])
+  // Load campaign and segments when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user && id) {
+      console.log('✅ Edit Campaign: User authenticated, loading campaign and segments')
+      loadCampaign()
+      loadSegments()
+    }
+  }, [isAuthenticated, user, id])
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   const loadCampaign = async () => {
     if (!id) return
@@ -276,14 +263,6 @@ export default function EditCampaign() {
                   <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className="ml-auto p-1 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
               </div>
             </div>
           </div>
