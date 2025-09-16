@@ -147,6 +147,15 @@ app.get('/api/docs/swagger.json', (req, res) => {
   res.json(swaggerSpec);
 });
 
+// CSP middleware for Swagger UI to allow iframe embedding
+app.use('/api/docs', (req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; frame-ancestors 'self' https://myxcrm.netlify.app https://xeno-crm-frontend.onrender.com https://xeno-crm-frontend-sigma.vercel.app; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data:;"
+  );
+  next();
+});
+
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // Redirect /docs to /api/docs for easier access
