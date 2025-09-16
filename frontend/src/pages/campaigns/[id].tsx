@@ -5,6 +5,9 @@ import { campaignApi, segmentApi } from '@/lib/api'
 import { useAuth } from '@/lib/useAuth'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import AuthNavigation from '@/components/AuthNavigation'
+import PageTransition from '@/components/PageTransition'
+import SmoothButton from '@/components/SmoothButton'
 
 interface CampaignFormData {
   name: string
@@ -192,107 +195,74 @@ export default function EditCampaign() {
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Edit Campaign</title>
         <meta name="description" content="Edit marketing campaign in Xeno CRM" />
       </Head>
       <div className="min-h-screen bg-gray-50">
-        {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <span className="ml-3 text-xl font-semibold text-gray-900">Xeno CRM</span>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-2">
-              <div className="space-y-1">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                  Navigation
-                </div>
-                <Link href="/" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
-                  </svg>
-                  Dashboard
-                </Link>
-                <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Orders
-                </Link>
-                <Link href="/customers" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  Customers
-                </Link>
-                <Link href="/segments" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Segments
-                </Link>
-                <Link href="/campaigns" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Campaigns
-                </Link>
-              </div>
-            </nav>
-
-            {/* User Info */}
-            <div className="px-4 py-4 border-t border-gray-200">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    {user?.name?.charAt(0) || 'U'}
-                  </span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthNavigation currentPath={router.pathname} />
 
         {/* Main Content */}
-        <div className="pl-64">
-          {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          {/* Mobile Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4 lg:hidden">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Link href="/campaigns" className="text-blue-600 hover:text-blue-800 mr-4">
-                  ← Back to Campaigns
-                </Link>
-                <div className="flex items-center text-sm text-gray-500">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <div className="flex items-center space-x-4">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar-nav')
+                    const backdrop = document.querySelector('.sidebar-backdrop')
+                    if (sidebar) {
+                      sidebar.classList.toggle('-translate-x-full')
+                      sidebar.classList.toggle('translate-x-0')
+                    }
+                    if (backdrop) {
+                      backdrop.classList.toggle('opacity-0')
+                      backdrop.classList.toggle('opacity-100')
+                      backdrop.classList.toggle('pointer-events-none')
+                      backdrop.classList.toggle('pointer-events-auto')
+                    }
+                  }}
+                  className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                  aria-label="Open sidebar"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>/campaigns/edit/{id}</span>
+                </button>
+                
+                <div className="flex items-center">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>/campaigns/edit</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Page Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
+              {/* Header */}
               <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Edit Campaign</h1>
-                <p className="mt-2 text-gray-600">Update your marketing campaign details</p>
+                <div className="flex items-center mb-4">
+                  <Link 
+                    href="/campaigns" 
+                    className="text-blue-600 hover:text-blue-800 flex items-center"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Campaigns
+                  </Link>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Campaign</h1>
+                <p className="mt-2 text-sm sm:text-base text-gray-600">Update your marketing campaign details</p>
               </div>
 
               {success && (
@@ -400,17 +370,17 @@ export default function EditCampaign() {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
                   <Link
                     href="/campaigns"
-                    className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-center"
                   >
                     Cancel
                   </Link>
                   <button
                     type="submit"
                     disabled={isSubmitting || loading}
-                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                    className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                   >
                     {isSubmitting || loading ? 'Updating...' : 'Update Campaign'}
                   </button>
@@ -420,6 +390,6 @@ export default function EditCampaign() {
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }
