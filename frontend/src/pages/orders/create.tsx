@@ -53,11 +53,23 @@ export default function CreateOrder() {
 
   const loadCustomers = async () => {
     try {
+      console.log('🔄 Loading customers...')
       const response = await customerApi.getAll()
+      console.log('✅ Customers API response:', response)
+      console.log('📊 Response data:', response.data)
+      
       const apiCustomers = response.data.data || response.data
+      console.log('📋 Processed customers:', apiCustomers)
+      console.log('📋 Customers count:', apiCustomers?.length || 0)
+      
+      if (apiCustomers && apiCustomers.length > 0) {
+        console.log('📋 First customer:', apiCustomers[0])
+      }
+      
       setCustomers(apiCustomers)
-    } catch (error) {
-      console.error('Error loading customers:', error)
+    } catch (error: any) {
+      console.error('❌ Error loading customers:', error)
+      console.error('❌ Error details:', error.response?.data)
     }
   }
 
@@ -89,6 +101,10 @@ export default function CreateOrder() {
         date: formData.date || new Date().toISOString()
       }
 
+      console.log('📝 Order data being sent:', orderData)
+      console.log('📝 Available customers:', customers.length)
+      console.log('📝 Selected customer name:', formData.customerName)
+
       await orderApi.create(orderData)
       setSuccess(true)
       
@@ -99,7 +115,16 @@ export default function CreateOrder() {
 
     } catch (error: any) {
       console.error('Error creating order:', error)
-      setError(error.response?.data?.message || 'Failed to create order')
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      
+      if (error.response?.data?.errors) {
+        console.error('Validation errors:', error.response.data.errors)
+        const errorMessages = error.response.data.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`).join(', ')
+        setError(`Validation error: ${errorMessages}`)
+      } else {
+        setError(error.response?.data?.message || 'Failed to create order')
+      }
     } finally {
       setLoading(false)
     }
