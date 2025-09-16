@@ -142,20 +142,31 @@ export default function Campaigns() {
     try {
       setDeleteLoading(campaign._id)
       console.log('🗑️ Deleting campaign:', campaign._id)
+      console.log('🗑️ Campaign name:', campaign.name)
       
       // Try to delete from API first
       try {
-        await campaignApi.delete(campaign._id)
-        console.log('✅ Campaign deleted from API successfully')
+        const response = await campaignApi.delete(campaign._id)
+        console.log('✅ Campaign deleted from API successfully:', response)
       } catch (apiError) {
-        console.warn('⚠️ API delete failed, removing from local state only:', apiError)
+        console.error('❌ API delete failed:', apiError)
+        setError(`Failed to delete campaign: ${apiError.response?.data?.message || apiError.message}`)
+        return
       }
       
-      // Remove from local state regardless of API result
-      setCampaigns(prev => prev.filter(c => c._id !== campaign._id))
-      setFilteredCampaigns(prev => prev.filter(c => c._id !== campaign._id))
+      // Remove from local state only if API delete was successful
+      setCampaigns(prev => {
+        const filtered = prev.filter(c => c._id !== campaign._id)
+        console.log('📝 Updated campaigns list:', filtered.length, 'campaigns remaining')
+        return filtered
+      })
+      setFilteredCampaigns(prev => {
+        const filtered = prev.filter(c => c._id !== campaign._id)
+        console.log('📝 Updated filtered campaigns list:', filtered.length, 'campaigns remaining')
+        return filtered
+      })
       
-      console.log('✅ Campaign deleted successfully')
+      console.log('✅ Campaign deleted successfully from both API and local state')
     } catch (error) {
       console.error('❌ Error deleting campaign:', error)
       setError('Failed to delete campaign')
