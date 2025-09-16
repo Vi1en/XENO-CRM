@@ -4,7 +4,8 @@ import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 import { orderApi } from '@/lib/api'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { useAuth } from '@/lib/useAuth'
+import AuthNavigation from '@/components/AuthNavigation'
 import PageTransition from '@/components/PageTransition'
 import SmoothButton from '@/components/SmoothButton'
 
@@ -32,9 +33,7 @@ interface Order {
 export default function EditOrder() {
   const router = useRouter()
   const { id } = router.query
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -48,28 +47,13 @@ export default function EditOrder() {
     setValue
   } = useForm<OrderFormData>()
 
-  // Authentication check
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('🔐 Order Edit: User not authenticated, redirecting to login')
+      router.push('/login')
     }
-
-    checkAuth()
-  }, [])
+  }, [authLoading, isAuthenticated, router])
 
   // Load order data
   useEffect(() => {
@@ -164,12 +148,6 @@ export default function EditOrder() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   // Loading state
   if (authLoading || loading) {
@@ -206,15 +184,51 @@ export default function EditOrder() {
       </Head>
 
       <div className="min-h-screen bg-gray-100">
-        <Navigation 
-          currentPath="/orders" 
-          user={user} 
-          onSignOut={handleSignOut} 
-        />
+        <AuthNavigation currentPath={router.pathname} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-64">
-          <div className="p-6">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          {/* Mobile Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4 lg:hidden">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar-nav')
+                    const backdrop = document.querySelector('.sidebar-backdrop')
+                    if (sidebar) {
+                      sidebar.classList.toggle('-translate-x-full')
+                      sidebar.classList.toggle('translate-x-0')
+                    }
+                    if (backdrop) {
+                      backdrop.classList.toggle('opacity-0')
+                      backdrop.classList.toggle('opacity-100')
+                      backdrop.classList.toggle('pointer-events-none')
+                      backdrop.classList.toggle('pointer-events-auto')
+                    }
+                  }}
+                  className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                  aria-label="Open sidebar"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                
+                <div className="flex items-center">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span>/orders/edit</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="mb-8">

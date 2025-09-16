@@ -4,7 +4,8 @@ import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form'
 import { customerApi } from '@/lib/api'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { useAuth } from '@/lib/useAuth'
+import AuthNavigation from '@/components/AuthNavigation'
 import PageTransition from '@/components/PageTransition'
 import SmoothButton from '@/components/SmoothButton'
 
@@ -32,9 +33,7 @@ interface Customer {
 export default function EditCustomer() {
   const router = useRouter()
   const { id } = router.query
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -48,28 +47,13 @@ export default function EditCustomer() {
     setValue
   } = useForm<CustomerFormData>()
 
-  // Authentication check
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('🔐 Customer Edit: User not authenticated, redirecting to login')
+      router.push('/login')
     }
-
-    checkAuth()
-  }, [])
+  }, [authLoading, isAuthenticated, router])
 
   // Load customer data
   useEffect(() => {
@@ -170,12 +154,6 @@ export default function EditCustomer() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   // Loading state
   if (authLoading || loading) {
@@ -212,15 +190,11 @@ export default function EditCustomer() {
       </Head>
 
       <div className="min-h-screen bg-gray-100">
-        <Navigation 
-          currentPath="/customers" 
-          user={user} 
-          onSignOut={handleSignOut} 
-        />
+        <AuthNavigation currentPath={router.pathname} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-64">
-          <div className="p-6">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          <div className="p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="mb-8">

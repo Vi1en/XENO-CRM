@@ -35,10 +35,33 @@ export const api = axios.create({
   withCredentials: false, // Disable credentials to avoid CORS issues
 });
 
-// Add request interceptor for debugging
+// Function to get auth headers from localStorage
+const getAuthHeaders = () => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('auth-token');
+    if (token) {
+      console.log('🔐 API: Adding auth token to request');
+      return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+    }
+  }
+  console.log('⚠️ API: No auth token found');
+  return {
+    'Content-Type': 'application/json',
+  };
+};
+
+// Add request interceptor for debugging and auth
 api.interceptors.request.use(
   (config) => {
     console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    
+    // Add authentication headers
+    const authHeaders = getAuthHeaders();
+    Object.assign(config.headers, authHeaders);
+    
     return config;
   },
   (error) => {
