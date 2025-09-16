@@ -1,11 +1,27 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
 import { useAuth } from '@/lib/useAuth'
 import AuthNavigation from '@/components/AuthNavigation'
 import PageTransition from '@/components/PageTransition'
-import ApiDocs from '@/components/ApiDocs'
 import SmoothButton from '@/components/SmoothButton'
+
+// Dynamically import ApiDocs to avoid SSR issues
+const ApiDocs = dynamic(() => import('@/components/ApiDocs'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle shadow-lg">
+          <span className="text-white font-bold text-2xl">📚</span>
+        </div>
+        <p className="text-gray-600 animate-pulse font-medium">Loading API Documentation...</p>
+        <p className="text-sm text-gray-500 mt-2">Initializing Swagger UI...</p>
+      </div>
+    </div>
+  )
+})
 
 export default function ApiDocsNew() {
   const router = useRouter()

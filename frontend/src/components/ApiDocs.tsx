@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react'
-import SwaggerUI from 'swagger-ui-react'
-import 'swagger-ui-react/swagger-ui.css'
 import { useAuth } from '@/lib/useAuth'
 
 interface ApiDocsProps {
@@ -11,16 +9,24 @@ export default function ApiDocs({ className = '' }: ApiDocsProps) {
   const { token } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
 
   // Get the backend URL from environment or use production URL
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://backend-production-05a7e.up.railway.app'
-  const swaggerJsonUrl = `${backendUrl}/api/docs/swagger.json`
+  const swaggerUrl = `${backendUrl}/api/docs`
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
-    // Test if the swagger.json endpoint is accessible
+    if (!isClient) return
+
+    // Test if the swagger endpoint is accessible
     const testConnection = async () => {
       try {
-        const response = await fetch(swaggerJsonUrl)
+        const response = await fetch(`${backendUrl}/api/docs/swagger.json`)
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`)
         }
@@ -34,40 +40,20 @@ export default function ApiDocs({ className = '' }: ApiDocsProps) {
     }
 
     testConnection()
-  }, [swaggerJsonUrl])
+  }, [backendUrl, isClient])
 
-  // Swagger UI configuration
-  const swaggerConfig = {
-    url: swaggerJsonUrl,
-    deepLinking: true,
-    displayOperationId: false,
-    defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1,
-    defaultModelRendering: 'example' as const,
-    displayRequestDuration: true,
-    docExpansion: 'list' as const,
-    filter: true,
-    showExtensions: true,
-    showCommonExtensions: true,
-    tryItOutEnabled: true,
-    requestInterceptor: (request: any) => {
-      // Add authentication header if token is available
-      if (token) {
-        request.headers.Authorization = `Bearer ${token}`
-      }
-      return request
-    },
-    responseInterceptor: (response: any) => {
-      // Handle responses
-      return response
-    },
-    onComplete: () => {
-      console.log('Swagger UI loaded successfully')
-    },
-    onFailure: (error: any) => {
-      console.error('Swagger UI failed to load:', error)
-      setError('Failed to load API documentation')
-    }
+  if (!isClient) {
+    return (
+      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle shadow-lg">
+            <span className="text-white font-bold text-2xl">📚</span>
+          </div>
+          <p className="text-gray-600 animate-pulse font-medium">Loading API Documentation...</p>
+          <p className="text-sm text-gray-500 mt-2">Initializing...</p>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -105,7 +91,7 @@ export default function ApiDocs({ className = '' }: ApiDocsProps) {
               Retry Loading
             </button>
             <button
-              onClick={() => window.open(`${backendUrl}/api/docs`, '_blank')}
+              onClick={() => window.open(swaggerUrl, '_blank')}
               className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
             >
               Open in New Tab
@@ -118,135 +104,52 @@ export default function ApiDocs({ className = '' }: ApiDocsProps) {
 
   return (
     <div className={`w-full ${className}`}>
-      {/* Custom CSS to match dashboard theme */}
+      {/* API Documentation iframe with proper styling */}
+      <iframe
+        src={swaggerUrl}
+        className="w-full border-0 rounded-lg"
+        title="API Documentation"
+        style={{
+          minHeight: '600px',
+          height: '80vh',
+        }}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+        loading="lazy"
+      />
+      
+      {/* Custom CSS for iframe styling */}
       <style jsx global>{`
-        .swagger-ui {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        .swagger-ui .topbar {
-          display: none;
-        }
-        
-        .swagger-ui .info {
-          margin: 20px 0;
-        }
-        
-        .swagger-ui .info .title {
-          color: #1f2937;
-          font-size: 2rem;
-          font-weight: 700;
-        }
-        
-        .swagger-ui .info .description {
-          color: #6b7280;
-          font-size: 1.1rem;
-        }
-        
-        .swagger-ui .scheme-container {
-          background: #f9fafb;
-          padding: 20px;
+        iframe[title="API Documentation"] {
           border-radius: 8px;
-          margin: 20px 0;
-          border: 1px solid #e5e7eb;
-        }
-        
-        .swagger-ui .opblock {
-          border-radius: 8px;
-          margin-bottom: 20px;
-          border: 1px solid #e5e7eb;
-        }
-        
-        .swagger-ui .opblock.opblock-post {
-          border-left: 4px solid #10b981;
-        }
-        
-        .swagger-ui .opblock.opblock-get {
-          border-left: 4px solid #3b82f6;
-        }
-        
-        .swagger-ui .opblock.opblock-put {
-          border-left: 4px solid #f59e0b;
-        }
-        
-        .swagger-ui .opblock.opblock-delete {
-          border-left: 4px solid #ef4444;
-        }
-        
-        .swagger-ui .btn {
-          border-radius: 6px;
-          font-weight: 500;
-        }
-        
-        .swagger-ui .btn.execute {
-          background-color: #3b82f6;
-          border-color: #3b82f6;
-        }
-        
-        .swagger-ui .btn.execute:hover {
-          background-color: #2563eb;
-        }
-        
-        .swagger-ui .response-col_status {
-          font-weight: 600;
-        }
-        
-        .swagger-ui .model {
-          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        }
-        
-        .swagger-ui .model-title {
-          color: #1f2937;
-        }
-        
-        .swagger-ui .prop-name {
-          color: #7c3aed;
-        }
-        
-        .swagger-ui .prop-type {
-          color: #059669;
-        }
-        
-        .swagger-ui .response-col_description__inner p {
-          margin: 0;
-        }
-        
-        .swagger-ui .response-col_description__inner code {
-          background: #f3f4f6;
-          padding: 2px 6px;
-          border-radius: 4px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          background: white;
         }
         
         /* Mobile responsiveness */
         @media (max-width: 768px) {
-          .swagger-ui .wrapper {
-            padding: 10px;
+          iframe[title="API Documentation"] {
+            min-height: 500px;
+            height: 70vh;
+            border-radius: 6px;
           }
-          
-          .swagger-ui .opblock {
-            margin-bottom: 15px;
+        }
+        
+        /* Tablet responsiveness */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          iframe[title="API Documentation"] {
+            min-height: 600px;
+            height: 75vh;
           }
-          
-          .swagger-ui .opblock-summary {
-            padding: 10px;
-          }
-          
-          .swagger-ui .opblock-description-wrapper {
-            padding: 10px;
-          }
-          
-          .swagger-ui .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-          }
-          
-          .swagger-ui .info .title {
-            font-size: 1.5rem;
+        }
+        
+        /* Desktop responsiveness */
+        @media (min-width: 1024px) {
+          iframe[title="API Documentation"] {
+            min-height: 600px;
+            height: calc(100vh - 200px);
           }
         }
       `}</style>
-      
-      <SwaggerUI {...swaggerConfig} />
     </div>
   )
 }
