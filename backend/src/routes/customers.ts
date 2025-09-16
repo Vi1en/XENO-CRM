@@ -4,6 +4,17 @@ import { z } from 'zod';
 
 const router = Router();
 
+// Test endpoint to debug frontend requests
+router.post('/debug', (req, res) => {
+  console.log('🔍 Debug customer request:', req.body);
+  console.log('🔍 Headers:', req.headers);
+  return res.json({
+    success: true,
+    message: 'Debug endpoint hit',
+    receivedData: req.body
+  });
+});
+
 // Customer creation schema
 const customerCreateSchema = z.object({
   email: z.string().email(),
