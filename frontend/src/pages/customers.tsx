@@ -210,33 +210,33 @@ export default function Customers() {
                 ) : (
                   <>
                     {/* Mobile Card Layout */}
-                    <div className="block lg:hidden space-y-4">
+                    <div className="block lg:hidden space-y-6">
                       {customers.map((customer, index) => (
-                        <div key={customer._id || index} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
-                          <div className="flex items-start justify-between mb-3">
+                        <div key={customer._id || index} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
+                          <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center min-w-0 flex-1">
-                              <div className="flex-shrink-0 h-10 w-10">
-                                <div className="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
-                                  <span className="text-sm font-medium text-white">
+                              <div className="flex-shrink-0 h-14 w-14">
+                                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-md">
+                                  <span className="text-lg font-semibold text-white">
                                     {customer.firstName?.charAt(0)?.toUpperCase() || 'U'}
                                   </span>
                                 </div>
                               </div>
-                              <div className="ml-3 min-w-0 flex-1">
-                                <div className="text-base font-medium text-gray-900 truncate">
+                              <div className="ml-4 min-w-0 flex-1">
+                                <div className="text-lg font-semibold text-gray-900 truncate">
                                   {customer.firstName} {customer.lastName}
                                 </div>
-                                <div className="text-sm text-gray-500 truncate">
+                                <div className="text-sm text-gray-500 truncate mt-1">
                                   ID: {customer.externalId}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex flex-col space-y-1">
+                            <div className="flex flex-col space-y-2">
                               <SmoothButton
                                 onClick={() => router.push(`/customers/${customer._id}`)}
                                 variant="secondary"
                                 size="sm"
-                                className="text-xs px-2 py-1"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Edit
                               </SmoothButton>
@@ -244,50 +244,50 @@ export default function Customers() {
                                 onClick={() => handleDeleteCustomer(customer._id)}
                                 variant="danger"
                                 size="sm"
-                                className="text-xs px-2 py-1"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Delete
                               </SmoothButton>
                             </div>
                           </div>
                           
-                          <div className="space-y-2">
-                            <div className="flex items-center text-sm">
-                              <span className="text-gray-500 w-16">Email:</span>
-                              <span className="text-gray-900 truncate">{customer.email}</span>
+                          <div className="space-y-4">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Email:</span>
+                              <span className="text-gray-900 truncate text-base">{customer.email}</span>
                             </div>
-                            <div className="flex items-center text-sm">
-                              <span className="text-gray-500 w-16">Phone:</span>
-                              <span className="text-gray-900">{customer.phone || 'N/A'}</span>
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Phone:</span>
+                              <span className="text-gray-900 text-base">{customer.phone || 'N/A'}</span>
                             </div>
-                            <div className="flex items-center text-sm">
-                              <span className="text-gray-500 w-16">Spend:</span>
-                              <span className="text-gray-900 font-medium">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Spend:</span>
+                              <span className="text-gray-900 font-semibold text-lg">
                                 ${(customer.totalSpend || 0).toLocaleString()}
                               </span>
                             </div>
-                            <div className="flex items-center text-sm">
-                              <span className="text-gray-500 w-16">Visits:</span>
-                              <span className="text-gray-900">{customer.visits || 0}</span>
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Visits:</span>
+                              <span className="text-gray-900 text-base font-medium">{customer.visits || 0}</span>
                             </div>
-                            <div className="flex items-start text-sm">
-                              <span className="text-gray-500 w-16 mt-1">Tags:</span>
-                              <div className="flex flex-wrap gap-1 flex-1">
+                            <div className="flex items-start text-base">
+                              <span className="text-gray-500 w-20 mt-1 font-medium">Tags:</span>
+                              <div className="flex flex-wrap gap-2 flex-1">
                                 {customer.tags?.slice(0, 3).map((tag: string, tagIndex: number) => (
                                   <span
                                     key={tagIndex}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 shadow-sm"
                                   >
                                     {tag}
                                   </span>
                                 ))}
                                 {customer.tags?.length > 3 && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 shadow-sm">
                                     +{customer.tags.length - 3}
                                   </span>
                                 )}
                                 {(!customer.tags || customer.tags.length === 0) && (
-                                  <span className="text-xs text-gray-500">No tags</span>
+                                  <span className="text-sm text-gray-500">No tags</span>
                                 )}
                               </div>
                             </div>

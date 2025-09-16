@@ -275,14 +275,14 @@ export default function Segments() {
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Segments</h1>
                   <p className="mt-2 text-sm sm:text-base text-gray-600">Organize customers into targeted groups with AI assistance</p>
                 </div>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                   <SmoothButton
                     onClick={loadSegments}
                     disabled={loading}
                     loading={loading}
                     variant="secondary"
                     size="md"
-                    className="animate-fade-in w-full sm:w-auto"
+                    className="animate-fade-in w-full sm:w-auto py-3 px-6 rounded-xl font-semibold text-base min-h-[48px]"
                   >
                     Refresh
                   </SmoothButton>
@@ -290,7 +290,7 @@ export default function Segments() {
                     onClick={() => setShowAIModal(true)}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in w-full sm:w-auto"
+                    className="animate-fade-in w-full sm:w-auto py-3 px-6 rounded-xl font-semibold text-base min-h-[48px]"
                   >
                     🤖 Generate AI Segments
                   </SmoothButton>
@@ -298,7 +298,7 @@ export default function Segments() {
                     onClick={() => router.push('/segments/create')}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in w-full sm:w-auto"
+                    className="animate-fade-in w-full sm:w-auto py-3 px-6 rounded-xl font-semibold text-base min-h-[48px]"
                   >
                     + Create Segment
                   </SmoothButton>
@@ -347,7 +347,7 @@ export default function Segments() {
             )}
 
             {/* Segments Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
               {loading && (
                 <div className="col-span-full">
                   <SkeletonLoader type="card" count={6} />
@@ -401,7 +401,7 @@ export default function Segments() {
                         placeholder="Search segments..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-base font-medium placeholder-gray-400"
                       />
                     </div>
                   </div>
@@ -410,23 +410,23 @@ export default function Segments() {
                   {filteredSegments.map((segment: Segment, index: number) => (
                     <div 
                       key={segment._id} 
-                      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out animate-fade-in-up group"
+                      className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 ease-smooth-out animate-fade-in-up group"
                       style={{animationDelay: `${index * 0.05}s`}}
                     >
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start justify-between mb-6">
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">{segment.name}</h3>
-                          <p className="text-sm text-gray-600 mb-4">{segment.description}</p>
+                          <h3 className="text-xl font-bold text-gray-900 mb-3">{segment.name}</h3>
+                          <p className="text-base text-gray-600 mb-6 leading-relaxed">{segment.description}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-3">
                           <SmoothButton
                             onClick={() => router.push(`/segments/edit?id=${segment._id}`)}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-400 hover:text-blue-600"
+                            className="text-gray-400 hover:text-blue-600 p-3 rounded-xl min-h-[44px] min-w-[44px]"
                             title="Edit segment"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </SmoothButton>
@@ -434,10 +434,10 @@ export default function Segments() {
                             onClick={() => handleDelete(segment._id)}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-400 hover:text-red-600"
+                            className="text-gray-400 hover:text-red-600 p-3 rounded-xl min-h-[44px] min-w-[44px]"
                             title="Delete segment"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </SmoothButton>
@@ -446,10 +446,10 @@ export default function Segments() {
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className="text-2xl font-bold text-blue-600">{segment.customerCount}</div>
-                          <div className="text-sm text-gray-500">customers</div>
+                          <div className="text-3xl font-bold text-blue-600">{segment.customerCount}</div>
+                          <div className="text-base text-gray-500 font-medium">customers</div>
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-sm text-gray-400 font-medium">
                           Created {new Date(segment.createdAt).toLocaleDateString()}
                         </div>
                       </div>

@@ -477,34 +477,34 @@ export default function Campaigns() {
                 {!loading && filteredCampaigns.length > 0 && (
                   <>
                     {/* Mobile Card Layout */}
-                    <div className="block lg:hidden space-y-4">
+                    <div className="block lg:hidden space-y-6">
                       {filteredCampaigns.map((campaign: Campaign, index: number) => (
                         <div 
                           key={campaign._id} 
-                          className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 animate-fade-in-up"
+                          className="bg-white rounded-2xl border border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up"
                           style={{animationDelay: `${index * 0.05}s`}}
                         >
-                          <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center min-w-0 flex-1">
-                              <div className="text-2xl mr-3 flex-shrink-0">{getTypeIcon(campaign.type)}</div>
+                              <div className="text-3xl mr-4 flex-shrink-0 p-2 bg-gray-50 rounded-2xl">{getTypeIcon(campaign.type)}</div>
                               <div className="min-w-0 flex-1">
-                                <div className="text-base font-medium text-gray-900 truncate">{campaign.name}</div>
-                                <div className="text-sm text-gray-500">
+                                <div className="text-lg font-semibold text-gray-900 truncate">{campaign.name}</div>
+                                <div className="text-base text-gray-500 mt-1">
                                   {campaign.type} • {campaign.targetSegment}
                                 </div>
                                 {campaign.scheduledAt && (
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-sm text-gray-500 mt-1">
                                     Scheduled: {new Date(campaign.scheduledAt).toLocaleDateString()}
                                   </div>
                                 )}
                               </div>
                             </div>
-                            <div className="flex flex-col space-y-1">
+                            <div className="flex flex-col space-y-2">
                               <SmoothButton
                                 onClick={() => handleView(campaign)}
                                 variant="ghost"
                                 size="sm"
-                                className="text-green-600 hover:text-green-900 text-xs px-2 py-1"
+                                className="text-green-600 hover:text-green-900 text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 View
                               </SmoothButton>
@@ -512,7 +512,7 @@ export default function Campaigns() {
                                 onClick={() => handleEdit(campaign)}
                                 variant="ghost"
                                 size="sm"
-                                className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1"
+                                className="text-blue-600 hover:text-blue-900 text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Edit
                               </SmoothButton>
@@ -522,41 +522,41 @@ export default function Campaigns() {
                                 loading={deleteLoading === campaign._id}
                                 variant="ghost"
                                 size="sm"
-                                className="text-red-600 hover:text-red-900 text-xs px-2 py-1"
+                                className="text-red-600 hover:text-red-900 text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Delete
                               </SmoothButton>
                             </div>
                           </div>
                           
-                          <div className="space-y-2">
+                          <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Status:</span>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
+                              <span className="text-base text-gray-500 font-medium">Status:</span>
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(campaign.status)} shadow-sm`}>
                                 {campaign.status}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Sent:</span>
-                              <span className="text-sm text-gray-900 font-medium">
+                              <span className="text-base text-gray-500 font-medium">Sent:</span>
+                              <span className="text-base text-gray-900 font-semibold">
                                 {(campaign.sentCount || 0).toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Open Rate:</span>
-                              <span className="text-sm text-gray-900">
+                              <span className="text-base text-gray-500 font-medium">Open Rate:</span>
+                              <span className="text-base text-gray-900 font-medium">
                                 {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Click Rate:</span>
-                              <span className="text-sm text-gray-900">
+                              <span className="text-base text-gray-500 font-medium">Click Rate:</span>
+                              <span className="text-base text-gray-900 font-medium">
                                 {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Created:</span>
-                              <span className="text-sm text-gray-900">
+                              <span className="text-base text-gray-500 font-medium">Created:</span>
+                              <span className="text-base text-gray-900 font-medium">
                                 {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '-'}
                               </span>
                             </div>

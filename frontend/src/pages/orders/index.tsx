@@ -241,33 +241,33 @@ export default function Orders() {
                 ) : (
                   <>
                     {/* Mobile Card Layout */}
-                    <div className="block lg:hidden space-y-4">
+                    <div className="block lg:hidden space-y-6">
                       {orders.map((order, index) => (
-                        <div key={order._id || index} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
-                          <div className="flex items-start justify-between mb-3">
+                        <div key={order._id || index} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
+                          <div className="flex items-start justify-between mb-6">
                             <div className="flex items-center min-w-0 flex-1">
-                              <div className="flex-shrink-0 h-10 w-10">
-                                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                                  <span className="text-sm font-medium text-white">
+                              <div className="flex-shrink-0 h-14 w-14">
+                                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+                                  <span className="text-lg font-semibold text-white">
                                     #{order.orderId?.slice(-4) || 'N/A'}
                                   </span>
                                 </div>
                               </div>
-                              <div className="ml-3 min-w-0 flex-1">
-                                <div className="text-base font-medium text-gray-900 truncate">
+                              <div className="ml-4 min-w-0 flex-1">
+                                <div className="text-lg font-semibold text-gray-900 truncate">
                                   {order.orderId || 'N/A'}
                                 </div>
-                                <div className="text-sm text-gray-500 truncate">
+                                <div className="text-sm text-gray-500 truncate mt-1">
                                   ID: {order._id?.slice(-8)}
                                 </div>
                               </div>
                             </div>
-                            <div className="flex flex-col space-y-1">
+                            <div className="flex flex-col space-y-2">
                               <SmoothButton
                                 onClick={() => router.push(`/orders/edit/${order._id}`)}
                                 variant="secondary"
                                 size="sm"
-                                className="text-xs px-2 py-1"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Edit
                               </SmoothButton>
@@ -275,39 +275,39 @@ export default function Orders() {
                                 onClick={() => handleDeleteOrder(order._id)}
                                 variant="danger"
                                 size="sm"
-                                className="text-xs px-2 py-1"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
                               >
                                 Delete
                               </SmoothButton>
                             </div>
                           </div>
                           
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Customer:</span>
-                              <span className="text-sm text-gray-900 truncate">{order.customerName || 'Unknown Customer'}</span>
+                          <div className="space-y-4">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Customer:</span>
+                              <span className="text-gray-900 truncate text-base">{order.customerName || 'Unknown Customer'}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Amount:</span>
-                              <span className="text-sm text-gray-900 font-medium">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Amount:</span>
+                              <span className="text-gray-900 font-semibold text-lg">
                                 ${(order.totalAmount || 0).toLocaleString()}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Status:</span>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Status:</span>
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(order.status)} shadow-sm`}>
                                 {order.status || 'Unknown'}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Items:</span>
-                              <span className="text-sm text-gray-900">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Items:</span>
+                              <span className="text-gray-900 text-base font-medium">
                                 {order.items?.length || 0} items
                               </span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-500">Date:</span>
-                              <span className="text-sm text-gray-900">
+                            <div className="flex items-center text-base">
+                              <span className="text-gray-500 w-20 font-medium">Date:</span>
+                              <span className="text-gray-900 text-base font-medium">
                                 {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                               </span>
                             </div>
