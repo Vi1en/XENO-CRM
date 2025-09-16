@@ -125,10 +125,16 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
+    console.log('👤 Customer creation request:', req.body);
+    console.log('👤 Request body type:', typeof req.body);
+    console.log('👤 Request body keys:', Object.keys(req.body || {}));
+    
     const validatedData = customerCreateSchema.parse(req.body);
+    console.log('👤 Validated data:', validatedData);
     
     // Generate externalId if not provided
     const externalId = `cust_${Date.now()}_${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    console.log('👤 Generated externalId:', externalId);
     
     const customer = new Customer({
       ...validatedData,
@@ -137,7 +143,9 @@ router.post('/', async (req, res) => {
       updatedAt: new Date(),
     });
     
+    console.log('👤 Customer object created:', customer);
     await customer.save();
+    console.log('👤 Customer saved successfully');
     
     return res.status(201).json({
       success: true,
@@ -145,7 +153,12 @@ router.post('/', async (req, res) => {
       data: customer,
     });
   } catch (error) {
+    console.error('❌ Error creating customer:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    
     if (error instanceof z.ZodError) {
+      console.error('❌ Zod validation errors:', error.errors);
       return res.status(400).json({
         success: false,
         message: 'Validation error',
@@ -153,10 +166,10 @@ router.post('/', async (req, res) => {
       });
     }
     
-    console.error('Error creating customer:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
