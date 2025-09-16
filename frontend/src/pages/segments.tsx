@@ -421,16 +421,19 @@ export default function Segments() {
                       style={{animationDelay: `${index * 0.05}s`}}
                     >
                       <div className="flex items-start justify-between mb-6">
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0 pr-4">
                           <h3 className="text-xl font-bold text-gray-900 mb-3">{segment.name}</h3>
                           <p className="text-base text-gray-600 mb-6 leading-relaxed">{segment.description}</p>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2 flex-shrink-0">
                           <SmoothButton
-                            onClick={() => router.push(`/segments/edit?id=${segment._id}`)}
+                            onClick={() => {
+                              console.log('📱 Mobile Edit button clicked for segment:', segment._id)
+                              router.push(`/segments/edit?id=${segment._id}`)
+                            }}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-400 hover:text-blue-600 p-3 rounded-xl min-h-[44px] min-w-[44px]"
+                            className="text-gray-400 hover:text-blue-600 p-3 rounded-xl min-h-[48px] min-w-[48px] flex items-center justify-center"
                             title="Edit segment"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,7 +444,7 @@ export default function Segments() {
                             onClick={() => handleDelete(segment._id)}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-400 hover:text-red-600 p-3 rounded-xl min-h-[44px] min-w-[44px]"
+                            className="text-gray-400 hover:text-red-600 p-3 rounded-xl min-h-[48px] min-w-[48px] flex items-center justify-center"
                             title="Delete segment"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

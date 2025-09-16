@@ -26,7 +26,7 @@ export default function SmoothButton({
 }: SmoothButtonProps) {
   const [isPressed, setIsPressed] = useState(false)
 
-  const baseClasses = 'relative overflow-hidden font-medium rounded-lg transition-all duration-200 ease-smooth-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
+  const baseClasses = 'relative overflow-hidden font-medium rounded-lg transition-all duration-200 ease-smooth-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation select-none'
   
   const variantClasses = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md',
@@ -44,6 +44,10 @@ export default function SmoothButton({
   const handleMouseDown = () => setIsPressed(true)
   const handleMouseUp = () => setIsPressed(false)
   const handleMouseLeave = () => setIsPressed(false)
+  
+  const handleTouchStart = () => setIsPressed(true)
+  const handleTouchEnd = () => setIsPressed(false)
+  const handleTouchCancel = () => setIsPressed(false)
 
   return (
     <button
@@ -53,6 +57,9 @@ export default function SmoothButton({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
       title={title}
       className={`
         ${baseClasses}

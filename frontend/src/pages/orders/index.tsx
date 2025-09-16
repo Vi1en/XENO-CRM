@@ -252,7 +252,7 @@ export default function Orders() {
                       {orders.map((order, index) => (
                         <div key={order._id || index} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
                           <div className="flex items-start justify-between mb-6">
-                            <div className="flex items-center min-w-0 flex-1">
+                            <div className="flex items-center min-w-0 flex-1 pr-4">
                               <div className="flex-shrink-0 h-14 w-14">
                                 <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
                                   <span className="text-lg font-semibold text-white">
@@ -269,12 +269,15 @@ export default function Orders() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex flex-col space-y-2">
+                            <div className="flex flex-col space-y-2 flex-shrink-0">
                               <SmoothButton
-                                onClick={() => router.push(`/orders/edit/${order._id}`)}
+                                onClick={() => {
+                                  console.log('📱 Mobile Edit button clicked for order:', order._id)
+                                  router.push(`/orders/edit/${order._id}`)
+                                }}
                                 variant="secondary"
                                 size="sm"
-                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[48px] min-w-[80px] flex items-center justify-center"
                               >
                                 Edit
                               </SmoothButton>
@@ -282,7 +285,7 @@ export default function Orders() {
                                 onClick={() => handleDeleteOrder(order._id)}
                                 variant="danger"
                                 size="sm"
-                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[44px]"
+                                className="text-sm px-4 py-2 rounded-xl font-medium min-h-[48px] min-w-[80px] flex items-center justify-center"
                               >
                                 Delete
                               </SmoothButton>
