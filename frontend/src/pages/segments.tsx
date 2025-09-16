@@ -271,9 +271,16 @@ export default function Segments() {
             {/* Header */}
             <div className="mb-6 sm:mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Segments</h1>
-                  <p className="mt-2 text-sm sm:text-base text-gray-600">Organize customers into targeted groups with AI assistance</p>
+                <div className="flex items-center space-x-3">
+                  <div className="hidden sm:block w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Segments</h1>
+                    <p className="mt-2 text-sm sm:text-base text-gray-600">Organize customers into targeted groups with AI assistance</p>
+                  </div>
                 </div>
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                   <SmoothButton

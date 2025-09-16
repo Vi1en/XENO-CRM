@@ -130,9 +130,16 @@ export default function Customers() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </button>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Customers</h1>
-                  <p className="text-sm sm:text-base text-gray-600">Manage your customer relationships</p>
+                <div className="flex items-center space-x-3">
+                  <div className="hidden sm:block w-8 h-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-2xl font-bold text-gray-900">Customers</h1>
+                    <p className="text-sm sm:text-base text-gray-600">Manage your customer relationships</p>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">

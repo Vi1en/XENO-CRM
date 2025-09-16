@@ -161,9 +161,16 @@ export default function Orders() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </button>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Orders</h1>
-                  <p className="text-sm sm:text-base text-gray-600">Manage your customer orders</p>
+                <div className="flex items-center space-x-3">
+                  <div className="hidden sm:block w-8 h-8 bg-gradient-to-br from-orange-600 to-red-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-2xl font-bold text-gray-900">Orders</h1>
+                    <p className="text-sm sm:text-base text-gray-600">Manage your customer orders</p>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
