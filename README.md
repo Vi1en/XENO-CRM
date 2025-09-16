@@ -1,293 +1,260 @@
-# 🚀 Xeno CRM - AI-Powered Customer Relationship Management System
+# Xeno CRM
 
-A comprehensive, full-stack CRM application built with Next.js, Express.js, MongoDB, and AI-powered features for intelligent customer segmentation, campaign management, and analytics.
+A modern, AI-powered Customer Relationship Management system built with Next.js, Express.js, and MongoDB. Features intelligent customer segmentation, automated campaign management, and real-time analytics with Google OAuth authentication.
 
-## ✨ Features
+## Project Summary
 
-### 🤖 AI-Powered Features
-- **Smart Segment Creation**: Natural language to segment rules conversion
-- **AI Message Generator**: Intelligent campaign message and variant generation
-- **AI Analytics Dashboard**: Real-time insights with interactive charts and graphs
-- **Smart Personalization**: Dynamic message personalization based on customer data
+Xeno CRM is a full-stack CRM solution that leverages AI to automatically generate customer segments from natural language descriptions, create targeted marketing campaigns, and provide intelligent analytics insights. The system includes a responsive web interface, RESTful API backend, background worker services, and vendor simulation capabilities for testing and development.
 
-### 📊 Core CRM Functionality
-- **Customer Management**: Complete customer lifecycle management
-- **Order Management**: Order tracking and customer spending analysis
-- **Campaign Management**: Email/SMS campaign creation and delivery
-- **Segment Management**: Advanced customer segmentation with preview
-- **Campaign History**: Comprehensive campaign performance tracking
-
-### 📈 Analytics & Insights
-- **Real-time Dashboard**: Live statistics and performance metrics
-- **Interactive Charts**: Customer segments, campaign performance, revenue trends
-- **AI Insights**: Intelligent recommendations and warnings
-- **Growth Tracking**: Customer acquisition and revenue trend analysis
-
-## 🏗️ Architecture
-
-### Frontend (Next.js)
-- **Framework**: Next.js 14 with TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts for data visualization
-- **Authentication**: NextAuth.js with Google OAuth
-
-### Backend (Express.js)
-- **Framework**: Express.js with TypeScript
-- **Database**: MongoDB with Mongoose ODM
-- **Queue System**: RabbitMQ for asynchronous processing
-- **AI Integration**: OpenAI API with smart mock responses
-- **API Documentation**: Swagger/OpenAPI
-
-### Microservices
-- **Worker Service**: Background job processing
-- **Vendor Simulator**: Mock external service for message delivery
-- **Message Queue**: RabbitMQ for reliable message processing
-
-## 🚀 Quick Start
+## Local Setup Instructions
 
 ### Prerequisites
-- Node.js 18+ 
-- MongoDB (local or cloud)
-- RabbitMQ (local or cloud)
+- Node.js >= 18.17.0
+- npm >= 9.0.0
+- MongoDB (local or cloud instance)
+- Google Cloud Console account (for OAuth)
 
-### Installation
-
-1. **Clone the repository**
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/Vi1en/XENO-CRM.git
 cd XENO-CRM
 ```
 
-2. **Install dependencies**
+### 2. Install Dependencies
 ```bash
 # Install root dependencies
 npm install
 
-# Install backend dependencies
-cd backend && npm install
-
-# Install frontend dependencies
-cd ../frontend && npm install
-
-# Install worker dependencies
-cd ../worker && npm install
-
-# Install vendor simulator dependencies
-cd ../vendor-simulator && npm install
+# Install all workspace dependencies
+npm run build
 ```
 
-3. **Environment Setup**
-Create `.env` files in each service directory:
+### 3. Environment Setup
 
-**Backend (.env)**
-```env
-MONGO_URI=mongodb://localhost:27017/xeno-crm
-OPENAI_API_KEY=your-openai-api-key
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-nextauth-secret
-NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-BACKEND_URL=http://localhost:3001
-VENDOR_URL=http://localhost:3002
+Create environment files for each service:
+
+#### Backend (.env)
+```bash
+# Database
+MONGODB_URI=mongodb://localhost:27017/xeno-crm
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# JWT
+JWT_SECRET=your_jwt_secret_key
+
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key
+
+# Server
+PORT=5000
+NODE_ENV=development
+
+# CORS
+FRONTEND_URL=http://localhost:3000
+```
+
+#### Frontend (.env.local)
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+#### Worker (.env)
+```bash
+MONGODB_URI=mongodb://localhost:27017/xeno-crm
 RABBITMQ_URL=amqp://localhost:5672
 ```
 
-4. **Start Services**
-
-**Terminal 1 - Backend**
+### 4. Database Setup
 ```bash
-cd backend
+# Start MongoDB (if using local instance)
+mongod
+
+# Or use MongoDB Atlas cloud instance
+# Update MONGODB_URI in .env files
+```
+
+### 5. Google OAuth Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - `http://localhost:5000/api/v1/google/callback`
+   - `http://localhost:3000/auth/callback`
+
+### 6. Run the Application
+
+#### Development Mode (All Services)
+```bash
 npm run dev
 ```
 
-**Terminal 2 - Frontend**
+#### Individual Services
 ```bash
-cd frontend
-npm run dev
+# Frontend only
+npm run dev:frontend
+
+# Backend only
+npm run dev:backend
+
+# Worker only
+npm run dev:worker
+
+# Vendor Simulator only
+npm run dev:vendor
 ```
 
-**Terminal 3 - Worker**
-```bash
-cd worker
-npm run dev
+### 7. Access the Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000
+- **API Documentation**: http://localhost:5000/api-docs
+
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        A[Next.js React App<br/>Port 3000]
+        B[Google OAuth<br/>Authentication]
+    end
+    
+    subgraph "Backend Layer"
+        C[Express.js API<br/>Port 5000]
+        D[Google OAuth<br/>Verification]
+        E[JWT Token<br/>Management]
+    end
+    
+    subgraph "AI Services"
+        F[OpenAI GPT-4<br/>Segment Generation]
+        G[OpenAI GPT-4<br/>Campaign Creation]
+        H[OpenAI GPT-4<br/>Analytics Insights]
+    end
+    
+    subgraph "Data Layer"
+        I[MongoDB<br/>Primary Database]
+        J[RabbitMQ<br/>Message Queue]
+    end
+    
+    subgraph "Worker Services"
+        K[Background Worker<br/>Campaign Processing]
+        L[Vendor Simulator<br/>Order Processing]
+    end
+    
+    subgraph "External Services"
+        M[Google OAuth<br/>Authentication]
+        N[OpenAI API<br/>AI Processing]
+    end
+    
+    A --> B
+    B --> M
+    A --> C
+    C --> D
+    D --> M
+    C --> E
+    C --> F
+    C --> G
+    C --> H
+    F --> N
+    G --> N
+    H --> N
+    C --> I
+    C --> J
+    K --> J
+    K --> I
+    L --> I
+    L --> J
 ```
 
-**Terminal 4 - Vendor Simulator**
-```bash
-cd vendor-simulator
-npm run dev
-```
+## Tech Stack
 
-## 📱 Usage
+### Frontend
+- **Framework**: Next.js 13.5.6
+- **UI Library**: React 18
+- **Styling**: Tailwind CSS 3.4.0
+- **Forms**: React Hook Form 7.62.0
+- **Validation**: Zod 3.22.4
+- **HTTP Client**: Axios 1.12.2
+- **TypeScript**: 5.x
 
-### Dashboard
-- Access the main dashboard at `http://localhost:3000`
-- View real-time analytics and AI insights
-- Monitor customer, campaign, and order statistics
+### Backend
+- **Runtime**: Node.js 18.17.0+
+- **Framework**: Express.js 4.18.2
+- **Database**: MongoDB with Mongoose 8.0.3
+- **Authentication**: Google OAuth 2.0 + JWT
+- **Message Queue**: RabbitMQ (AMQP)
+- **API Documentation**: Swagger/OpenAPI
+- **Security**: Helmet, CORS
+- **TypeScript**: 5.3.3
 
-### Customer Management
-- Add, edit, and manage customer profiles
-- Track customer spending and behavior
-- View customer segments and tags
+### AI & Machine Learning
+- **Primary AI**: OpenAI GPT-4
+- **Services**:
+  - Natural Language to Segment Rules
+  - Campaign Message Generation
+  - Analytics Insights Generation
+  - Customer Behavior Analysis
 
-### Campaign Management
-- Create targeted email/SMS campaigns
-- Use AI to generate message variants
-- Track delivery rates and performance
-- View campaign history and analytics
+### Infrastructure & Deployment
+- **Frontend Hosting**: Netlify
+- **Backend Hosting**: Railway
+- **Database**: MongoDB Atlas
+- **Containerization**: Docker
+- **CI/CD**: Git-based deployment
 
-### Order Management
-- Process customer orders
-- Track revenue and spending patterns
-- Automatically update customer total spend
+### Development Tools
+- **Package Manager**: npm workspaces
+- **Process Manager**: Concurrently
+- **Linting**: ESLint + TypeScript ESLint
+- **Code Formatting**: Prettier
+- **Type Checking**: TypeScript
 
-### Segment Management
-- Create customer segments using natural language
-- Preview audience size before saving
-- Use AI to generate segment rules
+## Known Limitations / Assumptions
 
-## 🔧 API Endpoints
+### Technical Limitations
+- **AI Dependency**: Requires OpenAI API key and credits for AI features
+- **Google OAuth**: Requires Google Cloud Console setup for authentication
+- **MongoDB**: Requires MongoDB instance (local or cloud)
+- **Single Tenant**: Currently designed for single organization use
+- **Rate Limiting**: No built-in rate limiting for API endpoints
 
-### Core APIs
-- `GET /api/v1/customers` - List customers
-- `POST /api/v1/customers` - Create customer
-- `GET /api/v1/campaigns` - List campaigns
-- `POST /api/v1/campaigns` - Create campaign
-- `GET /api/v1/orders` - List orders
-- `POST /api/v1/orders` - Create order
+### Functional Assumptions
+- **Customer Data**: Assumes customer data is provided via API or manual entry
+- **Campaign Delivery**: Campaign delivery is simulated (no actual email/SMS sending)
+- **Real-time Updates**: Some features may require page refresh for latest data
+- **Mobile Responsiveness**: Optimized for desktop and tablet, mobile support is basic
 
-### AI APIs
-- `POST /api/v1/ai/nl-to-segment` - Convert natural language to segment rules
-- `POST /api/v1/ai/message-variants` - Generate message variants
-- `GET /api/v1/ai/analytics` - Get AI-powered analytics
+### Security Considerations
+- **JWT Tokens**: Stored in localStorage (consider httpOnly cookies for production)
+- **API Keys**: Environment variables must be properly secured
+- **CORS**: Currently configured for development URLs
+- **Input Validation**: Basic validation in place, may need enhancement
 
-### Documentation
-- API Documentation: `http://localhost:3001/api/docs`
+### Performance Assumptions
+- **Database**: Assumes MongoDB can handle expected data volume
+- **AI Processing**: OpenAI API response times may vary
+- **Concurrent Users**: Not tested with high concurrent user loads
+- **File Uploads**: No file upload functionality implemented
 
-## 🎨 UI/UX Features
+### Development Notes
+- **Environment**: Tested primarily in development environment
+- **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge)
+- **Node.js**: Requires Node.js 18.17.0 or higher
+- **Dependencies**: Some dependencies may have security vulnerabilities (run `npm audit`)
 
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Dark/Light Theme**: Consistent design system
-- **Interactive Charts**: Real-time data visualization
-- **Sidebar Navigation**: Intuitive navigation structure
-- **Loading States**: Smooth user experience
-- **Error Handling**: Comprehensive error management
+---
 
-## 🔒 Security
-
-- **Authentication**: Google OAuth integration
-- **Data Validation**: Zod schema validation
-- **CORS Protection**: Cross-origin request security
-- **Input Sanitization**: XSS protection
-- **Rate Limiting**: API request throttling
-
-## 📊 Database Schema
-
-### Customer
-```typescript
-{
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  totalSpend: number
-  visits: number
-  lastOrderAt?: Date
-  tags: string[]
-}
-```
-
-### Campaign
-```typescript
-{
-  name: string
-  description?: string
-  segmentId: string
-  message: string
-  status: 'draft' | 'scheduled' | 'running' | 'paused' | 'completed'
-  stats: {
-    totalRecipients: number
-    sent: number
-    delivered: number
-    failed: number
-    bounced: number
-  }
-}
-```
-
-### Order
-```typescript
-{
-  orderId: string
-  customerName: string
-  totalSpent: number
-  date: Date
-}
-```
-
-## 🤖 AI Features
-
-### Smart Segment Creation
-- Natural language input: "Customers who spent more than $1000"
-- AI generates segment rules automatically
-- Preview audience size before saving
-
-### Message Generation
-- Campaign objective and tone input
-- AI generates multiple message variants
-- Personalized content based on customer data
-
-### Analytics Insights
-- Automatic trend detection
-- Performance recommendations
-- Warning alerts for low performance
-- Growth pattern analysis
-
-## 🚀 Deployment
-
-### Production Environment
-1. Set up MongoDB Atlas or production MongoDB
-2. Configure RabbitMQ cloud service
-3. Set up environment variables
-4. Deploy backend to your preferred platform
-5. Deploy frontend to Vercel/Netlify
-6. Configure domain and SSL certificates
-
-### Docker Support
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-```
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Next.js team for the amazing framework
-- Express.js for the robust backend
-- MongoDB for the flexible database
-- OpenAI for AI capabilities
-- Recharts for beautiful visualizations
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
----
-
-**Built with ❤️ using Next.js, Express.js, MongoDB, and AI**
-# Trigger Vercel deployment
+This project is private and proprietary. All rights reserved.
