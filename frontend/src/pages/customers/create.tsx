@@ -3,12 +3,12 @@ import Head from 'next/head'
 import { customerApi } from '@/lib/api'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useAuth } from '@/lib/useAuth'
+import AuthNavigation from '@/components/AuthNavigation'
 
 export default function CreateCustomer() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -24,35 +24,13 @@ export default function CreateCustomer() {
     lastOrderAt: ''
   })
 
-  // Simple authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('❌ Create Customer: User not authenticated, redirecting to login')
+      router.replace('/login')
     }
-
-    checkAuth()
-  }, [])
-
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
+  }, [authLoading, isAuthenticated, router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -102,6 +80,9 @@ export default function CreateCustomer() {
         lastOrderAt: lastOrderAt
       }
 
+      console.log('📝 Customer data being sent:', customerData)
+      console.log('📝 Form data:', formData)
+      
       await customerApi.create(customerData)
       setSuccess(true)
       
@@ -112,7 +93,16 @@ export default function CreateCustomer() {
 
     } catch (error: any) {
       console.error('Error creating customer:', error)
-      setError(error.response?.data?.message || 'Failed to create customer')
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      
+      if (error.response?.data?.errors) {
+        console.error('Validation errors:', error.response.data.errors)
+        const errorMessages = error.response.data.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`).join(', ')
+        setError(`Validation error: ${errorMessages}`)
+      } else {
+        setError(error.response?.data?.message || 'Failed to create customer')
+      }
     } finally {
       setLoading(false)
     }
@@ -122,15 +112,8 @@ export default function CreateCustomer() {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h2>
-          <p className="text-gray-600">You need to be signed in to create customers.</p>
-        </div>
-      </div>
-    )
+  if (!isAuthenticated || !user) {
+    return null
   }
 
   return (
@@ -140,8 +123,7 @@ export default function CreateCustomer() {
         <meta name="description" content="Create a new customer in Xeno CRM" />
       </Head>
       <div className="min-h-screen bg-gray-50">
-        {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+        <AuthNavigation currentPath={router.pathname} />
           <div className="flex flex-col h-full">
             {/* Logo */}
             <div className="flex items-center px-6 py-4 border-b border-gray-200">
