@@ -1,36 +1,20 @@
 import axios from 'axios';
 
-// API base configuration
+// API base configuration - PRODUCTION ONLY
 const getApiBaseUrl = () => {
+  // Always use production backend URL
+  const prodUrl = 'https://backend-production-05a7e.up.railway.app/api/v1';
+  
   // Check if we're in browser environment
   if (typeof window !== 'undefined') {
-    // In browser, use the environment variable or fallback
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    console.log('🔗 Environment NEXT_PUBLIC_API_URL:', envUrl);
-    
-    if (envUrl) {
-      // Ensure the URL has the correct format
-      const cleanUrl = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
-      console.log('✅ Using environment URL:', cleanUrl);
-      return cleanUrl;
-    }
-    
-    // Fallback for production if env var is not set
-    if (window.location.hostname !== 'localhost') {
-      const prodUrl = 'https://backend-production-05a7e.up.railway.app/api/v1';
-      console.log('🌐 Using production fallback URL:', prodUrl);
-      return prodUrl;
-    }
-    
-    const localUrl = 'http://localhost:3001/api/v1';
-    console.log('🏠 Using local URL:', localUrl);
-    return localUrl;
+    console.log('🌐 Using production URL:', prodUrl);
+    console.log('📍 Current hostname:', window.location.hostname);
+    return prodUrl;
   }
   
-  // In server-side rendering, use environment variable or fallback
-  const ssrUrl = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-05a7e.up.railway.app/api/v1';
-  console.log('🖥️ Using SSR URL:', ssrUrl);
-  return ssrUrl;
+  // In server-side rendering, use production URL
+  console.log('🖥️ Using production SSR URL:', prodUrl);
+  return prodUrl;
 }
 
 const API_BASE_URL = getApiBaseUrl();
@@ -38,10 +22,8 @@ const API_BASE_URL = getApiBaseUrl();
 // Debug logging
 if (typeof window !== 'undefined') {
   console.log('🔗 API Base URL:', API_BASE_URL);
-  console.log('🌍 Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
   console.log('📍 Current hostname:', window.location.hostname);
-  console.log('📱 User Agent:', navigator.userAgent);
-  console.log('📐 Screen size:', window.innerWidth + 'x' + window.innerHeight);
+  console.log('🌐 Production mode: ENABLED');
 }
 
 export const api = axios.create({

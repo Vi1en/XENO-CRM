@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
-// Removed NextAuth imports - using demo mode
+// Mobile layout component
 
 interface MobileLayoutProps {
   children: React.ReactNode
@@ -9,8 +9,7 @@ interface MobileLayoutProps {
 }
 
 export default function MobileLayout({ children, title, currentPage }: MobileLayoutProps) {
-  // Demo mode - no authentication required
-  const session = null
+  // Mobile layout state
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const navigation = [
@@ -76,7 +75,7 @@ export default function MobileLayout({ children, title, currentPage }: MobileLay
                 External
               </div>
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/docs/`}
+                href="https://backend-production-05a7e.up.railway.app/api/docs/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
@@ -99,8 +98,8 @@ export default function MobileLayout({ children, title, currentPage }: MobileLay
                 <span className="text-sm font-medium text-gray-700">D</span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Demo User</p>
-                <p className="text-xs text-gray-500">demo@xenocrm.com</p>
+                <p className="text-sm font-medium text-gray-900">User</p>
+                <p className="text-xs text-gray-500">user@xenocrm.com</p>
               </div>
               <div className="ml-auto p-1 text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

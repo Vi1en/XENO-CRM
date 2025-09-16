@@ -76,7 +76,7 @@ export default function Home() {
     console.log('🚀 Starting data load...')
     setLoading(true)
     setError(null)
-    console.log('📱 Loading demo data...')
+    console.log('📱 Loading data...')
 
     // Load real data from API
     console.log('🔄 Loading real data from API...')
@@ -164,13 +164,13 @@ export default function Home() {
     } catch (err: any) {
       console.error('❌ Error loading real data:', err)
       setError('Failed to load data from API')
-      console.log('🔄 Falling back to demo data...')
+      console.log('🔄 Falling back to mock data...')
     }
     
     // Simulate a brief loading delay for better UX
     await new Promise(resolve => setTimeout(resolve, 800))
     
-    // Load demo data directly without any API calls
+    // Load mock data directly without any API calls
     const mockCustomers = [
       { _id: '1', firstName: 'John', lastName: 'Doe', email: 'john@example.com', totalSpend: 1500, visits: 5, tags: ['VIP'] },
       { _id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', totalSpend: 800, visits: 3, tags: ['Premium'] },
@@ -245,7 +245,7 @@ export default function Home() {
     setDeliveryData(mockDelivery)
     setUsingMockData(true)
     
-    console.log('✅ Demo data loaded successfully:', {
+    console.log('✅ Mock data loaded successfully:', {
       customers: mockCustomers.length,
       campaigns: mockCampaigns.length,
       segments: mockSegments.length,

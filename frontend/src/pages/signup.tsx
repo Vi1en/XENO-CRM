@@ -11,14 +11,6 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [authStep, setAuthStep] = useState<string>('')
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  })
-  const [passwordStrength, setPasswordStrength] = useState(0)
-  const [showPassword, setShowPassword] = useState(false)
-  const [success, setSuccess] = useState(false)
 
   // Redirect if already authenticated (handled by useAuth hook)
   useEffect(() => {
@@ -27,40 +19,6 @@ export default function SignUp() {
     }
   }, [isAuthenticated, router])
 
-  // Password strength checker
-  useEffect(() => {
-    if (formData.password) {
-      let strength = 0
-      if (formData.password.length >= 8) strength += 1
-      if (/[A-Z]/.test(formData.password)) strength += 1
-      if (/[a-z]/.test(formData.password)) strength += 1
-      if (/[0-9]/.test(formData.password)) strength += 1
-      if (/[^A-Za-z0-9]/.test(formData.password)) strength += 1
-      setPasswordStrength(strength)
-    } else {
-      setPasswordStrength(0)
-    }
-  }, [formData.password])
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 2) return 'bg-red-400'
-    if (passwordStrength <= 3) return 'bg-yellow-400'
-    return 'bg-green-400'
-  }
-
-  const getPasswordStrengthText = () => {
-    if (passwordStrength <= 2) return 'Weak'
-    if (passwordStrength <= 3) return 'Good'
-    return 'Strong'
-  }
 
   const handleGoogleSignUp = async () => {
     console.log('🔐 SignUp: Starting Google OAuth login...')
@@ -69,52 +27,7 @@ export default function SignUp() {
 
   const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const { name, email, password } = formData
-      
-      if (!name || !email || !password) {
-        setError('Please fill in all fields')
-        return
-      }
-
-      if (passwordStrength < 3) {
-        setError('Password is too weak. Please use a stronger password.')
-        return
-      }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Create user object
-      const user = {
-        id: `user_${Date.now()}`,
-        name,
-        email,
-        provider: 'email',
-        createdAt: new Date().toISOString(),
-        verified: false
-      }
-      
-      // Store user in localStorage
-      localStorage.setItem('xeno-user', JSON.stringify(user))
-      
-      // Show success message briefly before redirect
-      console.log('✅ Email signup successful!')
-      setSuccess(true)
-      setAuthStep('Account created successfully!')
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Redirect to dashboard
-      router.push('/')
-    } catch (err) {
-      console.error('❌ Signup error:', err)
-      setError('Failed to create account. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    setError('Email signup is not available. Please use Google OAuth to create your account.')
   }
 
   // Redirect if already authenticated
@@ -190,7 +103,7 @@ export default function SignUp() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 <span className="text-lg font-medium">
-                  {loading ? (authStep || 'Signing up with Google...') : 'Continue with Google'}
+                  {loading ? (authStep || 'Signing up with Google...') : 'Sign up with Google'}
                 </span>
                 {loading && (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
@@ -198,128 +111,17 @@ export default function SignUp() {
               </SmoothButton>
             </div>
 
-            {/* Divider */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">or continue with email</span>
-              </div>
-            </div>
-
-            {/* Email Sign Up Form */}
-            <form onSubmit={handleEmailSignUp} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-sm font-semibold text-gray-800">
-                    Full Name
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-blue-300 bg-white/70 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-semibold text-gray-800">
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-blue-300 bg-white/70 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
-                    placeholder="john@example.com"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-semibold text-gray-800">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-4 pr-12 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 hover:border-blue-300 bg-white/70 backdrop-blur-sm text-gray-900 placeholder-gray-500 font-medium"
-                      placeholder="Create a strong password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-                    >
-                      {showPassword ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  
-                  {/* Password Strength Indicator */}
-                  {formData.password && (
-                    <div className="mt-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-700 ease-out ${getPasswordStrengthColor()}`}
-                            style={{ width: `${(passwordStrength / 5) * 100}%` }}
-                          ></div>
-                        </div>
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          passwordStrength <= 2 ? 'text-red-700 bg-red-100' : 
-                          passwordStrength <= 3 ? 'text-yellow-700 bg-yellow-100' : 'text-green-700 bg-green-100'
-                        }`}>
-                          {getPasswordStrengthText()}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 animate-fade-in">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-red-700 font-semibold">{error}</span>
                 </div>
               </div>
-
-              {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 animate-fade-in">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm text-red-700 font-semibold">{error}</span>
-                  </div>
-                </div>
-              )}
-
-              <SmoothButton
-                type="submit"
-                disabled={loading}
-                loading={loading}
-                variant="primary"
-                size="lg"
-                className="w-full py-4 text-lg font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl text-white"
-              >
-                Create Your Account
-              </SmoothButton>
-            </form>
+            )}
 
             {/* Sign In Link */}
             <div className="mt-8 pt-6 border-t border-gray-200 text-center">
