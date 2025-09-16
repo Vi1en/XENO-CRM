@@ -594,8 +594,8 @@ export default function Home() {
       {/* Main Content */}
       <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4">
               {/* Mobile menu button */}
               <button
@@ -620,12 +620,12 @@ export default function Home() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900" style={{ fontSize: '1.5rem', margin: '0' }}>Dashboard</h1>
-                <p className="text-gray-600">Welcome to Xeno CRM!</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-sm sm:text-base text-gray-600">Welcome to Xeno CRM!</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <div className="text-left sm:text-right">
                 <p className="text-sm text-gray-500">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</p>
                 <p className="text-sm font-medium text-gray-900">{new Date().toLocaleTimeString()}</p>
                 {usingMockData && (
@@ -641,7 +641,7 @@ export default function Home() {
                 loading={loading}
                 variant="primary"
                 size="md"
-                className="animate-fade-in"
+                className="animate-fade-in w-full sm:w-auto"
               >
                 Refresh
               </SmoothButton>
@@ -650,68 +650,68 @@ export default function Home() {
         </div>
 
         {/* Dashboard Content */}
-        <div className={`flex-1 p-6 transition-all duration-300 ease-smooth-out ${pageLoading ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+        <div className={`flex-1 p-4 sm:p-6 transition-all duration-300 ease-smooth-out ${pageLoading ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {loading ? (
-              <SkeletonLoader type="card" count={4} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6" />
+              <SkeletonLoader type="card" count={4} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" />
             ) : (
               <>
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                      <p className="text-3xl font-bold text-gray-900">{customers.length}</p>
-                      <p className="text-sm text-green-600 mt-1">+12% from last month</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-gray-900">{customers.length}</p>
+                      <p className="text-xs sm:text-sm text-green-600 mt-1">+12% from last month</p>
                     </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0 ml-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.1s'}}>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
-                      <p className="text-3xl font-bold text-gray-900">{campaigns.length}</p>
-                      <p className="text-sm text-green-600 mt-1">+8% from last month</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-gray-900">{campaigns.length}</p>
+                      <p className="text-xs sm:text-sm text-green-600 mt-1">+8% from last month</p>
                     </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0 ml-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                       </svg>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.2s'}}>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-600">Customer Segments</p>
-                      <p className="text-3xl font-bold text-gray-900">{segments.length}</p>
-                      <p className="text-sm text-blue-600 mt-1">+3 new this week</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-gray-900">{segments.length}</p>
+                      <p className="text-xs sm:text-sm text-blue-600 mt-1">+3 new this week</p>
                     </div>
-                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0 ml-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:scale-105 transition-all duration-300 ease-smooth-out group animate-fade-in-up" style={{animationDelay: '0.3s'}}>
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                      <p className="text-3xl font-bold text-gray-900">{orders.length}</p>
-                      <p className="text-sm text-red-600 mt-1">+15% from last month</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-gray-900">{orders.length}</p>
+                      <p className="text-xs sm:text-sm text-red-600 mt-1">+15% from last month</p>
                     </div>
-                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200 flex-shrink-0 ml-2">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
@@ -722,11 +722,11 @@ export default function Home() {
           </div>
 
           {/* Analytics Overview */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Analytics Overview</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Analytics Overview</h2>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
               {/* Customer Segments - Pie Chart */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:scale-105 transition-all duration-300">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Customer Segments</h3>
                   <div className="flex items-center space-x-2">
@@ -904,7 +904,7 @@ export default function Home() {
               </div>
 
               {/* Campaign Performance - Bar Chart */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Campaign Performance</h3>
                   <div className="flex items-center space-x-2">
@@ -1016,9 +1016,9 @@ export default function Home() {
             </div>
             
             {/* Line Graphs */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
               {/* Customer Growth Line Chart */}
-              <div className="h-64">
+              <div className="h-48 sm:h-64">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-sm font-semibold text-gray-700">Customer Growth</h4>
                   <div className="flex items-center space-x-2">
@@ -1092,7 +1092,7 @@ export default function Home() {
               </div>
 
               {/* Revenue Trend Line Chart */}
-              <div className="h-64">
+              <div className="h-48 sm:h-64">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-sm font-semibold text-gray-700">Revenue Trend</h4>
                   <div className="flex items-center space-x-2">
@@ -1346,9 +1346,9 @@ export default function Home() {
 
           {/* Quick Actions */}
           <div className="mb-8">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Link href="/customers" className="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-center">
                   <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

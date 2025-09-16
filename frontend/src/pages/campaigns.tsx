@@ -304,7 +304,7 @@ export default function Campaigns() {
         {/* Main Content */}
         <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
           {/* Header */}
-          <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 {/* Mobile menu button */}
@@ -330,30 +330,30 @@ export default function Campaigns() {
                   </svg>
                 </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
-                  <p className="text-gray-600">Manage your marketing campaigns</p>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Campaigns</h1>
+                  <p className="text-sm sm:text-base text-gray-600">Manage your marketing campaigns</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Page Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Marketing Campaigns</h1>
-                  <p className="mt-2 text-gray-600">Create and manage your marketing campaigns with AI assistance</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Marketing Campaigns</h1>
+                  <p className="mt-2 text-sm sm:text-base text-gray-600">Create and manage your marketing campaigns with AI assistance</p>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                   <SmoothButton
                     onClick={loadCampaigns}
                     disabled={loading}
                     loading={loading}
                     variant="secondary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     Refresh
                   </SmoothButton>
@@ -361,7 +361,7 @@ export default function Campaigns() {
                     onClick={() => setShowAIModal(true)}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     🤖 Generate AI Campaigns
                   </SmoothButton>
@@ -369,7 +369,7 @@ export default function Campaigns() {
                     onClick={() => router.push('/campaigns/create')}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     + Create Campaign
                   </SmoothButton>

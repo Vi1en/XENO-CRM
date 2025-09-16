@@ -105,8 +105,8 @@ export default function Customers() {
         {/* Main Content */}
         <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
           {/* Header */}
-          <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
                 {/* Mobile menu button */}
                 <button
@@ -131,17 +131,18 @@ export default function Customers() {
                   </svg>
                 </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-                  <p className="text-gray-600">Manage your customer relationships</p>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Customers</h1>
+                  <p className="text-sm sm:text-base text-gray-600">Manage your customer relationships</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <SmoothButton
                   onClick={loadCustomers}
                   disabled={loading}
                   loading={loading}
                   variant="primary"
                   size="md"
+                  className="w-full sm:w-auto"
                 >
                   Refresh
                 </SmoothButton>
@@ -149,6 +150,7 @@ export default function Customers() {
                   onClick={() => router.push('/customers/create')}
                   variant="secondary"
                   size="md"
+                  className="w-full sm:w-auto"
                 >
                   Add Customer
                 </SmoothButton>
@@ -157,7 +159,7 @@ export default function Customers() {
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
                 <div className="flex">
