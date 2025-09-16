@@ -1,0 +1,22 @@
+# Removed Dependencies
+
+The following dependencies were removed from package.json as they were not being used in the codebase:
+
+## Dependencies Removed:
+- dotenv: ^16.6.1 (not used in frontend)
+- next-auth: ^4.24.11 (replaced with custom Google OAuth)
+- react-querybuilder: ^7.0.0 (not used anywhere)
+- recharts: ^3.2.0 (not used anywhere)
+
+## Dependencies Kept:
+- axios: ^1.12.2 (used for API calls)
+- next: 13.5.6 (Next.js framework)
+- react: ^18 (React framework)
+- react-dom: ^18 (React DOM)
+- react-hook-form: ^7.62.0 (used in forms)
+- zod: ^3.22.4 (used for validation)
+
+## Notes:
+- Original package.json saved as package.json.original
+- All removed dependencies can be reinstalled if needed
+- Project builds and runs successfully without these dependencies
