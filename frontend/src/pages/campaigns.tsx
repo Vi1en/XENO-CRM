@@ -148,7 +148,7 @@ export default function Campaigns() {
       try {
         const response = await campaignApi.delete(campaign._id)
         console.log('✅ Campaign deleted from API successfully:', response)
-      } catch (apiError) {
+      } catch (apiError: any) {
         console.error('❌ API delete failed:', apiError)
         setError(`Failed to delete campaign: ${apiError.response?.data?.message || apiError.message}`)
         return
