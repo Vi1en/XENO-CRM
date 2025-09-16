@@ -29,7 +29,7 @@ export default function AuthNavigation({ currentPath }: AuthNavigationProps) {
     { href: '/campaigns/history', label: 'Campaign History', icon: '📊' },
     { href: '/segments', label: 'Segments', icon: '🎯' },
     { href: '/orders', label: 'Orders', icon: '🛒' },
-    { href: '/api-docs-new', label: 'API Docs', icon: '📚' },
+    { href: '/api-docs-safe', label: 'API Docs', icon: '📚' },
   ]
 
   return (
