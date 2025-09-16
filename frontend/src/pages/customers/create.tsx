@@ -82,6 +82,12 @@ export default function CreateCustomer() {
 
       console.log('📝 Customer data being sent:', customerData)
       console.log('📝 Form data:', formData)
+      console.log('📝 Data types:', {
+        totalSpend: typeof customerData.totalSpend,
+        visits: typeof customerData.visits,
+        lastOrderAt: typeof customerData.lastOrderAt,
+        tags: Array.isArray(customerData.tags)
+      })
       
       await customerApi.create(customerData)
       setSuccess(true)
