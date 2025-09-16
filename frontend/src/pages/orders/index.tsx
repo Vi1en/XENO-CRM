@@ -239,102 +239,181 @@ export default function Orders() {
                     </div>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Order
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Customer
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total Amount
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Items
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {orders.map((order, index) => (
-                          <tr key={order._id || index} className="hover:bg-gray-50 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
-                                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-                                    <span className="text-sm font-medium text-white">
-                                      #{order.orderId?.slice(-4) || 'N/A'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {order.orderId || 'N/A'}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    ID: {order._id?.slice(-8)}
-                                  </div>
+                  <>
+                    {/* Mobile Card Layout */}
+                    <div className="block lg:hidden space-y-4">
+                      {orders.map((order, index) => (
+                        <div key={order._id || index} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center min-w-0 flex-1">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                  <span className="text-sm font-medium text-white">
+                                    #{order.orderId?.slice(-4) || 'N/A'}
+                                  </span>
                                 </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{order.customerName || 'Unknown Customer'}</div>
-                              <div className="text-sm text-gray-500">{order.customerId}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="ml-3 min-w-0 flex-1">
+                                <div className="text-base font-medium text-gray-900 truncate">
+                                  {order.orderId || 'N/A'}
+                                </div>
+                                <div className="text-sm text-gray-500 truncate">
+                                  ID: {order._id?.slice(-8)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col space-y-1">
+                              <SmoothButton
+                                onClick={() => router.push(`/orders/edit/${order._id}`)}
+                                variant="secondary"
+                                size="sm"
+                                className="text-xs px-2 py-1"
+                              >
+                                Edit
+                              </SmoothButton>
+                              <SmoothButton
+                                onClick={() => handleDeleteOrder(order._id)}
+                                variant="danger"
+                                size="sm"
+                                className="text-xs px-2 py-1"
+                              >
+                                Delete
+                              </SmoothButton>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Customer:</span>
+                              <span className="text-sm text-gray-900 truncate">{order.customerName || 'Unknown Customer'}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Amount:</span>
+                              <span className="text-sm text-gray-900 font-medium">
                                 ${(order.totalAmount || 0).toLocaleString()}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Status:</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                                 {order.status || 'Unknown'}
                               </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Items:</span>
+                              <span className="text-sm text-gray-900">
                                 {order.items?.length || 0} items
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Date:</span>
+                              <span className="text-sm text-gray-900">
                                 {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
-                                <SmoothButton
-                                  onClick={() => router.push(`/orders/edit/${order._id}`)}
-                                  variant="secondary"
-                                  size="sm"
-                                >
-                                  Edit
-                                </SmoothButton>
-                                <SmoothButton
-                                  onClick={() => handleDeleteOrder(order._id)}
-                                  variant="danger"
-                                  size="sm"
-                                >
-                                  Delete
-                                </SmoothButton>
-                              </div>
-                            </td>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table Layout */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Order
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Customer
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Total Amount
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Items
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {orders.map((order, index) => (
+                            <tr key={order._id || index} className="hover:bg-gray-50 animate-fade-in-up" style={{animationDelay: `${index * 0.05}s`}}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 h-10 w-10">
+                                    <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                                      <span className="text-sm font-medium text-white">
+                                        #{order.orderId?.slice(-4) || 'N/A'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {order.orderId || 'N/A'}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      ID: {order._id?.slice(-8)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">{order.customerName || 'Unknown Customer'}</div>
+                                <div className="text-sm text-gray-500">{order.customerId}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  ${(order.totalAmount || 0).toLocaleString()}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                  {order.status || 'Unknown'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {order.items?.length || 0} items
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex space-x-2">
+                                  <SmoothButton
+                                    onClick={() => router.push(`/orders/edit/${order._id}`)}
+                                    variant="secondary"
+                                    size="sm"
+                                  >
+                                    Edit
+                                  </SmoothButton>
+                                  <SmoothButton
+                                    onClick={() => handleDeleteOrder(order._id)}
+                                    variant="danger"
+                                    size="sm"
+                                  >
+                                    Delete
+                                  </SmoothButton>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 )}
               </div>
             )}

@@ -475,99 +475,191 @@ export default function Campaigns() {
                 )}
 
                 {!loading && filteredCampaigns.length > 0 && (
-                  <div className="overflow-x-auto">
-                    <table className="w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Click</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredCampaigns.map((campaign: Campaign, index: number) => (
-                          <tr 
-                            key={campaign._id} 
-                            className="hover:bg-gray-50 transition-all duration-200 ease-smooth-out hover:shadow-sm animate-fade-in-up"
-                            style={{animationDelay: `${index * 0.05}s`}}
-                          >
-                            <td className="px-3 py-4">
-                              <div className="flex items-center min-w-0">
-                                <div className="text-lg mr-2 flex-shrink-0">{getTypeIcon(campaign.type)}</div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-sm font-medium text-gray-900 truncate max-w-[150px]">{campaign.name}</div>
-                                  {campaign.scheduledAt && (
-                                    <div className="text-xs text-gray-500">
-                                      {new Date(campaign.scheduledAt).toLocaleDateString()}
-                                    </div>
-                                  )}
+                  <>
+                    {/* Mobile Card Layout */}
+                    <div className="block lg:hidden space-y-4">
+                      {filteredCampaigns.map((campaign: Campaign, index: number) => (
+                        <div 
+                          key={campaign._id} 
+                          className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 animate-fade-in-up"
+                          style={{animationDelay: `${index * 0.05}s`}}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center min-w-0 flex-1">
+                              <div className="text-2xl mr-3 flex-shrink-0">{getTypeIcon(campaign.type)}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-base font-medium text-gray-900 truncate">{campaign.name}</div>
+                                <div className="text-sm text-gray-500">
+                                  {campaign.type} • {campaign.targetSegment}
                                 </div>
+                                {campaign.scheduledAt && (
+                                  <div className="text-xs text-gray-500">
+                                    Scheduled: {new Date(campaign.scheduledAt).toLocaleDateString()}
+                                  </div>
+                                )}
                               </div>
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900">
-                              {campaign.type}
-                            </td>
-                            <td className="px-3 py-4">
+                            </div>
+                            <div className="flex flex-col space-y-1">
+                              <SmoothButton
+                                onClick={() => handleView(campaign)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-600 hover:text-green-900 text-xs px-2 py-1"
+                              >
+                                View
+                              </SmoothButton>
+                              <SmoothButton
+                                onClick={() => handleEdit(campaign)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1"
+                              >
+                                Edit
+                              </SmoothButton>
+                              <SmoothButton
+                                onClick={() => handleDelete(campaign)}
+                                disabled={deleteLoading === campaign._id}
+                                loading={deleteLoading === campaign._id}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-900 text-xs px-2 py-1"
+                              >
+                                Delete
+                              </SmoothButton>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Status:</span>
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
                                 {campaign.status}
                               </span>
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900 max-w-[100px] truncate">
-                              {campaign.targetSegment}
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900">
-                              {(campaign.sentCount || 0).toLocaleString()}
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900">
-                              {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900">
-                              {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-900">
-                              {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '-'}
-                            </td>
-                            <td className="px-3 py-4 text-sm font-medium">
-                              <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
-                                <SmoothButton
-                                  onClick={() => handleView(campaign)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-green-600 hover:text-green-900 text-xs"
-                                >
-                                  View
-                                </SmoothButton>
-                                <SmoothButton
-                                  onClick={() => handleEdit(campaign)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-blue-600 hover:text-blue-900 text-xs"
-                                >
-                                  Edit
-                                </SmoothButton>
-                                <SmoothButton
-                                  onClick={() => handleDelete(campaign)}
-                                  disabled={deleteLoading === campaign._id}
-                                  loading={deleteLoading === campaign._id}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-900 text-xs"
-                                >
-                                  Delete
-                                </SmoothButton>
-                              </div>
-                            </td>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Sent:</span>
+                              <span className="text-sm text-gray-900 font-medium">
+                                {(campaign.sentCount || 0).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Open Rate:</span>
+                              <span className="text-sm text-gray-900">
+                                {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Click Rate:</span>
+                              <span className="text-sm text-gray-900">
+                                {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-500">Created:</span>
+                              <span className="text-sm text-gray-900">
+                                {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '-'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table Layout */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Click</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {filteredCampaigns.map((campaign: Campaign, index: number) => (
+                            <tr 
+                              key={campaign._id} 
+                              className="hover:bg-gray-50 transition-all duration-200 ease-smooth-out hover:shadow-sm animate-fade-in-up"
+                              style={{animationDelay: `${index * 0.05}s`}}
+                            >
+                              <td className="px-3 py-4">
+                                <div className="flex items-center min-w-0">
+                                  <div className="text-lg mr-2 flex-shrink-0">{getTypeIcon(campaign.type)}</div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-sm font-medium text-gray-900 truncate max-w-[150px]">{campaign.name}</div>
+                                    {campaign.scheduledAt && (
+                                      <div className="text-xs text-gray-500">
+                                        {new Date(campaign.scheduledAt).toLocaleDateString()}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900">
+                                {campaign.type}
+                              </td>
+                              <td className="px-3 py-4">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(campaign.status)}`}>
+                                  {campaign.status}
+                                </span>
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900 max-w-[100px] truncate">
+                                {campaign.targetSegment}
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900">
+                                {(campaign.sentCount || 0).toLocaleString()}
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900">
+                                {campaign.openRate > 0 ? `${campaign.openRate}%` : '-'}
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900">
+                                {campaign.clickRate > 0 ? `${campaign.clickRate}%` : '-'}
+                              </td>
+                              <td className="px-3 py-4 text-sm text-gray-900">
+                                {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '-'}
+                              </td>
+                              <td className="px-3 py-4 text-sm font-medium">
+                                <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
+                                  <SmoothButton
+                                    onClick={() => handleView(campaign)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-green-600 hover:text-green-900 text-xs"
+                                  >
+                                    View
+                                  </SmoothButton>
+                                  <SmoothButton
+                                    onClick={() => handleEdit(campaign)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-blue-600 hover:text-blue-900 text-xs"
+                                  >
+                                    Edit
+                                  </SmoothButton>
+                                  <SmoothButton
+                                    onClick={() => handleDelete(campaign)}
+                                    disabled={deleteLoading === campaign._id}
+                                    loading={deleteLoading === campaign._id}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-900 text-xs"
+                                  >
+                                    Delete
+                                  </SmoothButton>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
