@@ -136,8 +136,8 @@ export default function Orders() {
         {/* Main Content */}
         <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
           {/* Header */}
-          <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center space-x-4">
                 {/* Mobile menu button */}
                 <button
@@ -162,17 +162,18 @@ export default function Orders() {
                   </svg>
                 </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-                  <p className="text-gray-600">Manage your customer orders</p>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Orders</h1>
+                  <p className="text-sm sm:text-base text-gray-600">Manage your customer orders</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                 <SmoothButton
                   onClick={loadOrders}
                   disabled={loading}
                   loading={loading}
                   variant="primary"
                   size="md"
+                  className="w-full sm:w-auto"
                 >
                   Refresh
                 </SmoothButton>
@@ -180,6 +181,7 @@ export default function Orders() {
                   onClick={() => router.push('/orders/create')}
                   variant="secondary"
                   size="md"
+                  className="w-full sm:w-auto"
                 >
                   Add Order
                 </SmoothButton>
@@ -188,7 +190,7 @@ export default function Orders() {
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {error && (
               <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
                 <div className="flex">

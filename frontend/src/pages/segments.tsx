@@ -257,22 +257,22 @@ export default function Segments() {
           </div>
 
           {/* Page Content */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900" style={{ fontSize: '1.875rem', margin: '0' }}>Customer Segments</h1>
-                  <p className="mt-2 text-gray-600">Organize customers into targeted groups with AI assistance</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Customer Segments</h1>
+                  <p className="mt-2 text-sm sm:text-base text-gray-600">Organize customers into targeted groups with AI assistance</p>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                   <SmoothButton
                     onClick={loadSegments}
                     disabled={loading}
                     loading={loading}
                     variant="secondary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     Refresh
                   </SmoothButton>
@@ -280,7 +280,7 @@ export default function Segments() {
                     onClick={() => setShowAIModal(true)}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     🤖 Generate AI Segments
                   </SmoothButton>
@@ -288,7 +288,7 @@ export default function Segments() {
                     onClick={() => router.push('/segments/create')}
                     variant="primary"
                     size="md"
-                    className="animate-fade-in"
+                    className="animate-fade-in w-full sm:w-auto"
                   >
                     + Create Segment
                   </SmoothButton>
@@ -306,7 +306,7 @@ export default function Segments() {
                     <span className="text-sm text-gray-600">AI Active</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {aiSuggestions.map((suggestion: any, index: number) => (
                     <div 
                       key={suggestion.id}
@@ -337,7 +337,7 @@ export default function Segments() {
             )}
 
             {/* Segments Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {loading && (
                 <div className="col-span-full">
                   <SkeletonLoader type="card" count={6} />
