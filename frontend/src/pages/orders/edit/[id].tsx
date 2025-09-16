@@ -12,22 +12,18 @@ import SmoothButton from '@/components/SmoothButton'
 interface OrderFormData {
   orderNumber: string
   customerName: string
-  total: number
-  status: string
-  items: string
+  totalSpent: number
+  date: string
 }
 
 interface Order {
   _id: string
-  orderNumber?: string
-  orderId?: string
-  customerId: string
+  orderId: string
   customerName: string
-  total?: number
-  totalSpent?: number
-  status: string
+  totalSpent: number
+  date: string
   createdAt: string
-  items: any[]
+  updatedAt: string
 }
 
 export default function EditOrder() {
@@ -89,11 +85,10 @@ export default function EditOrder() {
 
       // Format data for form
       const formattedData: OrderFormData = {
-        orderNumber: orderData.orderNumber || orderData.orderId || '',
+        orderNumber: orderData.orderId || '',
         customerName: orderData.customerName || '',
-        total: orderData.total || orderData.totalSpent || 0,
-        status: orderData.status || 'completed',
-        items: orderData.items ? JSON.stringify(orderData.items, null, 2) : ''
+        totalSpent: orderData.totalSpent || 0,
+        date: orderData.date ? new Date(orderData.date).toISOString().split('T')[0] : ''
       }
 
       console.log('📝 Formatted data for form:', formattedData)
@@ -121,11 +116,9 @@ export default function EditOrder() {
       
       // Format data for API
       const updateData = {
-        orderNumber: data.orderNumber,
         customerName: data.customerName,
-        total: Number(data.total),
-        status: data.status,
-        items: data.items ? JSON.parse(data.items) : []
+        totalSpent: Number(data.totalSpent),
+        date: data.date ? new Date(data.date).toISOString() : new Date().toISOString()
       }
 
       console.log('📤 Sending update data:', updateData)
@@ -322,60 +315,41 @@ export default function EditOrder() {
                     )}
                   </div>
 
-                  {/* Total */}
+                  {/* Total Spent */}
                   <div>
-                    <label htmlFor="total" className="block text-sm font-medium text-gray-700 mb-1">
-                      Total Amount *
+                    <label htmlFor="totalSpent" className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Amount Spent *
                     </label>
                     <input
                       type="number"
-                      id="total"
+                      id="totalSpent"
                       step="0.01"
-                      {...register('total', { 
+                      {...register('totalSpent', { 
                         required: 'Total amount is required',
                         min: { value: 0, message: 'Total must be 0 or greater' }
                       })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter total amount"
+                      placeholder="Enter total amount spent"
                     />
-                    {errors.total && (
-                      <p className="mt-1 text-sm text-red-600">{errors.total.message}</p>
+                    {errors.totalSpent && (
+                      <p className="mt-1 text-sm text-red-600">{errors.totalSpent.message}</p>
                     )}
                   </div>
 
-                  {/* Status */}
+                  {/* Order Date */}
                   <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                      Status *
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                      Order Date *
                     </label>
-                    <select
-                      id="status"
-                      {...register('status', { required: 'Status is required' })}
+                    <input
+                      type="date"
+                      id="date"
+                      {...register('date', { required: 'Order date is required' })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    {errors.status && (
-                      <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
-                    )}
-                  </div>
-
-                  {/* Items */}
-                  <div>
-                    <label htmlFor="items" className="block text-sm font-medium text-gray-700 mb-1">
-                      Items (JSON)
-                    </label>
-                    <textarea
-                      id="items"
-                      rows={6}
-                      {...register('items')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-                      placeholder='[{"name": "Product 1", "quantity": 1, "price": 10.00}]'
                     />
-                    <p className="mt-1 text-sm text-gray-500">Enter items as JSON array</p>
+                    {errors.date && (
+                      <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+                    )}
                   </div>
                 </div>
 

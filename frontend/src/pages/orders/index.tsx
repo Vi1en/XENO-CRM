@@ -12,17 +12,11 @@ import AuthNavigation from '@/components/AuthNavigation'
 interface Order {
   _id: string
   orderId: string
-  customerId: string
   customerName: string
-  totalAmount: number
-  status: string
+  totalSpent: number
+  date: string
   createdAt: string
-  items: Array<{
-    productId: string
-    productName: string
-    quantity: number
-    price: number
-  }>
+  updatedAt: string
 }
 
 export default function Orders() {
@@ -89,18 +83,35 @@ export default function Orders() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-800'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      case 'processing':
-        return 'bg-blue-100 text-blue-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+  const getStatusColor = (date: string) => {
+    const orderDate = new Date(date)
+    const now = new Date()
+    const diffDays = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 7) {
+      return 'bg-green-100 text-green-800' // Recent
+    } else if (diffDays < 30) {
+      return 'bg-blue-100 text-blue-800' // This month
+    } else if (diffDays < 90) {
+      return 'bg-yellow-100 text-yellow-800' // This quarter
+    } else {
+      return 'bg-gray-100 text-gray-800' // Older
+    }
+  }
+
+  const getStatusText = (date: string) => {
+    const orderDate = new Date(date)
+    const now = new Date()
+    const diffDays = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 7) {
+      return 'Recent'
+    } else if (diffDays < 30) {
+      return 'This Month'
+    } else if (diffDays < 90) {
+      return 'This Quarter'
+    } else {
+      return 'Older'
     }
   }
 
@@ -300,25 +311,25 @@ export default function Orders() {
                             <div className="flex items-center text-base">
                               <span className="text-gray-500 w-20 font-medium">Amount:</span>
                               <span className="text-gray-900 font-semibold text-lg">
-                                ${(order.totalAmount || 0).toLocaleString()}
+                                ${(order.totalSpent || 0).toLocaleString()}
                               </span>
                             </div>
                             <div className="flex items-center text-base">
                               <span className="text-gray-500 w-20 font-medium">Status:</span>
-                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(order.status)} shadow-sm`}>
-                                {order.status || 'Unknown'}
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(order.date)} shadow-sm`}>
+                                {getStatusText(order.date)}
                               </span>
                             </div>
                             <div className="flex items-center text-base">
-                              <span className="text-gray-500 w-20 font-medium">Items:</span>
+                              <span className="text-gray-500 w-20 font-medium">Order ID:</span>
                               <span className="text-gray-900 text-base font-medium">
-                                {order.items?.length || 0} items
+                                {order.orderId || 'N/A'}
                               </span>
                             </div>
                             <div className="flex items-center text-base">
                               <span className="text-gray-500 w-20 font-medium">Date:</span>
                               <span className="text-gray-900 text-base font-medium">
-                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                                {order.date ? new Date(order.date).toLocaleDateString() : 'N/A'}
                               </span>
                             </div>
                           </div>
@@ -332,7 +343,7 @@ export default function Orders() {
                         <thead className="bg-gray-50">
                           <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Order
+                              Order ID
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Customer
@@ -344,10 +355,10 @@ export default function Orders() {
                               Status
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Items
+                              Order Date
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Date
+                              Created
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Actions
@@ -378,21 +389,21 @@ export default function Orders() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">{order.customerName || 'Unknown Customer'}</div>
-                                <div className="text-sm text-gray-500">{order.customerId}</div>
+                                <div className="text-sm text-gray-500">Order #{order.orderId?.slice(-6)}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">
-                                  ${(order.totalAmount || 0).toLocaleString()}
+                                  ${(order.totalSpent || 0).toLocaleString()}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                  {order.status || 'Unknown'}
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.date)}`}>
+                                  {getStatusText(order.date)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">
-                                  {order.items?.length || 0} items
+                                  {order.date ? new Date(order.date).toLocaleDateString() : 'N/A'}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
