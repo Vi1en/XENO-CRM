@@ -1,360 +1,203 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useAuth } from '@/lib/useAuth'
 import AuthNavigation from '@/components/AuthNavigation'
 import PageTransition from '@/components/PageTransition'
-import SmoothButton from '@/components/SmoothButton'
 
-// Dynamically import SwaggerUI to avoid SSR issues
-const SwaggerUI = dynamic(() => import('swagger-ui-react'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle shadow-lg">
-          <span className="text-white font-bold text-2xl">📚</span>
-        </div>
-        <p className="text-gray-600 animate-pulse font-medium">Loading API Documentation...</p>
-        <p className="text-sm text-gray-500 mt-2">Initializing Swagger UI...</p>
-      </div>
-    </div>
-  )
-})
+// Dynamically import SwaggerUI to avoid SSR issues and reduce bundle size
+const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false })
 
-export default function ApiDocs() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+// Import Swagger UI CSS
+import 'swagger-ui-react/swagger-ui.css'
 
-  // Redirect if not authenticated
+interface SwaggerSpec {
+  openapi: string
+  info: {
+    title: string
+    version: string
+    description: string
+  }
+  servers: Array<{
+    url: string
+    description: string
+  }>
+  paths: Record<string, any>
+  components: Record<string, any>
+}
+
+export default function ApiDocsPage() {
+  const { user, isAuthenticated, isLoading } = useAuth()
+  const [swaggerSpec, setSwaggerSpec] = useState<SwaggerSpec | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      console.log('🔐 API Docs: User not authenticated, redirecting to login')
-      router.push('/login')
+    const fetchSwaggerSpec = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Fetch the swagger spec from backend
+        const response = await fetch('https://backend-production-05a7e.up.railway.app/api/docs/swagger.json')
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch API spec: ${response.status}`)
+        }
+        
+        const spec = await response.json()
+        setSwaggerSpec(spec)
+      } catch (err) {
+        console.error('Error fetching swagger spec:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load API documentation')
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [authLoading, isAuthenticated, router])
 
-  // Loading state
-  if (authLoading) {
+    fetchSwaggerSpec()
+  }, [])
+
+  // Redirect to login if not authenticated
+  if (!isLoading && !isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
+    return null
+  }
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
-            <span className="text-white font-bold text-xl">📚</span>
+      <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading API Documentation...</p>
           </div>
-          <p className="text-gray-600 animate-pulse">Loading API Documentation...</p>
         </div>
       </div>
     )
-  }
-
-  // Access denied state
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-6">Please sign in to view API documentation.</p>
-          <SmoothButton onClick={() => router.push('/login')} variant="primary">
-            Go to Login
-          </SmoothButton>
-        </div>
-      </div>
-    )
-  }
-
-  // Swagger UI configuration
-  const swaggerConfig = {
-    url: 'https://backend-production-05a7e.up.railway.app/api/docs/swagger.json',
-    deepLinking: true,
-    displayOperationId: false,
-    defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1,
-    defaultModelRendering: 'example' as const,
-    displayRequestDuration: true,
-    docExpansion: 'list' as const,
-    filter: true,
-    showExtensions: true,
-    showCommonExtensions: true,
-    tryItOutEnabled: true,
   }
 
   return (
-    <PageTransition>
+    <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
       <Head>
         <title>API Documentation - Xeno CRM</title>
-        <meta name="description" content="Comprehensive API documentation for Xeno CRM" />
+        <meta name="description" content="Interactive API documentation and testing for Xeno CRM" />
       </Head>
 
-      <div className="min-h-screen bg-gray-100">
-        <AuthNavigation currentPath={router.pathname} />
+      <AuthNavigation currentPath="/api-docs" />
 
-        {/* Main Content */}
-        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
-          {/* Mobile Header */}
-          <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-4">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Toggle sidebar"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+      <main className="flex-1 p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
-              </button>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">📚</span>
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">API Documentation</h1>
-                  <p className="text-sm text-gray-600">Interactive API Reference</p>
-                </div>
               </div>
-              <div className="w-10"></div> {/* Spacer for centering */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">API Documentation</h1>
+                <p className="text-sm sm:text-base text-gray-600">Interactive API testing and documentation</p>
+              </div>
             </div>
           </div>
 
-          {/* Desktop Header */}
-          <div className="hidden lg:block bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">📚</span>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">API Documentation</h1>
-                  <p className="text-gray-600">Interactive API Reference and Testing Interface</p>
-                </div>
+          {/* Content */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {loading && (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading API specification...</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <SmoothButton
-                  onClick={() => window.open('https://backend-production-05a7e.up.railway.app/api/docs', '_blank')}
-                  variant="secondary"
-                  size="sm"
+            )}
+
+            {error && (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load API Documentation</h3>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Open in New Tab
-                </SmoothButton>
+                  Try Again
+                </button>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* API Documentation Content */}
-          <div className="flex-1 p-4 sm:p-6">
-            <div className="max-w-full mx-auto">
-              {/* Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                      <span className="text-green-600 text-sm">🔐</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">Authentication</h3>
-                      <p className="text-xs text-gray-600">Google OAuth + JWT</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <span className="text-blue-600 text-sm">📊</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">Endpoints</h3>
-                      <p className="text-xs text-gray-600">50+ API Endpoints</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <span className="text-purple-600 text-sm">🤖</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">AI Features</h3>
-                      <p className="text-xs text-gray-600">Smart Segmentation</p>
-                    </div>
-                  </div>
-                </div>
+            {swaggerSpec && !loading && !error && (
+              <div className="swagger-ui-container">
+                <SwaggerUI
+                  spec={swaggerSpec}
+                  docExpansion="list"
+                  defaultModelsExpandDepth={2}
+                  defaultModelExpandDepth={2}
+                  deepLinking={true}
+                  displayOperationId={false}
+                  displayRequestDuration={true}
+                  filter={true}
+                  showExtensions={true}
+                  showCommonExtensions={true}
+                  tryItOutEnabled={true}
+                  requestInterceptor={(request) => {
+                    // Add authentication token if available
+                    const token = localStorage.getItem('token')
+                    if (token) {
+                      request.headers.Authorization = `Bearer ${token}`
+                    }
+                    return request
+                  }}
+                  responseInterceptor={(response) => {
+                    // Handle responses
+                    return response
+                  }}
+                  onComplete={() => {
+                    // Custom styling after Swagger UI loads
+                    const style = document.createElement('style')
+                    style.textContent = `
+                      .swagger-ui .topbar { display: none; }
+                      .swagger-ui .info { margin: 20px 0; }
+                      .swagger-ui .info .title { color: #1f2937; font-size: 2rem; }
+                      .swagger-ui .info .description { color: #6b7280; font-size: 1.1rem; }
+                      .swagger-ui .scheme-container { background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                      .swagger-ui .opblock { border-radius: 8px; margin-bottom: 20px; }
+                      .swagger-ui .opblock.opblock-post { border-color: #10b981; }
+                      .swagger-ui .opblock.opblock-get { border-color: #3b82f6; }
+                      .swagger-ui .opblock.opblock-put { border-color: #f59e0b; }
+                      .swagger-ui .opblock.opblock-delete { border-color: #ef4444; }
+                      .swagger-ui .btn { border-radius: 6px; }
+                      .swagger-ui .btn.execute { background-color: #3b82f6; border-color: #3b82f6; }
+                      .swagger-ui .btn.execute:hover { background-color: #2563eb; }
+                      .swagger-ui .response-col_status { font-weight: 600; }
+                      .swagger-ui .model { font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; }
+                      .swagger-ui .model-title { color: #1f2937; }
+                      .swagger-ui .prop-name { color: #7c3aed; }
+                      .swagger-ui .prop-type { color: #059669; }
+                      .swagger-ui .response-col_description__inner p { margin: 0; }
+                      .swagger-ui .response-col_description__inner code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+                      @media (max-width: 768px) {
+                        .swagger-ui .wrapper { padding: 10px; }
+                        .swagger-ui .opblock { margin-bottom: 15px; }
+                        .swagger-ui .opblock-summary { padding: 10px; }
+                        .swagger-ui .opblock-description-wrapper { padding: 10px; }
+                        .swagger-ui .btn { padding: 8px 16px; font-size: 14px; }
+                      }
+                    `
+                    document.head.appendChild(style)
+                  }}
+                />
               </div>
-
-              {/* Swagger UI Container */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-700">Interactive API Documentation</span>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Live</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-gray-500">
-                      <span>Powered by Swagger UI React</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="min-h-[600px] p-4">
-                  <SwaggerUI {...swaggerConfig} />
-                </div>
-              </div>
-
-              {/* Quick Links */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-2">Quick Start</h3>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Use the "Authorize" button to set your JWT token</li>
-                    <li>• Click "Try it out" on any endpoint to test</li>
-                    <li>• View request/response schemas and examples</li>
-                    <li>• Copy cURL commands for integration</li>
-                  </ul>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-2">API Categories</h3>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• <strong>Authentication:</strong> Google OAuth, JWT tokens</li>
-                    <li>• <strong>Customers:</strong> CRUD operations, analytics</li>
-                    <li>• <strong>Segments:</strong> AI-powered segmentation</li>
-                    <li>• <strong>Campaigns:</strong> Email/SMS campaign management</li>
-                    <li>• <strong>Orders:</strong> Order processing and tracking</li>
-                    <li>• <strong>AI:</strong> Smart features and insights</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
-
-      {/* Custom CSS for Swagger UI styling */}
-      <style jsx global>{`
-        .swagger-ui {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        .swagger-ui .topbar {
-          display: none;
-        }
-        
-        .swagger-ui .info {
-          margin: 20px 0;
-        }
-        
-        .swagger-ui .info .title {
-          color: #1f2937;
-          font-size: 2rem;
-          font-weight: 700;
-        }
-        
-        .swagger-ui .info .description {
-          color: #6b7280;
-          font-size: 1.1rem;
-        }
-        
-        .swagger-ui .scheme-container {
-          background: #f9fafb;
-          padding: 20px;
-          border-radius: 8px;
-          margin: 20px 0;
-          border: 1px solid #e5e7eb;
-        }
-        
-        .swagger-ui .opblock {
-          border-radius: 8px;
-          margin-bottom: 20px;
-          border: 1px solid #e5e7eb;
-        }
-        
-        .swagger-ui .opblock.opblock-post {
-          border-left: 4px solid #10b981;
-        }
-        
-        .swagger-ui .opblock.opblock-get {
-          border-left: 4px solid #3b82f6;
-        }
-        
-        .swagger-ui .opblock.opblock-put {
-          border-left: 4px solid #f59e0b;
-        }
-        
-        .swagger-ui .opblock.opblock-delete {
-          border-left: 4px solid #ef4444;
-        }
-        
-        .swagger-ui .btn {
-          border-radius: 6px;
-          font-weight: 500;
-        }
-        
-        .swagger-ui .btn.execute {
-          background-color: #3b82f6;
-          border-color: #3b82f6;
-        }
-        
-        .swagger-ui .btn.execute:hover {
-          background-color: #2563eb;
-        }
-        
-        .swagger-ui .response-col_status {
-          font-weight: 600;
-        }
-        
-        .swagger-ui .model {
-          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        }
-        
-        .swagger-ui .model-title {
-          color: #1f2937;
-        }
-        
-        .swagger-ui .prop-name {
-          color: #7c3aed;
-        }
-        
-        .swagger-ui .prop-type {
-          color: #059669;
-        }
-        
-        .swagger-ui .response-col_description__inner p {
-          margin: 0;
-        }
-        
-        .swagger-ui .response-col_description__inner code {
-          background: #f3f4f6;
-          padding: 2px 6px;
-          border-radius: 4px;
-        }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-          .swagger-ui .wrapper {
-            padding: 10px;
-          }
-          
-          .swagger-ui .opblock {
-            margin-bottom: 15px;
-          }
-          
-          .swagger-ui .opblock-summary {
-            padding: 10px;
-          }
-          
-          .swagger-ui .opblock-description-wrapper {
-            padding: 10px;
-          }
-          
-          .swagger-ui .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-          }
-          
-          .swagger-ui .info .title {
-            font-size: 1.5rem;
-          }
-        }
-      `}</style>
-    </PageTransition>
+      </main>
+    </div>
   )
 }
