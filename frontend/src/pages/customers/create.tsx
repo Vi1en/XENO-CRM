@@ -375,11 +375,10 @@ export default function CreateCustomer() {
                     />
                   </div>
 
-
-                  {/* Total Spend */}
-                  <div>
+                  {/* Total Spend - Full Width */}
+                  <div className="md:col-span-2">
                     <label htmlFor="totalSpend" className="block text-sm font-medium text-gray-700 mb-2">
-                      Total Spend ($)
+                      Total Spend ($) *
                     </label>
                     <input
                       type="number"
@@ -389,6 +388,7 @@ export default function CreateCustomer() {
                       onChange={handleNumberChange}
                       min="0"
                       step="0.01"
+                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       placeholder="0.00"
                     />
