@@ -173,23 +173,24 @@ router.post('/preview', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
+ *               allOf:
+ *                 - $ref: '#/components/schemas/Success'
+ *                 - type: object
  *                   properties:
- *                     segmentId:
- *                       type: string
- *                     name:
- *                       type: string
- *                     customerCount:
- *                       type: integer
+ *                     data:
+ *                       $ref: '#/components/schemas/Segment'
  *       400:
- *         description: Invalid input data
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', async (req, res) => {
   try {

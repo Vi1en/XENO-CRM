@@ -32,33 +32,26 @@ const messageVariantsSchema = z.object({
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - prompt
- *             properties:
- *               prompt:
- *                 type: string
- *                 description: Natural language description of the segment
- *                 example: "Customers who spent more than $100 in the last 30 days"
+ *             $ref: '#/components/schemas/AISegmentRequest'
  *     responses:
  *       200:
  *         description: Segment rules generated
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     rules:
- *                       type: array
- *                       items:
- *                         type: object
+ *               $ref: '#/components/schemas/AISegmentResponse'
  *       400:
- *         description: Invalid input data
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/nl-to-segment', async (req, res) => {
   try {
