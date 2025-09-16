@@ -77,7 +77,7 @@ export default function CreateCustomer() {
         totalSpend: Number(formData.totalSpend) || 0,
         visits: Number(formData.visits) || 0,
         tags: tagsArray,
-        lastOrderAt: lastOrderAt
+        ...(lastOrderAt && { lastOrderAt })
       }
 
       console.log('📝 Customer data being sent:', customerData)
