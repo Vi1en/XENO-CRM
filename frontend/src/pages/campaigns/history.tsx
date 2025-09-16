@@ -368,7 +368,12 @@ export default function CampaignHistory() {
                           
                           <div className="bg-blue-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-blue-600">
-                              {formatNumber(campaign.stats?.delivered || campaign.deliveredCount || 0)}
+                              {(() => {
+                                // Calculate delivered as sent - failed
+                                const sent = campaign.stats?.sent || 0
+                                const failed = campaign.stats?.failed || 0
+                                return formatNumber(sent - failed)
+                              })()}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Delivered</div>
                             </div>
@@ -383,9 +388,10 @@ export default function CampaignHistory() {
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-purple-600">
                               {(() => {
-                                // Calculate delivery rate from sent and delivered counts
+                                // Calculate delivery rate from sent and failed counts
                                 const sent = campaign.stats?.sent || 0
-                                const delivered = campaign.stats?.delivered || 0
+                                const failed = campaign.stats?.failed || 0
+                                const delivered = sent - failed // Delivered = Sent - Failed
                                 const rate = sent > 0 ? (delivered / sent) * 100 : 0
                                 return `${rate.toFixed(0)}%`
                               })()}

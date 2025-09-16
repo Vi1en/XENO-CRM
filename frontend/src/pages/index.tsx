@@ -438,8 +438,9 @@ export default function Home() {
       
       if (dayCampaigns.length > 0) {
         dayCampaigns.forEach((campaign: any) => {
-          const sent = campaign.sentCount || 0
-          const delivered = campaign.stats?.delivered || 0
+          const sent = campaign.sentCount || campaign.stats?.sent || 0
+          const failed = campaign.stats?.failed || 0
+          const delivered = sent - failed // Calculate delivered as sent - failed
           const opened = campaign.stats?.opens || 0
           
           if (sent > 0) {
@@ -1194,7 +1195,8 @@ export default function Home() {
                     
                     // Try different possible field names for sent count
                     const sent = campaign.sentCount || campaign.stats?.sent || campaign.totalSent || 0
-                    const delivered = campaign.stats?.delivered || campaign.deliveredCount || 0
+                    const failed = campaign.stats?.failed || 0
+                    const delivered = sent - failed // Calculate delivered as sent - failed
                     const opens = campaign.stats?.opens || campaign.opensCount || 0
                     
                     console.log(`📊 Campaign ${index} extracted values:`, { sent, delivered, opens })
@@ -1296,7 +1298,8 @@ export default function Home() {
                       
                       dayCampaigns.forEach((campaign: any) => {
                         const sent = campaign.sentCount || campaign.stats?.sent || campaign.totalSent || 0
-                        const delivered = campaign.stats?.delivered || campaign.deliveredCount || 0
+                        const failed = campaign.stats?.failed || 0
+                        const delivered = sent - failed // Calculate delivered as sent - failed
                         totalSent += sent
                         totalDelivered += delivered
                       })
