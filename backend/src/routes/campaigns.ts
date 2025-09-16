@@ -1169,4 +1169,230 @@ router.get('/delivery-stats', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/v1/campaigns/history:
+ *   get:
+ *     summary: Get campaign history with delivery statistics
+ *     tags: [Campaigns]
+ *     responses:
+ *       200:
+ *         description: Campaign history with calculated stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       stats:
+ *                         type: object
+ *                         properties:
+ *                           totalRecipients:
+ *                             type: number
+ *                           sent:
+ *                             type: number
+ *                           delivered:
+ *                             type: number
+ *                           failed:
+ *                             type: number
+ *                           bounced:
+ *                             type: number
+ *                           deliveryRate:
+ *                             type: number
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/history', async (req, res) => {
+  try {
+    // Get all campaigns
+    const campaigns = await Campaign.find({}, {
+      name: 1,
+      description: 1,
+      status: 1,
+      stats: 1,
+      createdAt: 1,
+    } as any).sort({ createdAt: -1 });
+
+    // Calculate stats for each campaign
+    const campaignsWithStats = await Promise.all(
+      campaigns.map(async (campaign) => {
+        // Get communication logs for this campaign
+        const logs = await CommunicationLog.find({ campaignId: campaign._id.toString() });
+        
+        // Calculate stats from communication logs
+        const totalRecipients = logs.length;
+        const sent = logs.filter(log => ['SENT', 'DELIVERED', 'FAILED', 'BOUNCED'].includes(log.status)).length;
+        const delivered = logs.filter(log => log.status === 'DELIVERED').length;
+        const failed = logs.filter(log => log.status === 'FAILED').length;
+        const bounced = logs.filter(log => log.status === 'BOUNCED').length;
+        
+        // Calculate delivery rate
+        const deliveryRate = sent > 0 ? (delivered / sent) * 100 : 0;
+
+        return {
+          _id: campaign._id,
+          name: campaign.name,
+          description: campaign.description,
+          status: campaign.status,
+          stats: {
+            totalRecipients,
+            sent,
+            delivered,
+            failed,
+            bounced,
+            deliveryRate: Math.round(deliveryRate * 100) / 100 // Round to 2 decimal places
+          },
+          createdAt: campaign.createdAt,
+        };
+      })
+    );
+
+    return res.json({
+      success: true,
+      data: campaignsWithStats,
+    });
+  } catch (error) {
+    console.error('Campaign history error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/v1/campaigns/test-data:
+ *   post:
+ *     summary: Create test communication logs for campaigns
+ *     tags: [Campaigns]
+ *     responses:
+ *       200:
+ *         description: Test data created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     campaignsUpdated:
+ *                       type: number
+ *                     logsCreated:
+ *                       type: number
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/test-data', async (req, res) => {
+  try {
+    console.log('🧪 Creating test communication logs...');
+    
+    // Get all campaigns
+    const campaigns = await Campaign.find({});
+    console.log(`Found ${campaigns.length} campaigns to update`);
+    
+    let totalLogsCreated = 0;
+    
+    for (const campaign of campaigns) {
+      // Clear existing logs for this campaign
+      await CommunicationLog.deleteMany({ campaignId: campaign._id.toString() });
+      
+      // Get customers for this campaign's segment
+      const segment = await Segment.findById(campaign.segmentId);
+      if (!segment) continue;
+      
+      const customerQuery = buildCustomerQueryFromSegment(segment.rules);
+      const customers = await Customer.find(customerQuery).limit(10); // Limit to 10 customers for testing
+      
+      if (customers.length === 0) continue;
+      
+      // Create communication logs with realistic status distribution
+      const logs = [];
+      for (let i = 0; i < customers.length; i++) {
+        const customer = customers[i];
+        
+        // Determine status based on position (simulate realistic distribution)
+        let status: 'PENDING' | 'SENT' | 'FAILED' | 'DELIVERED' | 'BOUNCED';
+        if (i < customers.length * 0.05) {
+          status = 'PENDING'; // 5% pending
+        } else if (i < customers.length * 0.1) {
+          status = 'BOUNCED'; // 5% bounced
+        } else if (i < customers.length * 0.15) {
+          status = 'FAILED'; // 5% failed
+        } else if (i < customers.length * 0.9) {
+          status = 'DELIVERED'; // 75% delivered
+        } else {
+          status = 'SENT'; // 10% sent but not delivered
+        }
+        
+        const log = new CommunicationLog({
+          communicationLogId: `log_${Date.now()}_${i}`,
+          campaignId: campaign._id.toString(),
+          customerId: customer._id.toString(),
+          message: campaign.message,
+          email: customer.email,
+          phone: customer.phone,
+          status,
+          sentAt: status !== 'PENDING' ? new Date() : undefined,
+          deliveredAt: status === 'DELIVERED' ? new Date() : undefined,
+          customerData: {
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            totalSpend: customer.totalSpend,
+            visits: customer.visits,
+            lastOrderAt: customer.lastOrderAt,
+            tags: customer.tags,
+          },
+        });
+        
+        logs.push(log);
+      }
+      
+      // Insert all logs for this campaign
+      if (logs.length > 0) {
+        await CommunicationLog.insertMany(logs);
+        totalLogsCreated += logs.length;
+        console.log(`Created ${logs.length} logs for campaign: ${campaign.name}`);
+      }
+    }
+    
+    return res.json({
+      success: true,
+      message: `Test data created successfully`,
+      data: {
+        campaignsUpdated: campaigns.length,
+        logsCreated: totalLogsCreated,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating test data:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
 export { router as campaignsRoutes };

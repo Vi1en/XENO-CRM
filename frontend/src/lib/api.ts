@@ -159,6 +159,9 @@ export const campaignApi = {
   },
   getDeliveryStats: async () => {
     return retryRequest(() => api.get('/campaigns/delivery-stats'), 3, true);
+  },
+  getHistory: async () => {
+    return retryRequest(() => api.get('/campaigns/history'));
   }
 };
 

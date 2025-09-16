@@ -66,10 +66,11 @@ export default function CampaignHistory() {
     setError(null)
     
     try {
-      console.log('📧 Loading campaigns...')
+      console.log('📧 Loading campaign history...')
+      // Use the regular campaigns endpoint since it already has stats
       const response = await campaignApi.getAll()
       
-      console.log('📧 Campaigns response:', response)
+      console.log('📧 Campaign history response:', response)
       console.log('📧 Response data:', response.data)
       console.log('📧 Response data type:', typeof response.data)
       console.log('📧 Response data keys:', Object.keys(response.data || {}))
@@ -93,15 +94,16 @@ export default function CampaignHistory() {
       if (campaignsData && campaignsData.length > 0) {
         console.log('📧 First campaign sample:', campaignsData[0])
         console.log('📧 First campaign keys:', Object.keys(campaignsData[0] || {}))
+        console.log('📧 First campaign stats:', campaignsData[0]?.stats)
       }
       
       setCampaigns(Array.isArray(campaignsData) ? campaignsData : [])
       
-      console.log('✅ Campaigns loaded:', campaignsData?.length || 0)
+      console.log('✅ Campaign history loaded:', campaignsData?.length || 0)
     } catch (error: any) {
-      console.error('❌ Error loading campaigns:', error)
+      console.error('❌ Error loading campaign history:', error)
       console.error('❌ Error details:', error.response?.data)
-      setError('Failed to load campaigns. Please try again.')
+      setError('Failed to load campaign history. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -156,10 +158,10 @@ export default function CampaignHistory() {
   if (authLoading) {
     return (
       <PageTransition>
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="text-center animate-fade-in">
             <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-gentle">
-              <span className="text-white font-bold text-xl">X</span>
+            <span className="text-white font-bold text-xl">X</span>
             </div>
             <p className="text-gray-600 animate-pulse">Loading campaign history...</p>
           </div>
@@ -181,7 +183,7 @@ export default function CampaignHistory() {
       
       <div className="min-h-screen bg-gray-50">
         <AuthNavigation currentPath={router.pathname} />
-        
+
         {/* Main Content */}
         <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
           {/* Header */}
@@ -217,8 +219,8 @@ export default function CampaignHistory() {
               </div>
               <div className="flex items-center space-x-4">
                 <SmoothButton
-                  onClick={loadCampaigns}
-                  disabled={loading}
+                    onClick={loadCampaigns}
+                    disabled={loading}
                   loading={loading}
                   variant="primary"
                   size="md"
@@ -234,7 +236,7 @@ export default function CampaignHistory() {
                 </SmoothButton>
               </div>
             </div>
-          </div>
+                  </div>
 
           {/* Content */}
           <div className="flex-1 p-6">
@@ -262,7 +264,7 @@ export default function CampaignHistory() {
                     <option value="scheduled">Scheduled</option>
                     <option value="draft">Draft</option>
                     <option value="failed">Failed</option>
-                  </select>
+                </select>
                 </div>
                 <div>
                   <SmoothButton
@@ -271,7 +273,7 @@ export default function CampaignHistory() {
                     size="md"
                     disabled={searchTerm === '' && statusFilter === 'all'}
                   >
-                    Clear Filters
+                  Clear Filters
                   </SmoothButton>
                 </div>
               </div>
@@ -294,8 +296,8 @@ export default function CampaignHistory() {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+                </div>
+              )}
 
             {loading ? (
               <SkeletonLoader type="table" />
@@ -330,7 +332,7 @@ export default function CampaignHistory() {
                       <div key={campaign._id || index} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
                         {/* Campaign Header */}
                         <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
+                        <div className="flex-1">
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">
                               {campaign.name || 'Untitled Campaign'}
                             </h3>
@@ -343,13 +345,13 @@ export default function CampaignHistory() {
                               </span>
                               <span className="text-sm text-gray-500">
                                 Created: {formatDate(campaign.createdAt)}
-                              </span>
+                            </span>
                             </div>
                           </div>
                         </div>
-
+                          
                         {/* Campaign Metrics */}
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                           <div className="bg-gray-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-gray-900">
                               {formatNumber(campaign.stats?.totalRecipients || campaign.audienceSize || 0)}
@@ -369,7 +371,7 @@ export default function CampaignHistory() {
                               {formatNumber(campaign.stats?.delivered || campaign.deliveredCount || 0)}
                             </div>
                             <div className="text-xs text-gray-500 uppercase tracking-wide">Delivered</div>
-                          </div>
+                            </div>
                           
                           <div className="bg-red-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-red-600">
@@ -381,9 +383,10 @@ export default function CampaignHistory() {
                           <div className="bg-purple-50 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-purple-600">
                               {(() => {
-                                const totalRecipients = campaign.stats?.totalRecipients || campaign.audienceSize || 0
-                                const delivered = campaign.stats?.delivered || campaign.deliveredCount || 0
-                                const rate = totalRecipients > 0 ? (delivered / totalRecipients) * 100 : 0
+                                // Calculate delivery rate from sent and delivered counts
+                                const sent = campaign.stats?.sent || 0
+                                const delivered = campaign.stats?.delivered || 0
+                                const rate = sent > 0 ? (delivered / sent) * 100 : 0
                                 return `${rate.toFixed(0)}%`
                               })()}
                             </div>
@@ -411,13 +414,13 @@ export default function CampaignHistory() {
                           </div>
                           <div className="text-sm text-gray-500">
                             Email Campaign
-                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             )}
           </div>
         </div>
