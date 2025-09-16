@@ -72,14 +72,28 @@ export default function Orders() {
 
     try {
       console.log('🗑️ Deleting order:', orderId)
-      await orderApi.delete(orderId)
+      console.log('🗑️ Order ID type:', typeof orderId)
+      console.log('🗑️ Order ID length:', orderId?.length)
+      console.log('🗑️ Available orders:', orders.length)
+      console.log('🗑️ Order exists in state:', orders.find(o => o._id === orderId) ? 'Yes' : 'No')
+      
+      const response = await orderApi.delete(orderId)
+      console.log('✅ Delete API response:', response)
       
       // Remove from local state
       setOrders(orders.filter(o => o._id !== orderId))
-      console.log('✅ Order deleted successfully')
+      console.log('✅ Order deleted successfully from both API and local state')
     } catch (error: any) {
       console.error('❌ Error deleting order:', error)
-      alert('Failed to delete order. Please try again.')
+      console.error('❌ Error response:', error.response?.data)
+      console.error('❌ Error status:', error.response?.status)
+      console.error('❌ Error message:', error.message)
+      
+      if (error.response?.data?.message) {
+        alert(`Failed to delete order: ${error.response.data.message}`)
+      } else {
+        alert('Failed to delete order. Please try again.')
+      }
     }
   }
 

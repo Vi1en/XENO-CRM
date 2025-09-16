@@ -479,7 +479,14 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
+    console.log('🗑️ Delete order request:', req.params.id);
+    console.log('🗑️ Order ID type:', typeof req.params.id);
+    console.log('🗑️ Order ID length:', req.params.id?.length);
+    
     const order = await Order.findById(req.params.id);
+    console.log('🗑️ Order found:', order ? 'Yes' : 'No');
+    console.log('🗑️ Order details:', order ? { _id: order._id, customerName: order.customerName, totalSpent: order.totalSpent } : 'Not found');
+    
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -488,6 +495,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     // Find customer and subtract the order amount
+    console.log('🗑️ Looking for customer:', order.customerName);
     const customer = await Customer.findOne({
       $expr: {
         $eq: [
@@ -496,20 +504,28 @@ router.delete('/:id', async (req, res) => {
         ]
       }
     });
+    console.log('🗑️ Customer found:', customer ? 'Yes' : 'No');
+    console.log('🗑️ Customer details:', customer ? { firstName: customer.firstName, lastName: customer.lastName, totalSpend: customer.totalSpend } : 'Not found');
 
     if (customer) {
+      console.log('🗑️ Updating customer totalSpend from', customer.totalSpend, 'to', customer.totalSpend - order.totalSpent);
       customer.totalSpend -= order.totalSpent;
       await customer.save();
+      console.log('🗑️ Customer updated successfully');
     }
 
+    console.log('🗑️ Deleting order from database...');
     await Order.findByIdAndDelete(req.params.id);
+    console.log('🗑️ Order deleted successfully');
 
     return res.json({
       success: true,
       message: 'Order deleted successfully',
     });
   } catch (error) {
-    console.error('Delete order error:', error);
+    console.error('❌ Delete order error:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({
       success: false,
       message: 'Internal server error',
