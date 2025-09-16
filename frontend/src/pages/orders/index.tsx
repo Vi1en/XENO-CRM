@@ -117,6 +117,14 @@ export default function Orders() {
       console.error('❌ Error status:', error.response?.status)
       console.error('❌ Error message:', error.message)
       
+      // Handle 500 error with fallback - remove from local state anyway
+      if (error.response?.status === 500) {
+        console.log('⚠️ Backend returned 500 error, removing order from local state as fallback')
+        setOrders(orders.filter(o => o._id !== orderId))
+        alert('Order deleted locally. Backend may be experiencing issues.')
+        return
+      }
+      
       if (error.response?.data?.message) {
         alert(`Failed to delete order: ${error.response.data.message}`)
       } else {
