@@ -3,6 +3,10 @@ import Head from 'next/head'
 import { segmentApi } from '@/lib/api'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useAuth } from '@/lib/useAuth'
+import AuthNavigation from '@/components/AuthNavigation'
+import PageTransition from '@/components/PageTransition'
+import SmoothButton from '@/components/SmoothButton'
 
 interface Segment {
   _id: string
@@ -17,9 +21,7 @@ interface Segment {
 export default function EditSegment() {
   const router = useRouter()
   const { id } = router.query
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -40,28 +42,13 @@ export default function EditSegment() {
     value: ''
   })
 
-  // Simple authentication check
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('xeno-user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        setIsAuthenticated(false)
-      } finally {
-        setAuthLoading(false)
-      }
+    if (!authLoading && !isAuthenticated) {
+      console.log('🔐 Segment Edit: User not authenticated, redirecting to login')
+      router.push('/login')
     }
-
-    checkAuth()
-  }, [])
+  }, [authLoading, isAuthenticated, router])
 
   // Load segment data when ID is available
   useEffect(() => {
@@ -105,12 +92,6 @@ export default function EditSegment() {
     }
   }
 
-  const handleSignOut = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    localStorage.removeItem('xeno-user')
-    router.push('/')
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -223,108 +204,58 @@ export default function EditSegment() {
   }
 
   return (
-    <>
+    <PageTransition>
       <Head>
         <title>Xeno CRM - Edit Segment</title>
         <meta name="description" content="Edit customer segment in Xeno CRM" />
       </Head>
       <div className="min-h-screen bg-gray-50">
-        {/* Navigation Sidebar */}
-        <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-          <div className="flex flex-col h-full">
-            {/* Logo */}
-            <div className="flex items-center px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">X</span>
-                </div>
-                <span className="ml-3 text-xl font-semibold text-gray-900">Xeno CRM</span>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-2">
-              <div className="space-y-1">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                  Navigation
-                </div>
-                <Link href="/" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
-                  </svg>
-                  Dashboard
-                </Link>
-                <Link href="/orders" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Orders
-                </Link>
-                <Link href="/customers" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
-                  Customers
-                </Link>
-                <Link href="/segments" className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Segments
-                </Link>
-                <Link href="/campaigns" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Campaigns
-                </Link>
-              </div>
-            </nav>
-
-            {/* User Info */}
-            <div className="px-4 py-4 border-t border-gray-200">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    {user?.name?.charAt(0) || 'U'}
-                  </span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-                <button
-                  onClick={handleSignOut}
-                  className="ml-auto p-1 text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuthNavigation currentPath={router.pathname} />
 
         {/* Main Content */}
-        <div className="pl-64">
-          {/* Top Bar */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="ml-0 lg:ml-64 flex flex-col min-h-screen transition-all duration-300 ease-in-out">
+          {/* Mobile Header */}
+          <div className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4 lg:hidden">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="flex items-center text-sm text-gray-500">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <div className="flex items-center space-x-4">
+                {/* Mobile menu button */}
+                <button
+                  onClick={() => {
+                    const sidebar = document.querySelector('.sidebar-nav')
+                    const backdrop = document.querySelector('.sidebar-backdrop')
+                    if (sidebar) {
+                      sidebar.classList.toggle('-translate-x-full')
+                      sidebar.classList.toggle('translate-x-0')
+                    }
+                    if (backdrop) {
+                      backdrop.classList.toggle('opacity-0')
+                      backdrop.classList.toggle('opacity-100')
+                      backdrop.classList.toggle('pointer-events-none')
+                      backdrop.classList.toggle('pointer-events-auto')
+                    }
+                  }}
+                  className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                  aria-label="Open sidebar"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  <span>/segments/edit</span>
+                </button>
+                
+                <div className="flex items-center">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    <span>/segments/edit</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Page Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between">
@@ -620,6 +551,6 @@ export default function EditSegment() {
           </div>
         </div>
       </div>
-    </>
+    </PageTransition>
   )
 }
