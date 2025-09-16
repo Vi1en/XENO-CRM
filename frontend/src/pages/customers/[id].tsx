@@ -14,6 +14,7 @@ interface CustomerFormData {
   lastName: string
   email: string
   phone: string
+  totalSpend: number
   visits: number
   tags: string
   lastOrderAt: string
@@ -25,6 +26,7 @@ interface Customer {
   lastName: string
   email: string
   phone: string
+  totalSpend: number
   visits: number
   tags: string | string[]
   lastOrderAt: string
@@ -94,6 +96,7 @@ export default function EditCustomer() {
         lastName: customerData.lastName || '',
         email: customerData.email || '',
         phone: customerData.phone || '',
+        totalSpend: customerData.totalSpend || 0,
         visits: customerData.visits || 0,
         tags: Array.isArray(customerData.tags) 
           ? customerData.tags.join(', ') 
@@ -129,6 +132,7 @@ export default function EditCustomer() {
       // Format data for API
       const updateData = {
         ...data,
+        totalSpend: Number(data.totalSpend),
         visits: Number(data.visits),
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
         lastOrderAt: data.lastOrderAt ? new Date(data.lastOrderAt).toISOString() : null
@@ -323,6 +327,29 @@ export default function EditCustomer() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter phone number"
                     />
+                  </div>
+
+                  {/* Total Spend */}
+                  <div>
+                    <label htmlFor="totalSpend" className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Spend ($) *
+                    </label>
+                    <input
+                      type="number"
+                      id="totalSpend"
+                      step="0.01"
+                      {...register('totalSpend', { 
+                        valueAsNumber: true,
+                        required: 'Total spend is required',
+                        min: { value: 0, message: 'Total spend must be 0 or greater' }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Enter total amount spent"
+                    />
+                    {errors.totalSpend && (
+                      <p className="mt-1 text-sm text-red-600">{errors.totalSpend.message}</p>
+                    )}
+                    <p className="mt-1 text-sm text-gray-500">Total amount spent by this customer</p>
                   </div>
 
                   {/* Visits */}
